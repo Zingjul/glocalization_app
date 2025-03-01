@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.description }}{% endblock title %}
+
+{% block content %}
+    <h1>{{ post.description }}</h1>
+    <p>Author: {{ post.author.username }}</p>
+    <p>Category: {{ post.category }}</p>
+    <p>Date: {{ post.date }}</p>
+
+    {% if post.images.all %}
+        {% for image in post.images.all %}
+            <img src="{{ image.image.url }}" alt="{{ post.description }}" class="img-fluid">
+        {% endfor %}
+    {% endif %}
+
+    <p>Phone: {{ post.author_phone_number }}</p>
+    <p>Email: {{ post.author_email }}</p>
+    <a href="{% url 'post_edit' pk=post.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'post_delete' pk=post.pk %}" class="btn btn-danger">Delete</a>
+{% endblock content %}

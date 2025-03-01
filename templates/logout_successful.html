@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <div>
+        <h1>Log out Successful!</h1>
+    </div>
+{% endblock header %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Your account has been log out from this device.</h4>
+            <p>Thank you for being part of out platform. Remember, Your Visual ID is:</p>
+            <p class="lead"><strong>{{ visual_id }}</strong></p>
+            <hr>
+            <p class="mb-0">This ID will be used to represent you if you choose not to share your brand name publicly. It's unique to your account and cannot be changed.</p>
+        </div>
+
+        <div class="mt-3">
+            <p>You can now <a href="{% url 'login' %}" class="btn btn-primary">Log in to your account</a>.</p>
+        </div>
+    </div>
+{% endblock content %}

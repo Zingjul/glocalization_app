@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header %}
+    <div>
+        <h1>hEY THIS IS header</h1>
+    </div>
+{% endblock header %}
+
+{% block content %}
+<h2>Log in:</h2>
+<form method="post">{% csrf_token %}
+ {{ form|crispy }}
+ <button class="btn btn-success" type="submit">Log in</button> |
+</form>
+<a href="{% url 'signup' %}"><button>Sign up</button></a> now for your professional account too!
+{% endblock content %}

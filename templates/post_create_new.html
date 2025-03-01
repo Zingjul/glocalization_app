@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create New Post{% endblock title %}
+
+{% block content %}
+
+    <h1>Create New Post</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form|crispy }}  {# This renders your PostForm #}
+
+        {# Add a heading for the images #}
+        {{ image_formset.as_p }}  {# This renders the ImageFormSet #}
+        {{ image_formset.management_form }}  {# This is CRUCIAL for Django to manage the formset #}
+
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+{% endblock content %}

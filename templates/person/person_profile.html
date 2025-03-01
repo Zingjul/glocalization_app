@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}User Profiles{% endblock title %}
+
+{% block content %}
+    <h1>User Profiles</h1>
+    <ul>
+        {% for profile in profiles %}
+            <li><a href="{% url 'person:person_detailed_profile' %}">{{ profile.user.username }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock content %}
