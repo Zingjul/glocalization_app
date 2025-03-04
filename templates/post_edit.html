@@ -2,9 +2,9 @@
 {% load crispy_forms_tags %}
 
 {% block title %}Edit Post{% endblock title %}
-
+{% if user.is_authenticated and post.author == user %}
 {% block content %}
-    <h1>Edit Post</h1>
+<h1>Edit Post</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
@@ -13,3 +13,4 @@
         <button type="submit" class="btn btn-primary">Update</button>
     </form>
 {% endblock content %}
+{% endif %}

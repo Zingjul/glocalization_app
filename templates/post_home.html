@@ -8,7 +8,12 @@
         {% for post in posts %}
             <li>
                 <a href="{% url 'post_detailed' pk=post.pk %}">{{ post.description|truncatechars:50 }}</a>
-                <p>Author: {{ post.author.username }} | Category: {{ post.category }} | Date: {{ post.date }}</p>
+                {% if post.author.profile.use_business_name and post.author.profile.business_name %}
+                    <p>By: {{ post.author.profile.business_name }}</p>
+                {% else %}
+                    <p>By: {{ post.author.virtual_id }}</p>
+                {% endif %}
+                <p>Category: {{ post.category }} | Date: {{ post.date }}</p>
             </li>
         {% endfor %}
     </ul>

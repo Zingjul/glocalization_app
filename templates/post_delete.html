@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Delete Post{% endblock title %}
-
+{% if user.is_authenticated and post.author == user %}
 {% block content %}
     <h1>Delete Post</h1>
     <p>Are you sure you want to delete "{{ post.description }}"?</p>
@@ -11,3 +11,4 @@
         <a href="{% url 'post_detailed' pk=post.pk %}" class="btn btn-secondary">Cancel</a>
     </form>
 {% endblock content %}
+{% endif %}

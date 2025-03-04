@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Search Results{% endblock title %}
+
+{% block content %}
+    <h1>Search Results</h1>
+
+    {% if query %}
+        <h2>Person:</h2>
+        {% if person_results %}
+            <div class="list-group">
+                {% for person in person_results %}
+                    <a href="{% url 'person:person_detailed_profile' %}" class="list-group-item list-group-item-action">
+                        <strong>Person:</strong> {{ person.business_name }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No person results found.</p>
+        {% endif %}
+
+        <h2>Post Found:</h2>
+        {% if posts %}
+            <ul>
+                {% for post in posts %}
+                    <li>
+                        <a href="{% url 'post_detailed' pk=post.pk %}">{{ post.description|truncatechars:50 }}</a>
+                        {% if post.author.profile.use_business_name and post.author.profile.business_name %}
+                            <p>By: {{ post.author.profile.business_name }}</p>
+                        {% else %}
+                            <p>By: {{ post.author.virtual_id }}</p>
+                        {% endif %}
+                        <p>Category: {{ post.category }} | Date: {{ post.date }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if is_paginated %}
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?query={{ query }}&page=1">&laquo; first</a>
+                            <a href="?query={{ query }}&page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+        {% else %}
+            <p>No post results found.</p>
+        {% endif %}
+    {% endif %}
+{% endblock content %}

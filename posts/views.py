@@ -6,12 +6,12 @@ from django.urls import reverse_lazy, reverse
 from .models import Post, PostImage  # Import PostImage
 from .forms import PostForm, PostImageFormSet  # Import PostImageFormSet
 
-class PostView(ListView):
+class PostView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'post_home.html'
     context_object_name = 'posts'
 
-class PostDetailedView(DetailView):
+class PostDetailedView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'post_detailed.html'
     context_object_name = 'post'

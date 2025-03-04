@@ -35,10 +35,13 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     'phonenumber_field',
+    #locals
     'accounts',
     'person',
     'posts',
-
+    'comment',
+    'search',
+    'custom_search',
 ]
 
 MIDDLEWARE = [
@@ -116,7 +119,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'post_home'  # Corrected typo: LOGIN_REDIRECT_URL (singular)
-LOGOUT_REDIRECT_URL = 'logged_out'  # Corrected typo: LOGOUT_REDIRECT_URL (singular)
+LOGOUT_REDIRECT_URL = 'login'  # Corrected typo: LOGOUT_REDIRECT_URL (singular)
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -27,6 +27,8 @@ urlpatterns = [
     path('user/', include("person.urls")),
     path('posts/', include("posts.urls")),
     path('locations/', include("locations.urls")),
+    path('comments/', include("comment.urls")),
+    path('search/', include("search.urls")),
 ]
 
 if settings.DEBUG:
