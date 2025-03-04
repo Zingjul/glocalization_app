@@ -29,6 +29,7 @@ urlpatterns = [
     path('locations/', include("locations.urls")),
     path('comments/', include("comment.urls")),
     path('search/', include("search.urls")),
+    path('custom_search/', include('custom_search.urls')),
 ]
 
 if settings.DEBUG:

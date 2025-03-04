@@ -39,15 +39,6 @@
                                 <a class="nav-link" href="{% url 'login' %}">Login</a>
                             </li>
                         {% endif %}
-                        <!-- search -->
-                        <div class="collapse navbar-collapse" id="navbarNav">
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                                </ul>
-                            <form class="d-flex" method="get" action="{% url 'search' %}">
-                                {{ form.as_p }}
-                                <button class="btn btn-outline-success" type="submit">Search</button>
-                            </form>
-                        </div><!-- end search-->
                     </ul>
                 </div>
             </div>

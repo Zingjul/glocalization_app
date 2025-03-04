@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from custom_search.models import Continent, Country, State, Town
 
 class Person(models.Model):
     user = models.OneToOneField(
@@ -34,6 +35,10 @@ class Person(models.Model):
         default=False,
         verbose_name=_("Use Business Name"),
     )
+    continent = models.ForeignKey(Continent, on_delete=models.SET_NULL, blank=True, null=True)
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True)
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, blank=True, null=True)
+    town = models.ForeignKey(Town, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
