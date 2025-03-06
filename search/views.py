@@ -17,12 +17,14 @@ def search(request):
         query = form.cleaned_data['query']
 
         # Search Post model
-        post_results = Post.objects.filter(category__name__icontains=query)
+        post_results = Post.objects.filter(
+            Q(category__name__icontains=query) | Q(product_name__icontains=query)
+        )
 
         # Search Person model
         person_results = Person.objects.filter(business_name__icontains=query)
 
-    paginator = Paginator(post_results, 10)  # 10 posts per page
+    paginator = Paginator(post_results, 10)
     page = request.GET.get('page')
 
     try:

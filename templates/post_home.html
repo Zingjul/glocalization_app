@@ -13,6 +13,7 @@
                 {% else %}
                     <p>By: {{ post.author.virtual_id }}</p>
                 {% endif %}
+                <p>Name: {{post.product_name }}</p>
                 <p>Category: {{ post.category }} | Date: {{ post.date }}</p>
             </li>
         {% endfor %}

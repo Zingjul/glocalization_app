@@ -11,7 +11,7 @@
         <button type="submit">Search</button>
     </form>
 
-    {% if query or continent or country or state or town %}
+    {% if query or form.continent.value or form.country.value or form.state.value or form.town.value %}
         <h2>Person Results</h2>
         {% if person_results %}
             <div class="list-group">
@@ -45,8 +45,8 @@
                 <div class="pagination">
                     <span class="step-links">
                         {% if page_obj.has_previous %}
-                            <a href="?query={{ query }}&continent={{continent}}&country={{country}}&state={{state}}&town={{town}}&page=1">&laquo; first</a>
-                            <a href="?query={{ query }}&continent={{continent}}&country={{country}}&state={{state}}&town={{town}}&page={{ page_obj.previous_page_number }}">previous</a>
+                            <a href="?query={{ query }}&continent={{ form.continent.value }}&country={{ form.country.value }}&state={{ form.state.value }}&town={{ form.town.value }}&page=1">&laquo; first</a>
+                            <a href="?query={{ query }}&continent={{ form.continent.value }}&country={{ form.country.value }}&state={{ form.state.value }}&town={{ form.town.value }}&page={{ page_obj.previous_page_number }}">previous</a>
                         {% endif %}
 
                         <span class="current">
@@ -54,8 +54,8 @@
                         </span>
 
                         {% if page_obj.has_next %}
-                            <a href="?query={{ query }}&continent={{continent}}&country={{country}}&state={{state}}&town={{town}}&page={{ page_obj.next_page_number }}">next</a>
-                            <a href="?query={{ query }}&continent={{continent}}&country={{country}}&state={{state}}&town={{town}}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                            <a href="?query={{ query }}&continent={{ form.continent.value }}&country={{ form.country.value }}&state={{ form.state.value }}&town={{ form.town.value }}&page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?query={{ query }}&continent={{ form.continent.value }}&country={{ form.country.value }}&state={{ form.state.value }}&town={{ form.town.value }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
                         {% endif %}
                     </span>
                 </div>
@@ -64,4 +64,55 @@
             <p>No post results found.</p>
         {% endif %}
     {% endif %}
+
+    <script>
+        $(document).ready(function() {
+            $('#id_continent').change(function() {
+                let continentId = $(this).val();
+                if (continentId) {
+                    $.get('/custom_search/get_countries/', {continent_id: continentId}, function(data) {
+                        let countrySelect = $('#id_country');
+                        countrySelect.empty().append('<option value="">Select Country</option>');
+                        $.each(data, function(index, country) {
+                            countrySelect.append('<option value="' + country.id + '">' + country.name + '</option>');
+                        });
+                        $('#id_state, #id_town').empty().append('<option value="">Select State</option>');
+                    });
+                } else {
+                    $('#id_country, #id_state, #id_town').empty().append('<option value="">Select Country</option>');
+                }
+            });
+
+            $('#id_country').change(function() {
+                let countryId = $(this).val();
+                if (countryId) {
+                    $.get('/custom_search/get_states/', {country_id: countryId}, function(data) {
+                        let stateSelect = $('#id_state');
+                        stateSelect.empty().append('<option value="">Select State</option>');
+                        $.each(data, function(index, state) {
+                            stateSelect.append('<option value="' + state.id + '">' + state.name + '</option>');
+                        });
+                        $('#id_town').empty().append('<option value="">Select Town</option>');
+                    });
+                } else {
+                    $('#id_state, #id_town').empty().append('<option value="">Select State</option>');
+                }
+            });
+
+            $('#id_state').change(function() {
+                let stateId = $(this).val();
+                if (stateId) {
+                    $.get('/custom_search/get_towns/', {state_id: stateId}, function(data) {
+                        let townSelect = $('#id_town');
+                        townSelect.empty().append('<option value="">Select Town</option>');
+                        $.each(data, function(index, town) {
+                            townSelect.append('<option value="' + town.id + '">' + town.name + '</option>');
+                        });
+                    });
+                } else {
+                    $('#id_town').empty().append('<option value="">Select Town</option>');
+                }
+            });
+        });
+    </script>
 {% endblock content %}

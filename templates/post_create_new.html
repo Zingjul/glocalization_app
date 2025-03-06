@@ -9,11 +9,10 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        {{ form|crispy }}  {# This renders your PostForm #}
+        {{ form|crispy }}
 
-        {# Add a heading for the images #}
-        {{ image_formset.as_p }}  {# This renders the ImageFormSet #}
-        {{ image_formset.management_form }}  {# This is CRUCIAL for Django to manage the formset #}
+        {{ image_formset.as_p }}
+        {{ image_formset.management_form }}
 
         <button type="submit" class="btn btn-primary">Create</button>
     </form>

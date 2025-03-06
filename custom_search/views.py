@@ -5,6 +5,8 @@ from posts.models import Post
 from .forms import CustomSearchForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import View
+from django.http import JsonResponse
+from .models import Country, State, Town
 
 class CustomSearchView(View):
     template_name = 'custom_search/results.html'
@@ -41,7 +43,9 @@ class CustomSearchView(View):
             person_results = Person.objects.filter(person_filters)
 
             if query:
-                post_results = Post.objects.filter(category__name__icontains=query)
+                post_results = Post.objects.filter(
+                    Q(category__name__icontains=query) | Q(product_name__icontains=query)
+                )
 
         paginator = Paginator(post_results, 10)
         page = request.GET.get('page')
@@ -66,3 +70,21 @@ class CustomSearchView(View):
             'page_obj': posts,
         }
         return render(request, self.template_name, context)
+
+class GetCountriesView(View):
+    def get(self, request, *args, **kwargs):
+        continent_id = request.GET.get('continent_id')
+        countries = Country.objects.filter(continent_id=continent_id).values('id', 'name')
+        return JsonResponse(list(countries), safe=False)
+
+class GetStatesView(View):
+    def get(self, request, *args, **kwargs):
+        country_id = request.GET.get('country_id')
+        states = State.objects.filter(country_id=country_id).values('id', 'name')
+        return JsonResponse(list(states), safe=False)
+
+class GetTownsView(View):
+    def get(self, request, *args, **kwargs):
+        state_id = request.GET.get('state_id')
+        towns = Town.objects.filter(state_id=state_id).values('id', 'name')
+        return JsonResponse(list(towns), safe=False)
