@@ -1,21 +1,29 @@
-# comments/views.py
+from rest_framework import generics, permissions, serializers
+from .models import Comment
+from .serializers import CommentSerializer
+from rest_framework.response import Response
+from rest_framework import status
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from posts.models import Post
-from .forms import CommentForm
+class CommentList(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-@login_required
-def add_comment(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-            return redirect('post_detailed', pk=post_id)  # Replace with your post detail URL
-    else:
-        form = CommentForm()
-    return render(request, 'comments/add_comment.html', {'form': form, 'post': post})
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_update(self, serializer):
+        comment = self.get_object()
+        if comment.author != self.request.user:
+            raise serializers.ValidationError("You do not have permission to edit this comment.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise serializers.ValidationError("You do not have permission to delete this comment.")
+        instance.delete()

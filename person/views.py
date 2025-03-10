@@ -1,57 +1,38 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from rest_framework import generics, permissions, serializers
 from .models import Person
-from django.views.generic import DetailView
-from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy, reverse
-from .forms import PersonForm
+from .serializers import PersonSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import permissions
 
-class UserProfileDetailedView(LoginRequiredMixin, DetailView):
-    model = Person
-    template_name = "person/person_detailed_profile.html"
-    context_object_name = "person"
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    """
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-    def get_object(self):
-        return get_object_or_404(Person, user=self.request.user)
+        # Instance must have an attribute named `user`.
+        return obj.user == request.user
 
-class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
-    model = Person
-    form_class = PersonForm
-    template_name = "person/person_profile_edit.html"
-    context_object_name = "form"
+class PersonList(generics.ListCreateAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def get_object(self):
-        return get_object_or_404(Person, user=self.request.user)
+class PersonDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    permission_classes = [IsOwnerOrReadOnly]
 
-    def get_success_url(self):
-        return reverse('person:person_detailed_profile')
-
-class UserProfileCreateView(LoginRequiredMixin, CreateView):
-    model = Person
-    form_class = PersonForm
-    template_name = "person/person_profile_create_new.html"
-    context_object_name = "form"
-
-    def form_valid(self, form):
-        person = form.save(commit=False)
-        person.user = self.request.user
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('person:person_detailed_profile')
-
-class UserProfileDeleteView(LoginRequiredMixin, DeleteView):
-    model = Person
-    template_name = 'person/person_profile_delete.html'
-    success_url = reverse_lazy('login')
-
-    def get_object(self):
-        return get_object_or_404(Person, user=self.request.user)
-
-@login_required
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def toggle_business_name(request):
-    profile = get_object_or_404(Person, user=request.user)
+    profile = request.user.profile
     profile.use_business_name = not profile.use_business_name
     profile.save()
-    return redirect('person:person_detailed_profile')
+    serializer = PersonSerializer(profile)
+    return Response(serializer.data)

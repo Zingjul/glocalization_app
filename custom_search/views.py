@@ -1,90 +1,115 @@
-from django.shortcuts import render
-from django.db.models import Q
+from rest_framework import generics, permissions
+from .models import Continent, Country, State, Town
+from .serializers import ContinentSerializer, CountrySerializer, StateSerializer, TownSerializer
 from person.models import Person
 from posts.models import Post
-from .forms import CustomSearchForm
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views import View
-from django.http import JsonResponse
-from .models import Country, State, Town
+from person.serializers import PersonSerializer
+from posts.serializers import PostSerializer
+from rest_framework import filters
 
-class CustomSearchView(View):
-    template_name = 'custom_search/results.html'
+class ContinentList(generics.ListCreateAPIView):
+    queryset = Continent.objects.all()
+    serializer_class = ContinentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def get(self, request, *args, **kwargs):
-        form = CustomSearchForm(request.GET)
-        person_results = []
-        post_results = []
-        query = None
-        continent = None
-        country = None
-        state = None
-        town = None
+class ContinentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Continent.objects.all()
+    serializer_class = ContinentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-        if form.is_valid():
-            query = form.cleaned_data['query']
-            continent = form.cleaned_data['continent']
-            country = form.cleaned_data['country']
-            state = form.cleaned_data['state']
-            town = form.cleaned_data['town']
+class CountryList(generics.ListCreateAPIView):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-            person_filters = Q()
-            if continent:
-                person_filters &= Q(continent=continent)
-            if country:
-                person_filters &= Q(country=country)
-            if state:
-                person_filters &= Q(state=state)
-            if town:
-                person_filters &= Q(town=town)
-            if query:
-                person_filters &= Q(business_name__icontains=query)
+class CountryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-            person_results = Person.objects.filter(person_filters)
+class StateList(generics.ListCreateAPIView):
+    queryset = State.objects.all()
+    serializer_class = StateSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-            if query:
-                post_results = Post.objects.filter(
-                    Q(category__name__icontains=query) | Q(product_name__icontains=query)
-                )
+class StateDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = State.objects.all()
+    serializer_class = StateSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-        paginator = Paginator(post_results, 10)
-        page = request.GET.get('page')
+class TownList(generics.ListCreateAPIView):
+    queryset = Town.objects.all()
+    serializer_class = TownSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-        try:
-            posts = paginator.page(page)
-        except PageNotAnInteger:
-            posts = paginator.page(1)
-        except EmptyPage:
-            posts = paginator.page(paginator.num_pages)
+class TownDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Town.objects.all()
+    serializer_class = TownSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-        context = {
-            'form': form,
-            'posts': posts,
-            'person_results': person_results,
-            'query': query,
-            'continent': continent,
-            'country': country,
-            'state': state,
-            'town': town,
-            'is_paginated': posts.has_other_pages() if posts else False,
-            'page_obj': posts,
-        }
-        return render(request, self.template_name, context)
+class PersonSearch(generics.ListAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['business_name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-class GetCountriesView(View):
-    def get(self, request, *args, **kwargs):
-        continent_id = request.GET.get('continent_id')
-        countries = Country.objects.filter(continent_id=continent_id).values('id', 'name')
-        return JsonResponse(list(countries), safe=False)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        continent = self.request.query_params.get('continent')
+        country = self.request.query_params.get('country')
+        state = self.request.query_params.get('state')
+        town = self.request.query_params.get('town')
 
-class GetStatesView(View):
-    def get(self, request, *args, **kwargs):
-        country_id = request.GET.get('country_id')
-        states = State.objects.filter(country_id=country_id).values('id', 'name')
-        return JsonResponse(list(states), safe=False)
+        if continent:
+            queryset = queryset.filter(continent=continent)
+        if country:
+            queryset = queryset.filter(country=country)
+        if state:
+            queryset = queryset.filter(state=state)
+        if town:
+            queryset = queryset.filter(town=town)
+        return queryset
 
-class GetTownsView(View):
-    def get(self, request, *args, **kwargs):
-        state_id = request.GET.get('state_id')
-        towns = Town.objects.filter(state_id=state_id).values('id', 'name')
-        return JsonResponse(list(towns), safe=False)
+class PostSearch(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['category__name', 'product_name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CountryFilter(generics.ListAPIView):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        continent_id = self.request.query_params.get('continent_id')
+        if continent_id:
+            queryset = queryset.filter(continent_id=continent_id)
+        return queryset
+
+class StateFilter(generics.ListAPIView):
+    queryset = State.objects.all()
+    serializer_class = StateSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        country_id = self.request.query_params.get('country_id')
+        if country_id:
+            queryset = queryset.filter(country_id=country_id)
+        return queryset
+
+class TownFilter(generics.ListAPIView):
+    queryset = Town.objects.all()
+    serializer_class = TownSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        state_id = self.request.query_params.get('state_id')
+        if state_id:
+            queryset = queryset.filter(state_id=state_id)
+        return queryset

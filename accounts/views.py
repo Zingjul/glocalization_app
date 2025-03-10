@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.views import PasswordResetView, PasswordChangeView
+from .forms import CustomPasswordResetForm, CustomPasswordChangeForm
 from django.urls import reverse_lazy
 from django.contrib.auth import login
 from django.views.generic import CreateView, View
@@ -6,6 +8,19 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import logout
 from django.views.generic.edit import FormView
 
+from rest_framework import generics
+from .models import CustomUser
+from .serializers import CustomUserSerializer
+# api 
+class UserList(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+# end api
 class SignupView(FormView):
     template_name = 'registration/signup.html'
     form_class = CustomUserCreationForm
@@ -33,3 +48,18 @@ class LogoutView(View):
     def get(self, request,):
         logout(request)
         return redirect('login')
+#  password reset view  
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+    template_name = 'accounts/password_reset_form.html'  # Create this template
+    success_url = reverse_lazy('password_reset_done')  # Create this url and view.
+    email_template_name = 'accounts/password_reset_email.html' #Create this template
+
+    def form_valid(self, form):
+        # Add any additional logic before sending the email if needed
+        return super().form_valid(form)
+# password change view
+class CustomPasswordChangeView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'accounts/password_change_form.html'  # Create this template
+    success_url = reverse_lazy('password_change_done')

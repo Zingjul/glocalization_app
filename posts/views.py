@@ -1,76 +1,54 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import UpdateView, DeleteView, CreateView
-from django.urls import reverse_lazy, reverse
-from .models import Post, PostImage  # Import PostImage
-from .forms import PostForm, PostImageFormSet  # Import PostImageFormSet
+from rest_framework import generics, permissions, serializers
+from .models import Post, Category
+from .serializers import PostSerializer, CategorySerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import ValidationError
 
-class PostView(LoginRequiredMixin, ListView):
-    model = Post
-    template_name = 'post_home.html'
-    context_object_name = 'posts'
+class CategoryList(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-class PostDetailedView(LoginRequiredMixin, DetailView):
-    model = Post
-    template_name = 'post_detailed.html'
-    context_object_name = 'post'
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    form_class = PostForm
-    template_name = 'post_create_new.html'
+class PostList(generics.ListCreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['image_formset'] = PostImageFormSet(self.request.POST, self.request.FILES)
-        else:
-            context['image_formset'] = PostImageFormSet()
-        return context
+    def perform_create(self, serializer):
+        try:
+            category_id = self.request.data.get('category')
+            if category_id:
+                category = Category.objects.get(pk=category_id)
+            else:
+                category = None
+            serializer.save(author=self.request.user, category=category)
+        except Category.DoesNotExist:
+            raise ValidationError({'category': ['Category does not exist.']})
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)  # Save the Post instance first
-        self.object.author = self.request.user
-        self.object.save()  # Now save the Post to the DB
+class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]
 
-        image_formset = self.get_context_data()['image_formset']
-        if image_formset.is_valid():
-            image_formset.instance = self.object  # Link images to the Post
-            image_formset.save()
+    def perform_update(self, serializer):
+        try:
+            category_id = self.request.data.get('category')
+            if category_id:
+                category = Category.objects.get(pk=category_id)
+            else:
+                category = None
+            serializer.save(author=self.request.user, category=category)
+        except Category.DoesNotExist:
+            raise ValidationError({'category': ['Category does not exist.']})
 
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('post_detailed', kwargs={'pk': self.object.pk})
-
-class PostUpdateView(LoginRequiredMixin, UpdateView):
-    model = Post
-    form_class = PostForm
-    template_name = 'post_edit.html'
-    context_object_name = 'form'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['image_formset'] = PostImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
-        else:
-            context['image_formset'] = PostImageFormSet(instance=self.object) #This line is critical.
-        return context
-
-    def form_valid(self, form):
-        self.object = form.save()
-
-        image_formset = self.get_context_data()['image_formset']
-        if image_formset.is_valid():
-            image_formset.save()
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('post_detailed', kwargs={'pk': self.object.pk})
-
-class PostDeleteView(LoginRequiredMixin, DeleteView):
-    model = Post
-    template_name = 'post_delete.html'
-    success_url = reverse_lazy('post_home')
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user and not self.request.user.is_staff:
+            raise serializers.ValidationError("You do not have permission to delete this post.")
+        instance.delete()
