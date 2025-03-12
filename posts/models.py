@@ -14,11 +14,11 @@ class Category(models.Model):
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=False, blank=False) # Modified: null=False, blank=False
     date = models.DateTimeField(auto_now_add=True)
     author_phone_number = PhoneNumberField(blank=False)
     author_email = models.EmailField(max_length=254, blank=True)
-    product_name = models.CharField(max_length=255, blank=True, null=True) # Add this line
+    product_name = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         if self.description and len(self.description) > 50:
             return f"{self.description[:50]}..."

@@ -6,18 +6,25 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = UserCreationForm.Meta.fields + ("email", "phone_number", "country", "state", "home_town")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        print("CustomUserCreationForm Errors:", self.errors)
+        print("CustomUserCreationForm Cleaned Data:", cleaned_data)
+        return cleaned_data
+
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = UserChangeForm.Meta.fields
-# password reset form
+
 class CustomPasswordResetForm(PasswordResetForm):
     email = forms.EmailField(
         label="Email",
         max_length=254,
         widget=forms.EmailInput(attrs={'autocomplete': 'email', 'class': 'form-control'}),
     )
-# password change form
+
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(
         label="Old password",
@@ -35,3 +42,8 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control'}),
     )
+    def clean(self):
+        cleaned_data = super().clean()
+        print("CustomPasswordChangeForm Errors:", self.errors)
+        print("CustomPasswordChangeForm Cleaned Data:", cleaned_data)
+        return cleaned_data

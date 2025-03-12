@@ -17,24 +17,24 @@ class PostImageSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    category = CategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     images = PostImageSerializer(many=True, read_only=True)
     author_phone_number = PhoneNumberField()
 
     class Meta:
         model = Post
         fields = ['id', 'author', 'category', 'description', 'date', 'author_phone_number', 'author_email', 'product_name', 'images']
-        read_only_fields = ['date', 'author']
+        read_only_fields = ['date']
 
     def create(self, validated_data):
-        images_data = self.context.get('request').FILES.getlist('images')
+        images_data = self.context.get('request').FILES.getlist('images') if self.context.get('request') else []
         post = Post.objects.create(**validated_data)
         for image_data in images_data:
             PostImage.objects.create(post=post, image=image_data)
         return post
 
     def update(self, instance, validated_data):
-        images_data = self.context.get('request').FILES.getlist('images')
+        images_data = self.context.get('request').FILES.getlist('images') if self.context.get('request') else []
         instance.category = validated_data.get('category', instance.category)
         instance.description = validated_data.get('description', instance.description)
         instance.author_phone_number = validated_data.get('author_phone_number', instance.author_phone_number)
@@ -46,7 +46,7 @@ class PostSerializer(serializers.ModelSerializer):
             for image_data in images_data:
                 PostImage.objects.create(post=instance, image=image_data)
         return instance
-    
+
     def validate_product_name(self, value):
         if len(value) > 255:
             raise serializers.ValidationError("Product name is too long.")
@@ -58,7 +58,8 @@ class PostSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        image_count = len(self.context.get('request').FILES.getlist('images'))
-        if image_count > 6:
-            raise serializers.ValidationError("Too many images uploaded.")
+        if self.context and self.context.get('request'):
+            image_count = len(self.context.get('request').FILES.getlist('images'))
+            if image_count > 6:
+                raise serializers.ValidationError({"non_field_errors": ["Too many images uploaded."] })
         return data

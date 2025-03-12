@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Comment
-from django.conf import settings
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
@@ -20,12 +19,9 @@ class CommentSerializer(serializers.ModelSerializer):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
 
+    # Remove the permission checks from update and delete
     def update(self, instance, validated_data):
-        if instance.author != self.context['request'].user:
-            raise serializers.ValidationError("You do not have permission to edit this comment.")
         return super().update(instance, validated_data)
 
     def delete(self, instance):
-        if instance.author != self.context['request'].user:
-            raise serializers.ValidationError("You do not have permission to delete this comment.")
         instance.delete()

@@ -7,10 +7,10 @@ class CountrySerializer(serializers.Serializer):
     name = serializers.SerializerMethodField()
 
     def get_name(self, obj):
-        return countries.name(obj)
+        return countries.name(obj.code) # Correctly get country name
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    country = CountrySerializer()
+    country = CountrySerializer(required=False) # Allow country to be null
 
     class Meta:
         model = CustomUser

@@ -1,34 +1,44 @@
-from django.shortcuts import render
-from django.views.generic import FormView
-from .forms import LocationForm
+from rest_framework import generics, permissions, serializers
+from .models import Continent, Country, State, Town
+from .serializers import ContinentSerializer, CountrySerializer, StateSerializer, TownSerializer
+from .permissions import IsAdminOrReadOnly
 
-class LocationView(FormView):
-    template_name = 'location_form.html'  # Template to render
-    form_class = LocationForm  # Form class to use
-    # success_url = '/success/'  # URL to redirect to after successful form submission (optional)
+class ContinentList(generics.ListCreateAPIView):
+    queryset = Continent.objects.all()
+    serializer_class = ContinentSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(request.GET or None)  # Handle GET requests (form pre-population)
-        context = {'form': form}
-        return self.render_to_response(context)
+class ContinentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Continent.objects.all()
+    serializer_class = ContinentSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-    # If you need to handle POST requests (form submission):
-    # def post(self, request, *args, **kwargs):
-    #     form = self.form_class(request.POST)  # Use request.POST for form submission
-    #     if form.is_valid():
-    #         # Process the form data (e.g., save to database)
-    #         # ... your logic here ...
-    #         return self.form_valid(form) # Redirect on success
-    #     else:
-    #         return self.form_invalid(form) # Re-render form with errors
+class CountryList(generics.ListCreateAPIView):
+    queryset = Country.objects.select_related('continent').all()
+    serializer_class = CountrySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-    # def form_valid(self, form):
-    #     # Called when form is valid.  Can redirect or render a different template
-    #     # Example:
-    #     # return HttpResponseRedirect(self.success_url)  # Redirect
-    #     # Or render a different template
-    #     return super().form_valid(form)
+class CountryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Country.objects.select_related('continent').all()
+    serializer_class = CountrySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-    # def form_invalid(self, form):
-    #     # Called when form is invalid. Re-render the form with errors
-    #     return self.render_to_response(self.get_context_data(form=form))
+class StateList(generics.ListCreateAPIView):
+    queryset = State.objects.select_related('country__continent', 'country').all()
+    serializer_class = StateSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class StateDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = State.objects.select_related('country__continent', 'country').all()
+    serializer_class = StateSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class TownList(generics.ListCreateAPIView):
+    queryset = Town.objects.select_related('state__country__continent', 'state__country', 'state').all()
+    serializer_class = TownSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class TownDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Town.objects.select_related('state__country__continent', 'state__country', 'state').all()
+    serializer_class = TownSerializer
+    permission_classes = [IsAdminOrReadOnly]

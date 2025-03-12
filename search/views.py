@@ -1,44 +1,42 @@
-# search/views.py
-
-from django.shortcuts import render
-from django.db.models import Q
+from rest_framework import generics, permissions, filters
 from posts.models import Post
 from person.models import Person
-from .forms import SearchForm
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from posts.serializers import PostSerializer
+from person.serializers import PersonSerializer
+from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import PageNumberPagination
 
-def search(request):
-    form = SearchForm(request.GET)
-    post_results = []
-    person_results = []
-    query = None
+class CustomPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
-    if form.is_valid():
-        query = form.cleaned_data['query']
+class PostSearch(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['category__name', 'product_name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination # add this line
 
-        # Search Post model
-        post_results = Post.objects.filter(
+    def get_queryset(self):
+        query = self.request.query_params.get('query', None)
+        if query is None:
+            raise ValidationError({'query': ['This field is required.']})
+        return super().get_queryset().filter(
             Q(category__name__icontains=query) | Q(product_name__icontains=query)
         )
 
-        # Search Person model
-        person_results = Person.objects.filter(business_name__icontains=query)
+class PersonSearch(generics.ListAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['business_name']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination # add this line
 
-    paginator = Paginator(post_results, 10)
-    page = request.GET.get('page')
-
-    try:
-        posts = paginator.page(page)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
-
-    return render(request, 'search/results.html', {
-        'form': form,
-        'posts': posts,
-        'person_results': person_results,
-        'query': query,
-        'is_paginated': posts.has_other_pages() if posts else False,
-        'page_obj': posts,
-    })
+    def get_queryset(self):
+        query = self.request.query_params.get('query', None)
+        if query is None:
+            raise ValidationError({'query': ['This field is required.']})
+        return super().get_queryset().filter(business_name__icontains=query)

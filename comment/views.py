@@ -15,15 +15,19 @@ class CommentList(generics.ListCreateAPIView):
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_update(self, serializer):
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
         comment = self.get_object()
-        if comment.author != self.request.user:
-            raise serializers.ValidationError("You do not have permission to edit this comment.")
-        serializer.save()
+        if comment.author.pk != request.user.pk:
+            return Response({"detail": "You do not have permission to edit this comment."}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
 
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise serializers.ValidationError("You do not have permission to delete this comment.")
-        instance.delete()
+    def destroy(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+        instance = self.get_object()
+        if instance.author.pk != request.user.pk:
+            return Response({"detail": "You do not have permission to delete this comment."}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)

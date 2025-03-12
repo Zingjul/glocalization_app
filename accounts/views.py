@@ -56,8 +56,18 @@ class CustomPasswordResetView(PasswordResetView):
     email_template_name = 'accounts/password_reset_email.html' #Create this template
 
     def form_valid(self, form):
-        # Add any additional logic before sending the email if needed
-        return super().form_valid(form)
+        try:
+            user = form.save()
+            if user is None:
+                print("User object is None after save()")
+            login(self.request, user)
+            self.virtual_id = user.virtual_id
+            print(f"User {user.username} created successfully.")
+            return super().form_valid(form)
+        except Exception as e:
+            print(f"Error creating user: {e}")
+            return super().form_invalid(form)
+    
 # password change view
 class CustomPasswordChangeView(PasswordChangeView):
     form_class = CustomPasswordChangeForm

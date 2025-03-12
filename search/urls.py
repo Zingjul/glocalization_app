@@ -1,8 +1,7 @@
-# search/urls.py
-
 from django.urls import path
-from . import views
+from .views import PostSearch, PersonSearch
 
 urlpatterns = [
-    path('', views.search, name='search'),
+    path('posts/', PostSearch.as_view(), name='post-search'),
+    path('persons/', PersonSearch.as_view(), name='person-search'),
 ]
