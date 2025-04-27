@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Search for Products</h2>
+
+<form method="GET" action="{% url 'search_posts' %}">
+    <input type="text" name="query" placeholder="Enter search keywords" required>
+    
+    <h3>Filter by Location</h3>
+    <input type="text" name="continent" placeholder="Continent">
+    <input type="text" name="country" placeholder="Country">
+    <input type="text" name="state" placeholder="State">
+    <input type="text" name="town" placeholder="Town">
+
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% endblock %}

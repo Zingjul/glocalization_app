@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}  <!-- 🔥 Load Crispy Forms -->
+
+{% block content %}
+<h2>{% if profile %}Edit Your Profile{% else %}Create Your Profile{% endif %}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|crispy }}  <!-- 🔥 Uses Crispy Forms styling -->
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    
+    {% if profile %}
+        <a href="{% url 'person_detail' profile.pk %}" class="btn btn-secondary">Cancel</a>
+    {% else %}
+        <a href="{% url 'person_list' %}" class="btn btn-secondary">Cancel</a>  <!-- Redirect if no profile -->
+    {% endif %}
+</form>
+
+{% endblock %}

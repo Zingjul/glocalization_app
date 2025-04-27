@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Create a New Post</h2>
+
+{% if not user.profile.continent or not user.profile.country or not user.profile.state or not user.profile.town or not user.profile.business_name %}
+    <div class="alert alert-warning">
+        <strong>Warning:</strong> Your profile is incomplete!  
+        Please <a href="{% url 'person_edit' user.profile.pk %}" class="alert-link">complete your profile</a> before posting a product.
+    </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div id="location_fields" style="display: none;">
+        {{ form.continent.label_tag }} {{ form.continent }}
+        {{ form.country.label_tag }} {{ form.country }}
+        {{ form.state.label_tag }} {{ form.state }}
+        {{ form.town.label_tag }} {{ form.town }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit Post</button>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let radioButtons = document.querySelectorAll("input[name='use_default_location']");
+        let locationFields = document.getElementById("location_fields");
+
+        radioButtons.forEach(button => {
+            button.addEventListener("change", function() {
+                locationFields.style.display = (this.value === "False") ? "block" : "none";
+            });
+        });
+    });
+</script>
+
+{% endblock %}

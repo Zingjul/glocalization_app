@@ -1,54 +1,55 @@
-from rest_framework import generics, permissions, serializers
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, CreateView
+from django.urls import reverse_lazy
 from .models import Post, Category
-from .serializers import PostSerializer, CategorySerializer
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.exceptions import ValidationError
+from .forms import PostForm
 
-class CategoryList(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+class PostListView(ListView):
+    model = Post
+    template_name = "posts/post_list.html"
+    context_object_name = "posts"
 
-class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "posts/post_detail.html"
+    context_object_name = "post"
 
-class PostList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = "posts/post_form.html"
+    success_url = reverse_lazy("post_list")
 
-    def perform_create(self, serializer):
-        try:
-            category_id = self.request.data.get('category')
-            if category_id:
-                category = Category.objects.get(pk=category_id)
-            else:
-                category = None
-            serializer.save(author=self.request.user, category=category)
-        except Category.DoesNotExist:
-            raise ValidationError({'category': ['Category does not exist.']})
+    def dispatch(self, request, *args, **kwargs):
+        """ Ensure user has a profile before accessing the post form. """
+        profile = getattr(request.user, "profile", None)  # ✅ Avoid crashes if profile is missing
 
-class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]
+        if not profile:
+            messages.warning(request, "You need to create your profile before posting a product.")
+            return redirect("person_edit", pk=request.user.pk)  # ✅ Redirect users to create their profile
 
-    def perform_update(self, serializer):
-        try:
-            category_id = self.request.data.get('category')
-            if category_id:
-                category = Category.objects.get(pk=category_id)
-            else:
-                category = None
-            serializer.save(author=self.request.user, category=category)
-        except Category.DoesNotExist:
-            raise ValidationError({'category': ['Category does not exist.']})
+        if not (profile.continent and profile.country and profile.state and profile.town and profile.business_name):
+            messages.warning(request, "Complete your profile before posting.")
+            return redirect("person_edit", pk=profile.pk)
 
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user and not self.request.user.is_staff:
-            raise serializers.ValidationError("You do not have permission to delete this post.")
-        instance.delete()
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+
+        # 🔥 Prevent overwriting custom location selection
+        if form.cleaned_data["use_default_location"]:
+            profile = self.request.user.profile
+            form.instance.continent = profile.continent
+            form.instance.country = profile.country
+            form.instance.state = profile.state
+            form.instance.town = profile.town
+        
+        return super().form_valid(form)
+
+class CategoryListView(ListView):
+    model = Category
+    template_name = "posts/category_list.html"
+    context_object_name = "categories"

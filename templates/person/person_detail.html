@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Profile of {{ profile.user.username }}</h2>
+
+{% if profile.person_profile_picture %}
+    <img src="{{ profile.person_profile_picture.url }}" alt="Profile Picture" width="150">
+{% endif %}
+
+<p><strong>Business Name:</strong> {{ profile.business_name }}</p>
+<p><strong>About:</strong> {{ profile.about }}</p>
+<p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
+
+<p><strong>Location:</strong> 
+    {% if profile.continent %} {{ profile.continent.name }}, {% endif %}
+    {% if profile.country %} {{ profile.country.name }}, {% endif %}
+    {% if profile.state %} {{ profile.state.name }}, {% endif %}
+    {% if profile.town %} {{ profile.town.name }} {% endif %}
+</p>
+
+{% if user == profile.user %}
+    <a href="{% url 'person_edit' profile.pk %}" class="btn btn-warning">Edit Profile</a>
+    <a href="{% url 'person_delete' profile.pk %}" class="btn btn-danger">Delete Account</a>
+{% endif %}
+
+<a href="{% url 'person_list' %}" class="btn btn-secondary">Back to Profiles</a>
+{% endblock %}

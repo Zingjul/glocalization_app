@@ -4,40 +4,51 @@ from phonenumber_field.formfields import PhoneNumberField
 
 class PostForm(forms.ModelForm):
     author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
+
+    use_default_location = forms.ChoiceField(
+        choices=[(True, "Use my default location"), (False, "Specify a custom location")],
+        widget=forms.RadioSelect,
+        initial=True,
+        label="Location Option",
+    )
+
     class Meta:
         model = Post
-        fields = ['category', 'description', 'author_phone_number', 'author_email', 'product_name'] # Add 'product_name' here
+        fields = [
+            "category", "product_name", "description", "author_phone_number", "author_email",
+            "use_default_location"
+        ]  # 🔥 Removed non-editable location fields
+
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
-            'author_phone_number': forms.TextInput(attrs={'placeholder': 'e.g., 08012345678'}),
-            'author_email': forms.EmailInput(attrs={'placeholder': 'e.g., yourname@example.com'}),
-            'product_name': forms.TextInput(attrs={'placeholder': 'Enter a real-world product name'}) #added product_name widget.
+            "description": forms.Textarea(attrs={"rows": 5}),
+            "author_phone_number": forms.TextInput(attrs={"placeholder": "e.g., 08012345678"}),
+            "author_email": forms.EmailInput(attrs={"placeholder": "e.g., yourname@example.com"}),
+            "product_name": forms.TextInput(attrs={"placeholder": "Enter a real-world product name"}),
         }
         labels = {
-            'category': 'Post Category',
-            'description': 'Post Description',
-            'author_phone_number': 'Your Phone Number',
-            'author_email': 'Your Email',
-            'product_name': 'Product Name', #added product_name label.
+            "category": "Post Category",
+            "product_name": "Product Name",
+            "description": "Post Description",
+            "author_phone_number": "Your Phone Number",
+            "author_email": "Your Email",
+            "use_default_location": "Choose Location Preference",
         }
         help_texts = {
-            'description': 'Write your post description here.',
-        }
-        error_messages = {
-            'description': {
-                'required': 'The description is required',
-            },
+            "description": "Write your post description here.",
+            "use_default_location": "Select default to use your profile location or specify a new location.",
         }
 
-class PostImageForm(forms.ModelForm):
-    class Meta:
-        model = PostImage
-        fields = ['image']
-        labels = {'image':'',}
-class CustomPostImageFormSet(forms.BaseInlineFormSet):
-    def _construct_form(self, i, **kwargs):
-        form = super()._construct_form(i, **kwargs)
-        form.fields['DELETE'].widget = forms.HiddenInput()
-        return form
+    def save(self, commit=True):
+        post = super().save(commit=False)
 
-PostImageFormSet = forms.inlineformset_factory(Post, PostImage, form=PostImageForm, formset=CustomPostImageFormSet, extra=6, can_delete=True)
+        # 🔥 Assign location automatically if user selects "default location"
+        if post.use_default_location:
+            profile = post.author.profile  # Access user profile location
+            post.continent = profile.continent
+            post.country = profile.country
+            post.state = profile.state
+            post.town = profile.town
+
+        if commit:
+            post.save()
+        return post

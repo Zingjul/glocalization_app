@@ -1,26 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django_countries.fields import CountryField
 import secrets
 
-def generate_visual_id(length=16):
+def generate_virtual_id(length=16):
     """Generates a secure random URL-safe string."""
     return secrets.token_urlsafe(length)
 
 class CustomUser(AbstractUser):
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    country = CountryField(blank=True, null=True)
-    state = models.CharField(max_length=20, blank=True, null=True)
-    home_town = models.CharField(max_length=20, blank=True, null=True)
-    virtual_id = models.CharField(max_length=32, unique=True, blank=True, null=True)
+    username = models.CharField(max_length=150, unique=True)  # Ensuring unique usernames
+    email = models.EmailField(unique=True)  # Email required and unique for authentication
+    phone_number = models.CharField(max_length=20, unique=True, blank=True, null=True)  # Phone should be unique
+    virtual_id = models.CharField(max_length=32, unique=True, blank=True, null=True)  # Auto-generated on save
 
     def save(self, *args, **kwargs):
         if not self.virtual_id:
-            self.virtual_id = generate_visual_id()
+            self.virtual_id = generate_virtual_id()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        if self.virtual_id:
-            return f"{self.username} (Virtual ID: {self.virtual_id})"
-        else:
-            return self.username
+        return f"{self.username} ({self.email})" if self.email else self.username
+
+    class Meta:
+        app_label = 'accounts'  # Ensures Django recognizes this model under the 'accounts' app

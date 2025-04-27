@@ -13,6 +13,6 @@ urlpatterns = [
     path('password_change/', CustomPasswordChangeView.as_view(), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='password_change_done'),
     # API Views
-    path('users/', UserList.as_view(), name='user-list'), # Added name
-    path('users/<int:pk>/', UserDetail.as_view(), name='user-detail'), # Added name
+    path('users/', UserList.as_view(), name='user_list'), # Added name
+    path('users/<int:pk>/', UserDetail.as_view(), name='user_detail'), # Added name
 ]

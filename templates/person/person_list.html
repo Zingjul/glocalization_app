@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>User Profiles</h2>
+
+<ul class="list-group">
+    {% for profile in profiles %}
+        <li class="list-group-item">
+            <strong>{{ profile.user.username }}</strong> 
+            {% if profile.business_name %}
+                | <em>{{ profile.business_name }}</em>
+            {% endif %}
+            <a href="{% url 'person_detail' profile.pk %}" class="btn btn-sm btn-primary">View Profile</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from custom_search.models import Continent, Country, State, Town
+from django.utils.timezone import now  # Import timezone utility
 
 class Person(models.Model):
     user = models.OneToOneField(
@@ -35,13 +36,26 @@ class Person(models.Model):
         default=False,
         verbose_name=_("Use Business Name"),
     )
-    continent = models.ForeignKey(Continent, on_delete=models.SET_NULL, blank=True, null=True)
-    country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True)
-    state = models.ForeignKey(State, on_delete=models.SET_NULL, blank=True, null=True)
-    town = models.ForeignKey(Town, on_delete=models.SET_NULL, blank=True, null=True)
+
+    # Location fields linked to custom_search
+    continent = models.ForeignKey(
+        Continent, on_delete=models.SET_NULL, blank=True, null=True, related_name="persons"
+    )
+    country = models.ForeignKey(
+        Country, on_delete=models.SET_NULL, blank=True, null=True, related_name="persons"
+    )
+    state = models.ForeignKey(
+        State, on_delete=models.SET_NULL, blank=True, null=True, related_name="persons"
+    )
+    town = models.ForeignKey(
+        Town, on_delete=models.SET_NULL, blank=True, null=True, related_name="persons"
+    )
+
+    date_joined = models.DateTimeField(default=now, verbose_name=_("Date Joined"))  # Tracks when the user created profile
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))  # Tracks updates
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username} ({self.business_name})" if self.business_name else self.user.username
 
     def get_absolute_url(self):
         return reverse("person_profile", kwargs={"pk": self.pk})
@@ -49,3 +63,4 @@ class Person(models.Model):
     class Meta:
         verbose_name = _("Profile")
         verbose_name_plural = _("Profiles")
+        ordering = ["-date_joined"]  # Sort profiles by most recent users

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ post.product_name }}</h2>
+
+{% if post.images.all %}
+    {% for image in post.images.all %}
+        <img src="{{ image.image.url }}" alt="Post Image" width="150">
+    {% endfor %}
+{% endif %}
+
+<p><strong>Category:</strong> {{ post.category.name }}</p>
+<p><strong>Description:</strong> {{ post.description }}</p>
+<p><strong>Price:</strong> ${{ post.price }}</p>
+<p><strong>Contact:</strong> {{ post.author_phone_number }} | {{ post.author_email }}</p>
+
+<p><strong>Location:</strong> 
+    {% if post.continent %} {{ post.continent.name }}, {% endif %}
+    {% if post.country %} {{ post.country.name }}, {% endif %}
+    {% if post.state %} {{ post.state.name }}, {% endif %}
+    {% if post.town %} {{ post.town.name }} {% endif %}
+</p>
+
+<a href="{% url 'post_list' %}" class="btn btn-secondary">Back to Posts</a>
+{% endblock %}

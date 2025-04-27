@@ -5,18 +5,30 @@ from .models import CustomUser
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ("email", "phone_number", "country", "state", "home_town")
+        fields = ("username", "email", "phone_number", "password1", "password2")  # Includes both username & email
 
-    def clean(self):
-        cleaned_data = super().clean()
-        print("CustomUserCreationForm Errors:", self.errors)
-        print("CustomUserCreationForm Cleaned Data:", cleaned_data)
-        return cleaned_data
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError("This username is already taken.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get("phone_number")
+        if CustomUser.objects.filter(phone_number=phone_number).exists():
+            raise forms.ValidationError("This phone number is already in use.")
+        return phone_number
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        fields = UserChangeForm.Meta.fields
+        fields = ("username", "email", "phone_number", "first_name", "last_name")
 
 class CustomPasswordResetForm(PasswordResetForm):
     email = forms.EmailField(
@@ -38,12 +50,15 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         help_text=PasswordChangeForm.base_fields['new_password1'].help_text,
     )
     new_password2 = forms.CharField(
-        label="New password confirmation",
+        label="Confirm new password",
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control'}),
     )
-    def clean(self):
-        cleaned_data = super().clean()
-        print("CustomPasswordChangeForm Errors:", self.errors)
-        print("CustomPasswordChangeForm Cleaned Data:", cleaned_data)
-        return cleaned_data
+
+    def clean_new_password2(self):
+        new_password1 = self.cleaned_data.get("new_password1")
+        new_password2 = self.cleaned_data.get("new_password2")
+
+        if new_password1 and new_password2 and new_password1 != new_password2:
+            raise forms.ValidationError("The new passwords do not match.")
+        return new_password2

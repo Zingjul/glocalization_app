@@ -1,35 +1,21 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView
-from .forms import CustomPasswordResetForm, CustomPasswordChangeForm
 from django.urls import reverse_lazy
-from django.contrib.auth import login
-from django.views.generic import CreateView, View
-from .forms import CustomUserCreationForm
-from django.contrib.auth import logout
-from django.views.generic.edit import FormView
-
-from rest_framework import generics
+from django.contrib.auth import login, logout
+from django.views.generic import ListView, DetailView, FormView, View
+from .forms import CustomUserCreationForm, CustomPasswordResetForm, CustomPasswordChangeForm
 from .models import CustomUser
-from .serializers import CustomUserSerializer
-# api 
-class UserList(generics.ListAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
 
-class UserDetail(generics.RetrieveAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-# end api
+# Signup View (User Registration)
 class SignupView(FormView):
     template_name = 'registration/signup.html'
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('signup_success')  # URL name for success
+    success_url = reverse_lazy('signup_success')
 
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        self.virtual_id = user.virtual_id  # Store virtual_id for success template
+        self.virtual_id = user.virtual_id
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -37,39 +23,58 @@ class SignupView(FormView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('some_redirect_url') #redirect authenticated users
+            return redirect('dashboard')  # Redirect authenticated users to dashboard or another page
         return super().get(request, *args, **kwargs)
 
+
+# Signup Success Page
 def signup_success(request):
     virtual_id = request.GET.get('virtual_id')
     return render(request, 'signup_success.html', {'virtual_id': virtual_id})
 
+
+# Logout View
 class LogoutView(View):
-    def get(self, request,):
+    def get(self, request):
         logout(request)
         return redirect('login')
-#  password reset view  
+
+
+# Password Reset View
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
-    template_name = 'accounts/password_reset_form.html'  # Create this template
-    success_url = reverse_lazy('password_reset_done')  # Create this url and view.
-    email_template_name = 'accounts/password_reset_email.html' #Create this template
+    template_name = 'accounts/password_reset_form.html'
+    success_url = reverse_lazy('password_reset_done')
+    email_template_name = 'accounts/password_reset_email.html'
 
     def form_valid(self, form):
         try:
-            user = form.save()
-            if user is None:
-                print("User object is None after save()")
-            login(self.request, user)
-            self.virtual_id = user.virtual_id
-            print(f"User {user.username} created successfully.")
+            user = CustomUser.objects.get(email=form.cleaned_data["email"])
+            if user:
+                print(f"Password reset request for {user.email}")
             return super().form_valid(form)
-        except Exception as e:
-            print(f"Error creating user: {e}")
+        except CustomUser.DoesNotExist:
+            print("No user found with that email.")
             return super().form_invalid(form)
-    
-# password change view
+
+
+# Password Change View
 class CustomPasswordChangeView(PasswordChangeView):
     form_class = CustomPasswordChangeForm
-    template_name = 'accounts/password_change_form.html'  # Create this template
+    template_name = 'accounts/password_change_form.html'
     success_url = reverse_lazy('password_change_done')
+
+
+# **Restoring UserList & UserDetail Views**
+class UserList(ListView):
+    model = CustomUser
+    template_name = "accounts/user_list.html"  # Create this template
+    context_object_name = "users"  # Ensures easier template access
+
+class UserDetail(DetailView):
+    model = CustomUser
+    template_name = "accounts/user_detail.html"  # Create this template
+    context_object_name = "user"
+
+    def get_object(self):
+        return get_object_or_404(CustomUser, pk=self.kwargs.get("pk"))

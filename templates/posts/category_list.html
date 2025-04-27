@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Product Categories</h2>
+
+<ul class="list-group">
+    {% for category in categories %}
+        <li class="list-group-item">
+            <a href="{% url 'post_list' %}?category={{ category.name }}" class="btn btn-outline-primary">
+                {{ category.name }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+{% if not categories %}
+    <p>No categories available.</p>
+{% endif %}
+
+<a href="{% url 'post_list' %}" class="btn btn-secondary">View All Posts</a>
+
+{% endblock %}

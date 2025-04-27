@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Browse Posts</h2>
+
+<ul class="list-group">
+    {% for post in posts %}
+        <li class="list-group-item">
+            <strong>{{ post.product_name }}</strong> 
+            | <em>{{ post.category.name }}</em>
+            <p>{{ post.description|truncatewords:20 }}</p>
+            <p><strong>Location:</strong> 
+                {% if post.continent %} {{ post.continent.name }}, {% endif %}
+                {% if post.country %} {{ post.country.name }}, {% endif %}
+                {% if post.state %} {{ post.state.name }}, {% endif %}
+                {% if post.town %} {{ post.town.name }} {% endif %}
+            </p>
+            <a href="{% url 'post_detail' post.pk %}" class="btn btn-primary">View Post</a>
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
