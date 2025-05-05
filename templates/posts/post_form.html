@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}  <!-- 🔥 Load Crispy Forms -->
+{% load static %}
+<script src="{% static 'search/location_autocomplete.js' %}"></script>
 
 {% block content %}
 <h2>Create a New Post</h2>
@@ -12,29 +15,40 @@
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    
+    {{ form.category|as_crispy_field }}
+    {{ form.product_name|as_crispy_field }}
+    {{ form.description|as_crispy_field }}
+    {{ form.author_phone_number|as_crispy_field }}
+    {{ form.author_email|as_crispy_field }}
 
-    <div id="location_fields" style="display: none;">
-        {{ form.continent.label_tag }} {{ form.continent }}
-        {{ form.country.label_tag }} {{ form.country }}
-        {{ form.state.label_tag }} {{ form.state }}
-        {{ form.town.label_tag }} {{ form.town }}
+    <!-- 🔥 Location Selection -->
+    <div class="mb-3">
+        <label>{{ form.use_default_location.label }}</label>
+        {{ form.use_default_location }}
     </div>
 
-    <button type="submit" class="btn btn-success">Submit Post</button>
-</form>
+    <!-- 🔥 Location Fields (Selection + Input) -->
+    <div id="location_fields" style="display: none;">
+        <div class="mb-3">
+            <label for="continent">Continent</label>
+            {{ form.continent }}
+            <input type="text" id="continent_text" name="continent_text" class="form-control location-input" placeholder="Type a continent">
+        </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let radioButtons = document.querySelectorAll("input[name='use_default_location']");
-        let locationFields = document.getElementById("location_fields");
+        <div class="mb-3">
+            <label for="country">Country</label>
+            {{ form.country }}
+            <input type="text" id="country_text" name="country_text" class="form-control location-input" placeholder="Type a country">
+        </div>
 
-        radioButtons.forEach(button => {
-            button.addEventListener("change", function() {
-                locationFields.style.display = (this.value === "False") ? "block" : "none";
-            });
-        });
-    });
-</script>
+        <div class="mb-3">
+            <label for="state">State</label>
+            {{ form.state }}
+            <input type="text" id="state_text" name="state_text" class="form-control location-input" placeholder="Type a state">
+        </div>
 
-{% endblock %}
+        <div class="mb-3">
+            <label for="town">Town</label>
+            {{ form.town }}
+            <input type="text" id="

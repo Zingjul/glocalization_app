@@ -27,13 +27,11 @@ class PersonCreateView(LoginRequiredMixin, CreateView):
 class PersonListView(ListView):
     model = Person
     template_name = "person/person_list.html"
-    context_object_name = "profiles"
 
 # Detail view for an individual profile
 class PersonDetailView(DetailView):
     model = Person
     template_name = "person/person_detail.html"
-    context_object_name = "profile"
 
 # Update profile view (User can edit their own profile)
 class PersonUpdateView(LoginRequiredMixin, UpdateView):

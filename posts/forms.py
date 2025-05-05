@@ -1,5 +1,6 @@
 from django import forms
-from .models import Post, PostImage
+from .models import Post
+from custom_search.models import Continent, Country, State, Town
 from phonenumber_field.formfields import PhoneNumberField
 
 class PostForm(forms.ModelForm):
@@ -12,42 +13,57 @@ class PostForm(forms.ModelForm):
         label="Location Option",
     )
 
+    # 🔥 Dual input fields: Dropdown & Text Input (Auto-Suggest)
+    continent = forms.ModelChoiceField(queryset=Continent.objects.all(), required=False, empty_label="Select Continent")
+    continent_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a continent"}))
+
+    country = forms.ModelChoiceField(queryset=Country.objects.all(), required=False, empty_label="Select Country")
+    country_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a country"}))
+
+    state = forms.ModelChoiceField(queryset=State.objects.all(), required=False, empty_label="Select State")
+    state_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a state"}))
+
+    town = forms.ModelChoiceField(queryset=Town.objects.all(), required=False, empty_label="Select Town")
+    town_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a town"}))
+
     class Meta:
         model = Post
-        fields = [
-            "category", "product_name", "description", "author_phone_number", "author_email",
-            "use_default_location"
-        ]  # 🔥 Removed non-editable location fields
+        fields = ["category", "product_name", "description", "author_phone_number", "author_email", "use_default_location"]
 
-        widgets = {
-            "description": forms.Textarea(attrs={"rows": 5}),
-            "author_phone_number": forms.TextInput(attrs={"placeholder": "e.g., 08012345678"}),
-            "author_email": forms.EmailInput(attrs={"placeholder": "e.g., yourname@example.com"}),
-            "product_name": forms.TextInput(attrs={"placeholder": "Enter a real-world product name"}),
-        }
-        labels = {
-            "category": "Post Category",
-            "product_name": "Product Name",
-            "description": "Post Description",
-            "author_phone_number": "Your Phone Number",
-            "author_email": "Your Email",
-            "use_default_location": "Choose Location Preference",
-        }
-        help_texts = {
-            "description": "Write your post description here.",
-            "use_default_location": "Select default to use your profile location or specify a new location.",
-        }
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # 🔥 Validate user-typed location input
+        def validate_field(field_name, model):
+            user_input = cleaned_data.get(f"{field_name}_text")
+            if user_input:
+                if not model.objects.filter(name__iexact=user_input).exists():
+                    self.add_error(f"{field_name}_text", f"Invalid {field_name}. Please select from the list.")
+                else:
+                    cleaned_data[field_name] = model.objects.get(name__iexact=user_input)
+
+        validate_field("continent", Continent)
+        validate_field("country", Country)
+        validate_field("state", State)
+        validate_field("town", Town)
+
+        return cleaned_data
 
     def save(self, commit=True):
         post = super().save(commit=False)
 
         # 🔥 Assign location automatically if user selects "default location"
         if post.use_default_location:
-            profile = post.author.profile  # Access user profile location
+            profile = post.author.profile
             post.continent = profile.continent
             post.country = profile.country
             post.state = profile.state
             post.town = profile.town
+        else:
+            post.continent = self.cleaned_data.get("continent")
+            post.country = self.cleaned_data.get("country")
+            post.state = self.cleaned_data.get("state")
+            post.town = self.cleaned_data.get("town")
 
         if commit:
             post.save()

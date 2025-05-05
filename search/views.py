@@ -1,8 +1,10 @@
 from django.db.models import Q
 from django.views.generic import ListView
+from django.http import JsonResponse
 from rest_framework import generics, permissions, filters
 from posts.models import Post
 from person.models import Person
+from custom_search.models import Continent, Country, State, Town
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 
@@ -86,3 +88,26 @@ class SearchResultsView(ListView):
             posts = posts.filter(town__name__icontains=town)
 
         return posts
+
+# 🔥 Auto-Suggestions API for Location Fields
+def location_autocomplete(request):
+    field = request.GET.get("field")
+    query = request.GET.get("query", "").strip()
+    
+    if not field or not query:
+        return JsonResponse({"suggestions": []})
+
+    model_mapping = {
+        "continent": Continent,
+        "country": Country,
+        "state": State,
+        "town": Town
+    }
+
+    if field not in model_mapping:
+        return JsonResponse({"suggestions": []})
+
+    results = model_mapping[field].objects.filter(name__icontains=query)[:10]
+    suggestions = list(results.values_list("name", flat=True))
+    
+    return JsonResponse({"suggestions": suggestions})

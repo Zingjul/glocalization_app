@@ -108,7 +108,8 @@ USE_TZ = True
 
 # Static and media files configuration
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'  # Collect static files for production
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+# STATIC_ROOT = BASE_DIR / 'static'  # Collect static files for production
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'  # Store uploaded media files
@@ -124,4 +125,3 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Email backend for development/testing (change for production)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Remove REST Framework settings since APIs are no longer used

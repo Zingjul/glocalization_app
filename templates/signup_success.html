@@ -9,15 +9,16 @@
 {% block content %}
     <div class="container mt-4">
         <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Your account has been created!</h4>
-            <p>Thank you for joining our platform. Your Visual ID is:</p>
+            <h2 class="alert-heading">Congratulations!</h2>
+            <h4 class="alert-heading">You have successfully created a new account</h4>
+            <p>Your unique market ID is:</p>
             <p class="lead"><strong>{{ virtual_id }}</strong></p>
             <hr>
             <p class="mb-0">This ID will be used to represent you if you choose not to share your brand name publicly. It's unique to your account and cannot be changed.</p>
+            <p class="mb-0">Don't worry, you can always find it on your <a href='{% url "person_detail" user.profile.pk %}' class="btn btn-sm btn-primary">View Profile</a></p>
         </div>
-
         <div class="mt-3">
-            <p>You can now <a href="{% url 'login' %}" class="btn btn-primary">Log in to your account</a>.</p>
+            <p>You can now <a href="{% url 'login' %}" class="btn btn-primary">Login</a></p>
         </div>
     </div>
 {% endblock content %}
