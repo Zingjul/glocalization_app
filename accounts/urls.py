@@ -23,3 +23,4 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetail.as_view(), name='user_detail'),
     path('delete/', UserDeleteView.as_view(), name='delete_account'),
 ]
+    

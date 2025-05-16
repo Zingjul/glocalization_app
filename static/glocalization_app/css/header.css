@@ -1,0 +1,12 @@
+  .bg-dark {
+    background-color: var(--primary-dark-background) ;
+  }
+  
+  .text-primary-custom {
+    color: var(--primary-color) !important;
+  }
+  
+  .btn-link:hover {
+    color: var(--primary-color) !important;
+  }
+  

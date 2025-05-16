@@ -15,13 +15,13 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-    
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'glocalization_app/css/general.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'glocalization_app/css/header.css' %}">
     <link rel="stylesheet" href="{% static 'glocalization_app/css/login_page.css' %}">
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
@@ -35,51 +35,40 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <!-- Additional head content -->
-    {% block extra_head %}{% endblock extra_head %}
+    {% block extra_head %}
+    {% endblock extra_head %}
+
 </head>
 <body>
-    <header>
-        <div class="container-fluid text-center the_header">
-            <div class="row">
-                <div class="col-3 header_child">
-                    <a class="navbar-brand" href="/">My Website</a>
-                </div>
-                <div class="row col-9">
-                    <div class="col header_child text-start">
-                        <a class="nav-link" href="/"></a>
-                    </div>
-                    <div class="col header_child text-start">
-                        <a class="nav-link" href="/"></a>
-                    </div>
-                    {% if user.is_authenticated %}
-                    <div class="row col">
-                        <div class="col header_child text-start">
-                            <a class="nav-link" href="/">Home</a>
-                        </div>
-                        <div class="col header_child">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                        </div>
-                        <div class="col-sm header_child">
-                            <a href="{% url 'delete_account' %}" class="btn btn-outline-danger">
-                                Delete My Account
-                            </a>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="row col container-fluid">
-                        <div class="col-sm-8 header_child text-end">
-                            <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
-                        </div>
-                        <div class="col-sm-4 header_child text-end">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
+    <header class="bg-dark text-white py-3">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            
+            <!-- Brand / Logo -->
+            <div class="col-md-3 col-6">
+              <a class="navbar-brand text-primary-custom fw-bold" href="/">My Website</a>
             </div>
+      
+            <!-- Authenticated Links -->
+            {% if user.is_authenticated %}
+            <div class="col-md-9 col-6 text-end">
+              <a class="btn btn-link text-white me-2" href="/">Home</a>
+              <a class="btn btn-link text-white me-2" href="{% url 'logout' %}">Logout</a>
+              <a class="btn btn-outline-danger" href="{% url 'delete_account' %}">Delete Account</a>
+            </div>
+      
+            <!-- Unauthenticated Links -->
+            {% else %}
+            <div class="col-md-9 col-6 text-end">
+              <a class="btn btn-link text-white me-2" href="{% url 'signup' %}">Sign up</a>
+              <a class="btn btn-link text-white" href="{% url 'login' %}">Login</a>
+            </div>
+            {% endif %}
+      
+          </div>
         </div>
-    </header>
-    
+      </header>   
+      
     <div class="container mt-3">
         {% block messages %}
             {% if messages %}

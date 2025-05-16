@@ -1,0 +1,61 @@
+:root{
+    --primary-dark-background: #000;
+    --primary-font-family:'Open Sans', sans-serif;
+    --primary-font-size: 18px;
+
+    /* headers */
+    --header_font_size_h1: 77px;
+    --header_font_size_h2: 64px;
+    --header_font_size_h3: 51px;
+    --header_font_size_h4: 38px;
+    --header_font_size_h5: 25px;
+    --header_font_size_h6: 12px;
+    --header_margin_top: 70px;
+    --header_margin_bottom: 10px;
+    --header_font_weight: 300px;
+
+    /* forms */
+    --form_inner_padding: 17px;
+}
+  /* ===== FORM FIELDS BASE STYLE ===== */
+* {
+    font-family: var(--primary-font-family);
+  }
+body {
+    font-size: var(--primary-font-size);
+    /* color: rgb(194, 255, 28); */
+}
+
+.main_headers{
+    margin-bottom: var(--header_margin_bottom);
+    margin-top: var(--header_margin_top);
+}
+  .main_headers h1{
+    font-size: var(--header_font_size_h1);
+    font-weight: var(--header_font_weight);
+  }
+  .main_headers h2{
+    font-size: var(--header_font_size_h2);
+    font-weight: var(--header_font_weight);
+  }
+  .main_headers h3{
+    font-size: var(--header_font_size_h3);
+    font-weight: var(--header_font_weight);
+  }
+  .main_headers h4{
+    font-size: var(--header_font_size_h4);
+    font-weight: var(--header_font_weight);
+  }
+  .main_headers h5{
+    font-size: var(--header_font_size_h5);
+    font-weight: var(--header_font_weight);
+  }
+  .main_headers h6{
+    font-size: var(--header_font_size_h6);
+    font-weight: var(--header_font_weight);
+  }
+
+
+form{
+    padding: var(--form_inner_padding);
+}

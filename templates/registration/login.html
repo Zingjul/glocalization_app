@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+ 
 {% block content %}
 <div class="text-center">
   <div class="main_headers">
@@ -22,8 +23,8 @@
     </form>
 
     <div class="mt-3">
-      <a href="{% url 'password_reset' %}">Forgot password?</a>
+      <a href="{% url 'password_reset' %}">Forgot password? <span class="alert alert-warning">Reset now!</span></span></a>
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock %}

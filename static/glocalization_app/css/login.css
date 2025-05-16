@@ -1,0 +1,38 @@
+  .forms_container {
+    background-color: var(--primary-dark);
+    padding: 2rem;
+    border-radius: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--primary-light);
+    background-color: var(--primary-mid);
+    color: #fff;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  
+  button.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    color: #000;
+    transition: background-color 0.3s ease;
+  }
+  
+  button.btn-primary:hover {
+    background-color: var(--primary-light);
+    color: #000;
+  }
+  
