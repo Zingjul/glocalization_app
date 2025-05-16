@@ -1,40 +1,8 @@
-Package                  Version
------------------------- -----------
-asgiref                  3.8.1
-certifi                  2025.1.31
-charset-normalizer       3.4.1
-crispy-bootstrap5        2024.10
-Django                   5.1.6
-django-countries         7.6.1
-django-crispy-forms      2.3
-django-extensions        3.2.3
-django-haystack          3.3.0
-django-phonenumber-field 8.0.0
-django-storages          1.14.4
-djangorestframework      3.15.2
-elastic-transport        8.17.0
-elasticsearch            8.17.1
-elasticsearch7           7.17.12
-elasticsearch8           8.17.1
-geopandas                1.0.1
-idna                     3.10
-networkx                 3.4.2
-numpy                    2.2.3
-osmnx                    2.0.1
-packaging                24.2
-pandas                   2.2.3
-phonenumbers             8.13.54
-pillow                   11.1.0
-pip                      25.0.1
-pycountry                24.6.1
-pyogrio                  0.10.0
-pyproj                   3.7.1
-python-dateutil          2.9.0.post0
-pytz                     2025.1
-requests                 2.32.3
-shapely                  2.0.7
-six                      1.17.0
-sqlparse                 0.5.3
-typing_extensions        4.12.2
-tzdata                   2025.1
-urllib3                  1.26.20
+asgiref==3.8.1
+Django==5.2.1
+django-countries==7.6.1
+django-phonenumber-field==8.1.0
+phonenumbers==9.0.5
+sqlparse==0.5.3
+typing_extensions==4.13.2
+tzdata==2025.2

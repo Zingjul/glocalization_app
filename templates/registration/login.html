@@ -1,17 +1,29 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
-
-{% block header %}
-    <div>
-        <h1>hEY THIS IS header</h1>
-    </div>
-{% endblock header %}
-
 {% block content %}
-<h2>Log in:</h2>
-<form method="post">{% csrf_token %}
- {{ form|crispy }}
- <button class="btn btn-success" type="submit">Log in</button> |
-</form>
-<a href="{% url 'signup' %}"><button>Sign up</button></a> now for your professional account too!
+<div class="text-center">
+  <div class="main_headers">
+    <h2>Login</h2>
+  </div>
+  <div class="forms_container">
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="form-group mb-3">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger">{{ field.errors }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <div class="mt-3">
+      <a href="{% url 'password_reset' %}">Forgot password?</a>
+    </div>
+  </div>
+</div>
 {% endblock content %}

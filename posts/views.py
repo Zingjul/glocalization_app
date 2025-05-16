@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic.edit import UpdateView, DeleteView
 from .models import Post, Category
 from .forms import PostForm
 from custom_search.models import Continent, Country, State, Town
@@ -93,3 +94,15 @@ def location_autocomplete(request):
         return JsonResponse({"suggestions": suggestions})
     except Exception as e:
         return JsonResponse({"suggestions": [], "error": str(e)})
+
+
+class PostUpdateView(UpdateView):
+    model = Post
+    fields = ['category', 'product_name', 'description', 'price']  # include the fields you want editable
+    template_name = 'posts/post_form.html'
+    success_url = reverse_lazy('posts:list')  # Change to your posts list URL name
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = 'posts/post_confirm_delete.html'
+    success_url = reverse_lazy('posts:list')

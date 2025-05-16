@@ -1,21 +1,18 @@
-"""
-Django settings for django_project project.
-"""
-
 from pathlib import Path
 import os
 
-# Base directory of the project
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security settings
-SECRET_KEY = 'django-insecure-iwv7hf4oo#bcbr5bqlpr9a_^!e-29oz(h5ssl69^u)g_9n#mfv'  # Use a strong secret key in production
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-iwv7hf4oo#bcbr5bqlpr9a_^!e-29oz(h5ssl69^u)g_9n#mfv'
+
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Hosts allowed to serve the application
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# Installed apps (Django + 3rd-party + Local apps)
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -23,12 +20,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # 3rd Party
-    "crispy_forms",
-    "crispy_bootstrap5",
-    'django_countries',
+
+    # 3rd-party
     'phonenumber_field',
+    'django_countries',
 
     # Local apps
     'accounts',
@@ -39,7 +34,6 @@ INSTALLED_APPS = [
     'search',
 ]
 
-# Middleware configurations
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -50,14 +44,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# URL Configuration
 ROOT_URLCONF = 'django_project.urls'
 
-# Templates configuration
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Ensure templates directory is recognized
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,10 +62,9 @@ TEMPLATES = [
     },
 ]
 
-# WSGI application
 WSGI_APPLICATION = 'django_project.wsgi.application'
 
-# Database settings
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -81,8 +72,8 @@ DATABASES = {
     }
 }
 
-# Authentication settings
-AUTH_USER_MODEL = "accounts.CustomUser"
+# Custom user model
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -100,28 +91,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization settings
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static and media files configuration
+# Static and media
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-# STATIC_ROOT = BASE_DIR / 'static'  # Collect static files for production
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'  # Store uploaded media files
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication redirects
 LOGIN_REDIRECT_URL = 'post_home'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Django Crispy Forms settings
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-# Email backend for development/testing (change for production)
+# Email backend (console for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-

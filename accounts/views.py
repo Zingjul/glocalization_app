@@ -1,10 +1,24 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.views import PasswordResetView, PasswordChangeView
+from django.contrib.auth.views import (
+    LoginView, PasswordResetView, PasswordChangeView
+)
 from django.urls import reverse_lazy
-from django.contrib.auth import login, logout
-from django.views.generic import ListView, DetailView, FormView, View
-from .forms import CustomUserCreationForm, CustomPasswordResetForm, CustomPasswordChangeForm
-from .models import CustomUser
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model, logout
+from django.views.generic.edit import FormView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+
+from .forms import (
+    CustomUserCreationForm,
+    CustomLoginForm,
+    CustomPasswordResetForm,
+    CustomPasswordChangeForm,
+    ConfirmPasswordForm,
+)
+
+CustomUser = get_user_model()
+
 
 # Signup View (User Registration)
 class SignupView(FormView):
@@ -14,7 +28,7 @@ class SignupView(FormView):
 
     def form_valid(self, form):
         user = form.save()
-        login(self.request, user)
+        print("✔️ User created:", user.email, "| Virtual ID:", user.virtual_id)
         self.virtual_id = user.virtual_id
         return super().form_valid(form)
 
@@ -23,21 +37,36 @@ class SignupView(FormView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('dashboard')  # Redirect authenticated users to dashboard or another page
+            return redirect('dashboard')
         return super().get(request, *args, **kwargs)
 
 
-# Signup Success Page
 def signup_success(request):
-    virtual_id = request.GET.get('virtual_id')
-    return render(request, 'signup_success.html', {'virtual_id': virtual_id})
+    return render(request, 'accounts/signup_success.html')
 
 
-# Logout View
-class LogoutView(View):
-    def get(self, request):
+# Login View
+class CustomLoginView(LoginView):
+    authentication_form = CustomLoginForm
+    template_name = 'registration/login.html'
+
+
+# Logout Confirmation Page
+class ConfirmLogoutView(LoginRequiredMixin, TemplateView):
+    template_name = 'registration/confirm_logout.html'
+
+
+# Actual Logout Handler (POST only, with message)
+class PerformLogoutView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
         logout(request)
-        return redirect('login')
+        messages.success(request, "You have been successfully logged out.")
+        return redirect('logged_out')
+
+
+# Final Logged Out Page
+class LoggedOutView(TemplateView):
+    template_name = 'registration/logged_out.html'
 
 
 # Password Reset View
@@ -47,16 +76,6 @@ class CustomPasswordResetView(PasswordResetView):
     success_url = reverse_lazy('password_reset_done')
     email_template_name = 'accounts/password_reset_email.html'
 
-    def form_valid(self, form):
-        try:
-            user = CustomUser.objects.get(email=form.cleaned_data["email"])
-            if user:
-                print(f"Password reset request for {user.email}")
-            return super().form_valid(form)
-        except CustomUser.DoesNotExist:
-            print("No user found with that email.")
-            return super().form_invalid(form)
-
 
 # Password Change View
 class CustomPasswordChangeView(PasswordChangeView):
@@ -65,16 +84,32 @@ class CustomPasswordChangeView(PasswordChangeView):
     success_url = reverse_lazy('password_change_done')
 
 
-# **Restoring UserList & UserDetail Views**
+# Admin-only User Views
 class UserList(ListView):
     model = CustomUser
-    template_name = "accounts/user_list.html"  # Create this template
-    context_object_name = "users"  # Ensures easier template access
+    template_name = 'accounts/user_list.html'
+    context_object_name = 'users'
+
 
 class UserDetail(DetailView):
     model = CustomUser
-    template_name = "accounts/user_detail.html"  # Create this template
-    context_object_name = "user"
+    template_name = 'accounts/user_detail.html'
+    context_object_name = 'user_obj'
 
-    def get_object(self):
-        return get_object_or_404(CustomUser, pk=self.kwargs.get("pk"))
+
+# Delete User Account with Password Confirmation
+class UserDeleteView(LoginRequiredMixin, FormView):
+    template_name = 'accounts/user_confirm_delete.html'
+    form_class = ConfirmPasswordForm
+    success_url = reverse_lazy('login')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        user = self.request.user
+        logout(self.request)
+        user.delete()
+        return super().form_valid(form)

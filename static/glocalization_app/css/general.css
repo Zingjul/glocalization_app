@@ -1,0 +1,126 @@
+/* ===== FORM FIELDS BASE STYLE ===== */
+input.form-control,
+select.form-control,
+textarea.form-control {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+/* ===== INPUT STYLING ===== */
+input.form-control {
+  border-bottom: 1px solid black;
+  color: var(--forms_font_color);
+  font-size: var(--forms_font_size);
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+/* ===== PLACEHOLDER STYLE ===== */
+input.form-control::placeholder {
+  color: var(--forms_font_color);
+  background-color: transparent;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ===== FOCUS STYLE ===== */
+input.form-control:focus {
+  background-color: #fff;
+  text-align: center;
+  outline: none;
+}
+
+/* ===== AUTOFILL OVERRIDE ===== */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  -webkit-text-fill-color: var(--forms_font_color) !important;
+  font-size: var(--forms_font_size) !important;
+  text-align: center;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===== OPTIONAL INPUT WRAPPER WITH ANIMATION ===== */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  padding: var(--forms_padding_all_sides);
+}
+
+.input-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: green;
+  transition: width 0.4s ease-in-out;
+}
+
+.input-wrapper:hover::after,
+.input-wrapper:focus-within::after {
+  width: 100%;
+}
+
+/* ===== FORM CONTAINER ===== */
+.forms_container {
+  padding: var(--forms_padding_all_sides);
+  background-color: var(--forms_background_color);
+  border-radius: 20px;
+}
+
+/* ===== HELP TEXT STYLE ===== */
+ul.helptext {
+  list-style-type: none !important;
+  padding-left: 0 !important;
+  margin-bottom: 10px;
+  color: #858686;
+  font-size: 0.9em;
+}
+
+ul.helptext li::before {
+  content: ''; /* remove bullets */
+  margin-right: 0;
+}
+
+/* ===== LABEL HIDE ===== */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+
+/* Remove bullets and spacing from error messages */
+ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #d9534f; /* Bootstrap danger color */
+    font-size: 0.9em;
+    text-align: left;
+  }
+  
+  ul.errorlist li {
+    margin-bottom: 4px;
+  }
+  .errorlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    color: red;
+    font-size: 0.9rem;
+}
+.errorlist li::before {
+    content: "⚠ ";
+    color: red;
+}
