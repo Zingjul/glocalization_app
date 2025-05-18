@@ -1,0 +1,4 @@
+button {
+    margin-left:var(--button_side_margin);
+    margin-right:var(--button_side_margin);
+}

@@ -7,7 +7,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm
 )
 from .models import CustomUser
-from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -16,12 +16,12 @@ class CustomLoginForm(AuthenticationForm):
         self.fields['username'].label = "Kindly enter your email address!"
         self.fields['password'].label = "Your Password"
         self.fields['username'].widget.attrs.update({
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
             'autocomplete': 'off',
             'placeholder': 'Enter your Gmail address (e.g. johnsmith@gmail.com)',
         })
         self.fields['password'].widget.attrs.update({
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
             'autocomplete': 'off',
         })
 
@@ -54,7 +54,7 @@ class CustomUserCreationForm(UserCreationForm):
             field.label = label_map.get(field_name, field_name.capitalize())
             field.error_messages.update(error_message_map)
             field.widget.attrs.update({
-                'class': 'form-control input-wrapper',
+                'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
                 'autocomplete': 'off'
             })
 
@@ -80,16 +80,20 @@ class CustomUserCreationForm(UserCreationForm):
         return phone_number
 
     def save(self, commit=True):
-            user = super().save(commit=False)
+        user = super().save(commit=False)
 
-            # Ensure virtual_id is set (in case it wasn't set by default)
-            if not user.virtual_id:
-                from .models import generate_virtual_id
-                user.virtual_id = generate_virtual_id()
+        # Ensure virtual_id is set (in case it wasn't set by default)
+        if not user.virtual_id:
+            from .models import generate_virtual_id
+            user.virtual_id = generate_virtual_id()
 
-            if commit:
-                user.save()
-            return user
+        # Auto-assign email by appending @gmail.com to the username
+        user.email = f"{user.username}@gmail.com"
+
+        if commit:
+            user.save()
+        return user
+
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
@@ -108,13 +112,20 @@ class CustomUserChangeForm(UserChangeForm):
         for name, field in self.fields.items():
             field.label = label_map.get(name, name.capitalize())
             field.widget.attrs.update({
-                'class': 'form-control input-wrapper',
+                'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
                 'autocomplete': 'off'
             })
 
 
 class CustomPasswordResetForm(PasswordResetForm):
-    email = forms.EmailField(label="Email", max_length=254)
+    email = forms.EmailField(
+        label="Kindly enter email address here:",
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'autocomplete': 'off',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
+        }),
+    )
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -122,13 +133,14 @@ class CustomPasswordResetForm(PasswordResetForm):
             raise ValidationError("No account is associated with this email address.")
         return email
 
+
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(
         label="Old Password",
         strip=False,
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'off',
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
         }),
     )
     new_password1 = forms.CharField(
@@ -136,7 +148,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         strip=False,
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'off',
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
         }),
         help_text=PasswordChangeForm.base_fields['new_password1'].help_text,
     )
@@ -145,7 +157,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         strip=False,
         widget=forms.PasswordInput(attrs={
             'autocomplete': 'off',
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
         }),
     )
 
@@ -157,11 +169,12 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             raise forms.ValidationError("The new passwords do not match.")
         return new_password2
 
+
 class ConfirmPasswordForm(forms.Form):
     password = forms.CharField(
         label="Confirm Password",
         widget=forms.PasswordInput(attrs={
-            'class': 'form-control input-wrapper',
+            'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
             'autocomplete': 'off',
             'placeholder': 'Enter your password to confirm',
         })

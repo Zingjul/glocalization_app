@@ -1,21 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Log Authentication{% endblock title %}
-{% block header %}
-    <div>
-        <h1>Log out Successful!</h1>
-    </div>
-{% endblock header %}
 
 {% block content %}
-    <div class="container mt-4">
+<div class="main_headers">
+    <div class="container mt-4 text-center">
         <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Log out successful!</h4>
+            <h2 class="alert-heading">Log out successful!</h4>
             <h4 class="alert-heading">Cheers!</h4>
             <hr>
         </div>
-
+</div>
         <div class="mt-3">
-            <p>You can now <a href="{% url 'login' %}" class="btn btn-primary">Login</a></p>
+            <p>You can now <a class="alert alert-warning" href="{% url 'login' %}" class="btn btn-primary">Login</a></p>
         </div>
     </div>
 {% endblock content %}

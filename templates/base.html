@@ -1,4 +1,5 @@
 {% load static %} 
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     
@@ -24,8 +25,11 @@
     <link rel="stylesheet" href="{% static 'glocalization_app/css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'glocalization_app/css/header.css' %}">
     <link rel="stylesheet" href="{% static 'glocalization_app/css/login_page.css' %}">
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/colors.css' %}">
 
+    <!-- react -->
+    <script type="text/babel" src="{% static 'js/components/Header.jsx' %}"></script>
     <!-- React (Production versions) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -40,6 +44,7 @@
 
 </head>
 <body>
+  <div id="react-header"></div>
     <header class="bg-dark text-white py-3">
         <div class="container-fluid">
           <div class="row align-items-center">
@@ -74,7 +79,6 @@
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                 {% endfor %}
             {% endif %}
         {% endblock messages %}
@@ -93,4 +97,12 @@
     <!-- Additional scripts -->
     {% block extra_scripts %}{% endblock extra_scripts %}
 </body>
+<script type="text/babel">
+  // Place the Header component code here (from above)
+  // Example usage:
+  ReactDOM.render(
+    <Header isAuthenticated={window.isAuthenticated || false} />,
+    document.getElementById('react-header')
+  );
+</script>
 </html>

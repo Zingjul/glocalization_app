@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     # 3rd-party
     'phonenumber_field',
     'django_countries',
-
+    'widget_tweaks',
+    
     # Local apps
     'accounts',
     'comment',
