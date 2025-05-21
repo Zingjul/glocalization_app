@@ -1,15 +1,76 @@
 from django import forms
 from .models import Person
-from custom_search.models import Continent, Country, State, Town  # Import location models
+from custom_search.models import Continent, Country, State, Town
 from django.utils.translation import gettext_lazy as _
 
 class PersonForm(forms.ModelForm):
+    # Dropdown fields (existing)
+    continent = forms.ModelChoiceField(
+        queryset=Continent.objects.all(),
+        required=False,
+        empty_label=_("Select Continent"),
+        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+    )
+    country = forms.ModelChoiceField(
+        queryset=Country.objects.all(),
+        required=False,
+        empty_label=_("Select Country"),
+        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+    )
+    state = forms.ModelChoiceField(
+        queryset=State.objects.all(),
+        required=False,
+        empty_label=_("Select State"),
+        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+    )
+    town = forms.ModelChoiceField(
+        queryset=Town.objects.all(),
+        required=False,
+        empty_label=_("Select Town"),
+        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+    )
+
+    # NEW text input fields for user to type location if not listed
+    continent_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'placeholder': _('Type your continent if not listed'),
+        }),
+        label=_("Or enter your continent")
+    )
+    country_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'placeholder': _('Type your country if not listed'),
+        }),
+        label=_("Or enter your country")
+    )
+    state_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'placeholder': _('Type your state if not listed'),
+        }),
+        label=_("Or enter your state")
+    )
+    town_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'placeholder': _('Type your town if not listed'),
+        }),
+        label=_("Or enter your town")
+    )
+
     class Meta:
         model = Person
         fields = [
-            'business_name', 'person_profile_picture', 'about', 'website', 'use_business_name',
-            'continent', 'country', 'state', 'town'
+            'person_profile_picture', 'business_name', 'about', 'website', 'continent', 'country', 'state', 'town', 'continent_input', 'country_input', 'state_input', 'town_input',
         ]
+
+        
         labels = {
             'business_name': _("What's the name of your awesome business/service?"),
             'person_profile_picture': _("Add a photo that shows your style!"),
@@ -31,28 +92,59 @@ class PersonForm(forms.ModelForm):
             'town': _("Select your town for precise location."),
         }
         widgets = {
-            'about': forms.Textarea(attrs={'rows': 5, 'class': 'form-control'}),
-            'website': forms.URLInput(attrs={'class': 'form-control'}),
-            'continent': forms.Select(attrs={'class': 'form-select'}),
-            'country': forms.Select(attrs={'class': 'form-select'}),
-            'state': forms.Select(attrs={'class': 'form-select'}),
-            'town': forms.Select(attrs={'class': 'form-select'}),
+            'business_name': forms.TextInput(attrs={
+                'class': 'form-input block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900'
+            }),
+            'about': forms.Textarea(attrs={
+                'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+                'rows': 4,
+            }),
+            'website': forms.URLInput(attrs={
+                'class': 'form-input block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900'
+            }),
+            'use_business_name': forms.CheckboxInput(attrs={
+                'class': 'form-checkbox h-4 w-4 text-green-600 transition duration-150 ease-in-out'
+            }),
+            # Your existing widget styles here...
         }
         error_messages = {
             'business_name': {
-                'required': _("Your business name is required."),
+                'required': _("Please enter the name of your business or service."),
+                'max_length': _("The business name is too long. Please shorten it."),
+            },
+            'about': {
+                'required': _("Please provide some information about yourself or your brand."),
+            },
+            'website': {
+                'invalid': _("Please enter a valid website URL."),
+            },
+            'continent': {
+                'required': _("Please select your continent or type it below."),
+            },
+            'country': {
+                'required': _("Please select your country or type it below."),
+            },
+            'state': {
+                'required': _("Please select your state or type it below."),
+            },
+            'town': {
+                'required': _("Please select your town or type it below."),
             },
         }
+    def clean(self):
+        cleaned_data = super().clean()
 
-    continent = forms.ModelChoiceField(
-        queryset=Continent.objects.all(), required=False, empty_label="Select Continent"
-    )
-    country = forms.ModelChoiceField(
-        queryset=Country.objects.all(), required=False, empty_label="Select Country"
-    )
-    state = forms.ModelChoiceField(
-        queryset=State.objects.all(), required=False, empty_label="Select State"
-    )
-    town = forms.ModelChoiceField(
-        queryset=Town.objects.all(), required=False, empty_label="Select Town"
-    )
+        # For each location, prefer typed input if filled, else dropdown selection
+        for loc in ['continent', 'country', 'state', 'town']:
+            typed_value = cleaned_data.get(f"{loc}_input")
+            dropdown_value = cleaned_data.get(loc)
+
+            if typed_value:
+                # User typed custom value; store it and clear dropdown field to avoid conflicts
+                cleaned_data[loc] = None  # Clear the dropdown value
+                cleaned_data[f"{loc}_input"] = typed_value.strip()
+            else:
+                # No typed input; use dropdown value, clear typed input
+                cleaned_data[f"{loc}_input"] = None
+
+        return cleaned_data

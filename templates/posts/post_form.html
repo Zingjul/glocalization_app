@@ -1,54 +1,98 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}  <!-- 🔥 Load Crispy Forms -->
 {% load static %}
 <script src="{% static 'search/location_autocomplete.js' %}"></script>
 
 {% block content %}
-<h2>Create a New Post</h2>
+<h2 class="text-3xl font-extrabold mb-6 text-gray-900">Create a New Post</h2>
 
 {% if not user.profile.continent or not user.profile.country or not user.profile.state or not user.profile.town or not user.profile.business_name %}
-    <div class="alert alert-warning">
-        <strong>Warning:</strong> Your profile is incomplete!  
-        Please <a href="{% url 'person_edit' user.profile.pk %}" class="alert-link">complete your profile</a> before posting a product.
-    </div>
+  <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 mb-8 rounded shadow" role="alert">
+    <p class="font-semibold mb-1">Warning:</p>
+    <p>
+      Please
+      <a href="{% url 'person_edit' user.profile.pk %}" class="underline text-yellow-600 hover:text-yellow-800 font-medium">complete your profile</a>
+      before posting a product.
+    </p>
+  </div>
 {% endif %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    {{ form.category|as_crispy_field }}
-    {{ form.product_name|as_crispy_field }}
-    {{ form.description|as_crispy_field }}
-    {{ form.author_phone_number|as_crispy_field }}
-    {{ form.author_email|as_crispy_field }}
+<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto space-y-8 bg-white p-8 rounded-lg shadow-md">
+  {% csrf_token %}
 
-    <!-- 🔥 Location Selection -->
-    <div class="mb-3">
-        <label>{{ form.use_default_location.label }}</label>
-        {{ form.use_default_location }}
+  <div class="space-y-1">
+    {{ form.category.label_tag }}
+    {{ form.category }}
+  </div>
+
+  <div class="space-y-1">
+    {{ form.product_name.label_tag }}
+    {{ form.product_name }}
+  </div>
+
+  <div class="space-y-1">
+    {{ form.description.label_tag }}
+    {{ form.description }}
+  </div>
+
+  <div class="space-y-1">
+    {{ form.author_phone_number.label_tag }}
+    {{ form.author_phone_number }}
+  </div>
+
+  <div class="space-y-1">
+    {{ form.author_email.label_tag }}
+    {{ form.author_email }}
+  </div>
+
+  <!-- Use default profile location toggle -->
+  <div class="flex items-center space-x-3">
+    {{ form.use_default_location }}
+    <label for="{{ form.use_default_location.id_for_label }}" class="cursor-pointer text-gray-700 font-medium select-none">Use my profile location</label>
+  </div>
+
+  <!-- Location input fields, initially hidden -->
+  <div id="location_fields" class="space-y-6 mt-6 hidden">
+
+    {% for field, text_id, placeholder in location_fields %}
+    <div class="space-y-1">
+      <label for="{{ field.id_for_label }}" class="block font-semibold mb-1 text-gray-800">{{ field.label }}</label>
+      {{ field }}
+      <input
+          type="text"
+          id="{{ text_id }}"
+          name="{{ text_id }}"
+          placeholder="{{ placeholder }}"
+          autocomplete="off"
+          class="block w-full mt-1 border border-gray-300 rounded px-3 py-2"
+      >
     </div>
+  {% endfor %}
 
-    <!-- 🔥 Location Fields (Selection + Input) -->
-    <div id="location_fields" style="display: none;">
-        <div class="mb-3">
-            <label for="continent">Continent</label>
-            {{ form.continent }}
-            <input type="text" id="continent_text" name="continent_text" class="form-control location-input" placeholder="Type a continent">
-        </div>
+  </div>
 
-        <div class="mb-3">
-            <label for="country">Country</label>
-            {{ form.country }}
-            <input type="text" id="country_text" name="country_text" class="form-control location-input" placeholder="Type a country">
-        </div>
+  <button
+    type="submit"
+    class="w-full bg-green-600 text-white font-semibold py-3 rounded-md hover:bg-green-700 transition duration-300"
+  >
+    Submit Post
+  </button>
+</form>
 
-        <div class="mb-3">
-            <label for="state">State</label>
-            {{ form.state }}
-            <input type="text" id="state_text" name="state_text" class="form-control location-input" placeholder="Type a state">
-        </div>
+<script>
+  const useDefaultLocationCheckbox = document.getElementById("{{ form.use_default_location.id_for_label }}");
+  const locationFields = document.getElementById("location_fields");
 
-        <div class="mb-3">
-            <label for="town">Town</label>
-            {{ form.town }}
-            <input type="text" id="
+  function toggleLocationFields() {
+    if (useDefaultLocationCheckbox.checked) {
+      locationFields.classList.add("hidden");
+    } else {
+      locationFields.classList.remove("hidden");
+    }
+  }
+
+  useDefaultLocationCheckbox.addEventListener("change", toggleLocationFields);
+
+  // Initialize visibility on page load
+  toggleLocationFields();
+</script>
+{% endblock %}

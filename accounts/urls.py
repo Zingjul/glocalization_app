@@ -1,13 +1,7 @@
 # accounts/urls.py
 
 from django.urls import path
-from .views import (
-    SignupView, signup_success, CustomLoginView, ConfirmLogoutView, PerformLogoutView, LoggedOutView,
-    CustomPasswordResetView, CustomPasswordResetDoneView,
-    CustomPasswordResetConfirmView, CustomPasswordResetCompleteView,
-    CustomPasswordChangeView,
-    UserList, UserDetail, UserDeleteView
-)
+from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView 
 
 urlpatterns = [
     # Auth routes

@@ -4,7 +4,7 @@ from custom_search.models import Continent, Country, State, Town
 from phonenumber_field.formfields import PhoneNumberField
 
 class PostForm(forms.ModelForm):
-    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
+    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890', 'class':'w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent'}))
 
     use_default_location = forms.ChoiceField(
         choices=[(True, "Use my default location"), (False, "Specify a custom location")],
@@ -15,16 +15,16 @@ class PostForm(forms.ModelForm):
 
     # 🔥 Dual input fields: Dropdown & Text Input (Auto-Suggest)
     continent = forms.ModelChoiceField(queryset=Continent.objects.all(), required=False, empty_label="Select Continent")
-    continent_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a continent"}))
+    continent_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a continent", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
 
     country = forms.ModelChoiceField(queryset=Country.objects.all(), required=False, empty_label="Select Country")
-    country_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a country"}))
+    country_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a country", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
 
     state = forms.ModelChoiceField(queryset=State.objects.all(), required=False, empty_label="Select State")
-    state_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a state"}))
+    state_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a state", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
 
     town = forms.ModelChoiceField(queryset=Town.objects.all(), required=False, empty_label="Select Town")
-    town_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a town"}))
+    town_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a town", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
 
     class Meta:
         model = Post

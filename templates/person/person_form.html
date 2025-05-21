@@ -1,20 +1,65 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}  <!-- 🔥 Load Crispy Forms -->
+{% load custom_filters %}
 
 {% block content %}
-<h2>{% if profile %}Edit Your Profile{% else %}Create Your Profile{% endif %}</h2>
+<div class="max-w-xl mx-auto px-4 py-10">
+  <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">
+    {% if profile %}Edit Your Profile{% else %}Create Your Profile{% endif %}
+  </h2>
 
-<form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-2xl shadow-md space-y-5">
     {% csrf_token %}
-    {{ form|crispy }}  <!-- 🔥 Uses Crispy Forms styling -->
-
-    <button type="submit" class="btn btn-success">Save Changes</button>
     
-    {% if profile %}
-        <a href="{% url 'person_detail' profile.pk %}" class="btn btn-secondary">Cancel</a>
-    {% else %}
-        <a href="{% url 'person_list' %}" class="btn btn-secondary">Cancel</a>  <!-- Redirect if no profile -->
-    {% endif %}
-</form>
+    {% for field in form %}
+      {% if field.name not in "continent continent_input country country_input state state_input town town_input" %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ field.errors.as_text|striptags }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+    
+    {# Location fields with dropdown + typed input #}
+    {% for loc in location_fields %}
+      {% with input_name=loc|add:"_input" %}
+        {% with field=form|get_item:loc %}
+        {% with input_field=form|get_item:input_name %}
+          <div>
+            {{ field }}
+            {% if field.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ field.errors.as_text|striptags }}</p>
+            {% endif %}
+            <small class="block mb-1 text-gray-600">Or type your {{ loc }} if not listed:</small>
+            {{ input_field }}
+            {% if input_field.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ input_field.errors.as_text|striptags }}</p>
+            {% endif %}
+          </div>
+        {% endwith %}
+        {% endwith %}
+      {% endwith %}
+    {% endfor %}
 
+    <div class="flex items-center justify-between mt-6">
+      <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
+        Save Changes
+      </button>
+
+      {% if profile %}
+        <a href="{% url 'person_detail' profile.pk %}" class="text-sm text-gray-600 hover:text-gray-800">
+          Cancel
+        </a>
+      {% else %}
+        <a href="{% url 'person_list' %}" class="text-sm text-gray-600 hover:text-gray-800">
+          Cancel
+        </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
 {% endblock %}

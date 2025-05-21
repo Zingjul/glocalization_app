@@ -107,7 +107,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication redirects
 LOGIN_REDIRECT_URL = 'post_home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = '/accounts/logged-out/'
 
 # Email backend (console for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# settings.py
+# LOGIN_REDIRECT_URL = '/'

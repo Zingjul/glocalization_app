@@ -1,0 +1,65 @@
+DESING PLAN FOR BUILDING A FAIR AND SAFE LOCAITON ENTRY BY USERS
+
+Step 1: Design Plan (What We’re Building)
+Problem:
+We want users to either:
+
+Select a known location from dropdowns (continent, country, state, town), OR
+
+Type their location manually if it’s not available.
+
+Typed locations should:
+
+Be saved temporarily.
+
+Not be used for posting until they are approved by the admin.
+
+Step 2: New Model — PendingLocation
+We'll need a model that holds unapproved user-submitted locations.
+
+Step 3: Modify PersonForm (forms.py)
+We’ll update the form to allow optional text fields for user input if a location isn't in the dropdown:
+
+Step 4: Update views.py for Profile Creation
+Now our profile view must check for user-typed entries and save them into PendingLocation:
+
+
+Refined Workflow With Your Correction
+When user submits a location (continent/country/state/town):
+User types a location (not selecting from dropdown).
+
+On form submission, for each typed location:
+
+Check if it already exists in the respective table (e.g., Town).
+
+If exists →
+
+Use that existing record directly (associate to user profile).
+
+✅ Allow posting immediately.
+
+Do NOT add a new record.
+
+If does NOT exist →
+
+Save the typed value in the PendingLocationRequest linked to the user (without adding to main location tables yet).
+
+🚫 Do NOT associate to user profile yet.
+
+🚫 User cannot post until admin approves.
+
+Admin reviews PendingLocationRequest:
+
+If admin approves the request, check again if the location already exists:
+
+If exists (maybe added meanwhile), just mark request as approved, and associate that existing location with the user.
+
+If still does NOT exist →
+
+Create a new record in the appropriate location table (Continent, Country, State, or Town) with the approved name.
+
+Mark PendingLocationRequest as approved.
+
+Associate this new record with the user’s profile.
+
+After approval and association, the location becomes available to all other users in the dropdown, so they can pick it directly next time.

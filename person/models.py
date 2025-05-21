@@ -51,6 +51,12 @@ class Person(models.Model):
         Town, on_delete=models.SET_NULL, blank=True, null=True, related_name="persons"
     )
 
+    # Temporary fields for user-typed location data (for admin review)
+    continent_input = models.CharField(max_length=100, blank=True, null=True)
+    country_input = models.CharField(max_length=100, blank=True, null=True)
+    state_input = models.CharField(max_length=100, blank=True, null=True)
+    town_input = models.CharField(max_length=100, blank=True, null=True)
+
     date_joined = models.DateTimeField(default=now, verbose_name=_("Date Joined"))  # Tracks when the user created profile
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))  # Tracks updates
 

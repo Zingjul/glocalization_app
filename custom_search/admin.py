@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import Continent, Country, State, Town
-
+from .models import Continent, Country, State, Town, PendingLocationRequest
+class ContinentAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
 class CountryInline(admin.TabularInline):  # ✅ Displays countries inside the continent view
     model = Country
     extra = 0  # ✅ Prevents unnecessary empty rows

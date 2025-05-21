@@ -11,12 +11,12 @@
 <p><strong>About:</strong> {{ profile.about }}</p>
 <p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
 
-<p><strong>Location:</strong> 
-    {% if profile.continent %} {{ profile.continent.name }}, {% endif %}
-    {% if profile.country %} {{ profile.country.name }}, {% endif %}
-    {% if profile.state %} {{ profile.state.name }}, {% endif %}
-    {% if profile.town %} {{ profile.town.name }} {% endif %}
-</p>
+<div><strong>Location:</strong> 
+    <p>Continent: {% if profile.continent %} {{ profile.continent.name }} {% endif %}</p>
+    <p>Country: {% if profile.country %} {{ profile.country.name }} {% endif %}</p>
+    <p>State/Province: {% if profile.state %} {{ profile.state.name }} {% endif %}</p>
+    <p>Town: {% if profile.town %} {{ profile.town.name }} {% endif %}</p>
+</div>
 
 {% if user == profile.user %}
     <a href="{% url 'person_edit' profile.pk %}" class="btn btn-warning">Edit Profile</a>

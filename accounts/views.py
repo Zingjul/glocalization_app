@@ -60,13 +60,14 @@ class ConfirmLogoutView(LoginRequiredMixin, TemplateView):
 
 
 # Actual Logout Handler (POST only, with message)
-class PerformLogoutView(LoginRequiredMixin, View):
+class PerformLogoutView(View):
     def post(self, request, *args, **kwargs):
         logout(request)
-        messages.success(request, "You have been successfully logged out.")
-        return redirect('logged_out')
+        return redirect('logged_out')  # This should match the template you want to show
 
-
+    def get(self, request, *args, **kwargs):
+        # Optional: prevent logout on GET
+        return redirect('confirm_logout')
 # Final Logged Out Page
 class LoggedOutView(TemplateView):
     template_name = 'registration/logged_out.html'

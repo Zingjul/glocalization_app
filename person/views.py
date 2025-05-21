@@ -8,11 +8,10 @@ from .models import Person
 from .forms import PersonForm
 from accounts.models import CustomUser
 from django.contrib.auth.decorators import login_required
-
 class PersonCreateView(LoginRequiredMixin, CreateView):
     model = Person
     template_name = "person/person_form.html"
-    fields = ["business_name", "person_profile_picture", "about", "website", "use_business_name", "continent", "country", "state", "town"]
+    form_class = PersonForm  # ✅ Use your custom form
 
     def form_valid(self, form):
         """ Ensure profile is correctly linked to user. """
@@ -21,8 +20,7 @@ class PersonCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         """ Redirect user to their profile after creation. """
-        return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})  # 🔥 Redirects properly
-        
+        return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})     
 # List all registered user profiles
 class PersonListView(ListView):
     model = Person
@@ -33,6 +31,10 @@ class PersonDetailView(DetailView):
     model = Person
     template_name = "person/person_detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile"] = self.object  # 👈 So your template can use {{ profile }}
+        return context
 # Update profile view (User can edit their own profile)
 class PersonUpdateView(LoginRequiredMixin, UpdateView):
     model = Person
@@ -44,10 +46,15 @@ class PersonUpdateView(LoginRequiredMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         profile = self.get_object()
-        if profile.user != request.user:  # Prevent others from editing another user's profile
+        if profile.user != request.user:
             return redirect("person_list")
         return super().get(request, *args, **kwargs)
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["location_fields"] = ["continent", "country", "state", "town"]
+        context["location_input_fields"] = ["continent_input", "country_input", "state_input", "town_input"]
+        return context
 # Delete account view (User can delete their own account)
 class PersonDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomUser

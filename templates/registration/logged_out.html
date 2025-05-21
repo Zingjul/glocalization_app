@@ -1,18 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
-{% if messages %}
-{% for message in messages %}
-    <p style="color: green;">{{ message }}</p>
-{% endfor %}
-{% endif %}        
-
-<div class="text-center">
-    <div class="main_headers">
-        <h2>You have been logged out.</h2>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 px-4">
+    <div class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-3xl shadow-xl p-10 max-w-md w-full text-center animate-fade-in">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 text-green-600 font-semibold">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">You have been logged out.</h2>
+        <p class="text-gray-600 mb-6">Thanks for stopping by. Come back soon!</p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{% url 'login' %}" class="py-2 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition">
+                Log in again
+            </a>
+            <a href="{% url 'post_home' %}" class="py-2 px-6 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-300 transition">
+                Homepage
+            </a>
+        </div>
     </div>
-    
-    <button class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition"><a href="{% url 'login' %}">Log in again</a></button>
-    <button class="py-2 px-4 bg-gray-200 text-gray-500 hover:bg-gray-300 hover:text-gray-700 font-semibold rounded-lg shadow-md transition focus:outline-none"><a href="{% url 'post_home' %}">Homepage</a></button>
-
-{% endblock content %}
 </div>
+
+<style>
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+}
+</style>
+{% endblock content %}

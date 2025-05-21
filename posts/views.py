@@ -56,7 +56,16 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             form.instance.town = form.cleaned_data.get("town")
 
         return super().form_valid(form)
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+        context["location_fields"] = [
+            (form["continent"], "continent_text", "Or type a continent"),
+            (form["country"], "country_text", "Or type a country"),
+            (form["state"], "state_text", "Or type a state"),
+            (form["town"], "town_text", "Or type a town"),
+        ]
+        return context
 class CategoryListView(ListView):
     model = Category
     template_name = "posts/category_list.html"

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Pending Location Approvals</h1>
+
+  {% for person in pending_people %}
+    <div class="p-4 mb-6 border rounded shadow-sm bg-white">
+      <p><strong>User:</strong> {{ person.user.username }}</p>
+      {% if person.continent_input and not person.continent %}
+        <p>Continent: <strong>{{ person.continent_input }}</strong></p>
+        <a href="{% url 'approve_location_single' person.pk 'continent' %}" class="text-green-600 underline">Approve</a>
+      {% endif %}
+      {% if person.country_input and not person.country %}
+        <p>Country: <strong>{{ person.country_input }}</strong></p>
+        <a href="{% url 'approve_location_single' person.pk 'country' %}" class="text-green-600 underline">Approve</a>
+      {% endif %}
+      {% if person.state_input and not person.state %}
+        <p>State: <strong>{{ person.state_input }}</strong></p>
+        <a href="{% url 'approve_location_single' person.pk 'state' %}" class="text-green-600 underline">Approve</a>
+      {% endif %}
+      {% if person.town_input and not person.town %}
+        <p>Town: <strong>{{ person.town_input }}</strong></p>
+        <a href="{% url 'approve_location_single' person.pk 'town' %}" class="text-green-600 underline">Approve</a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No pending custom location inputs.</p>
+  {% endfor %}
+{% endblock %}
