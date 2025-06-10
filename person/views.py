@@ -8,23 +8,36 @@ from .models import Person
 from .forms import PersonForm
 from accounts.models import CustomUser
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+
 class PersonCreateView(LoginRequiredMixin, CreateView):
     model = Person
     template_name = "person/person_form.html"
-    form_class = PersonForm  # ✅ Use your custom form
+    form_class = PersonForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if hasattr(request.user, "profile"):
+            return redirect("person_detail", pk=request.user.profile.pk)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """ Ensure profile is correctly linked to user. """
         form.instance.user = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
-        """ Redirect user to their profile after creation. """
-        return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})     
+        return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})
+     
 # List all registered user profiles
-class PersonListView(ListView):
+class PersonListView(LoginRequiredMixin, ListView):
     model = Person
     template_name = "person/person_list.html"
+    context_object_name = "profiles"  # 👈 This ensures the correct variable name is passed
+
+    def get_queryset(self):
+        return Person.objects.all()  # Retrieves all registered profiles
 
 # Detail view for an individual profile
 class PersonDetailView(DetailView):
@@ -36,7 +49,7 @@ class PersonDetailView(DetailView):
         context["profile"] = self.object  # 👈 So your template can use {{ profile }}
         return context
 # Update profile view (User can edit their own profile)
-class PersonUpdateView(LoginRequiredMixin, UpdateView):
+class PersonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Person
     form_class = PersonForm
     template_name = "person/person_form.html"
@@ -44,16 +57,19 @@ class PersonUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})
 
-    def get(self, request, *args, **kwargs):
-        profile = self.get_object()
-        if profile.user != request.user:
-            return redirect("person_list")
-        return super().get(request, *args, **kwargs)
-    
+    def test_func(self):
+        return self.get_object().user == self.request.user
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["location_fields"] = ["continent", "country", "state", "town"]
         context["location_input_fields"] = ["continent_input", "country_input", "state_input", "town_input"]
+        context["has_pending_location"] = any([
+            self.object.continent_input,
+            self.object.country_input,
+            self.object.state_input,
+            self.object.town_input,
+        ])
         return context
 # Delete account view (User can delete their own account)
 class PersonDeleteView(LoginRequiredMixin, DeleteView):
@@ -69,7 +85,11 @@ class PersonDeleteView(LoginRequiredMixin, DeleteView):
 # Toggle Business Name Visibility
 @login_required
 def toggle_business_name(request):
-    profile = request.user.profile
+    try:
+        profile = request.user.profile
+    except Person.DoesNotExist:
+        return redirect("person_create")
+
     profile.use_business_name = not profile.use_business_name
     profile.save()
     return redirect("person_detail", pk=profile.pk)

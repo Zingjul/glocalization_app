@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Person
+from .models import Person, Availability
 from custom_search.models import Continent, Country, State, Town
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):

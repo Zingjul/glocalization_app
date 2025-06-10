@@ -5,10 +5,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-iwv7hf4oo#bcbr5bqlpr9a_^!e-29oz(h5ssl69^u)g_9n#mfv'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Set to False in production
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -78,18 +78,10 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -98,10 +90,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static and media
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
+# Static and media files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]  # Optional global static dir
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -109,7 +100,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_REDIRECT_URL = 'post_home'
 LOGOUT_REDIRECT_URL = '/accounts/logged-out/'
 
-# Email backend (console for development)
+# Email backend for development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# settings.py
-# LOGIN_REDIRECT_URL = '/'
+
+# Session settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # Sessions last for 1 day
+SESSION_COOKIE_SECURE = True  # Ensures cookies are secure
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents logout when browser is closed
+SESSION_SAVE_EVERY_REQUEST = True  # Ensures session persistence

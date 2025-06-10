@@ -2,13 +2,20 @@ from django.core.management.base import BaseCommand
 from posts.models import Category
 
 class Command(BaseCommand):
-    help = 'Populates the Category model with default categories'
+    help = "Add default categories to the database"
 
-    def handle(self, *args, **options):
-        categories = ['Goods', 'Services', 'Labor']
-        for category_name in categories:
-            if not Category.objects.filter(name=category_name).exists():
-                Category.objects.create(name=category_name)
-                self.stdout.write(self.style.SUCCESS(f'Successfully created category: {category_name}'))
+    def handle(self, *args, **kwargs):
+        categories = [
+            "Product",
+            "Service",
+            "Labor",
+        ]
+
+        for cat_name in categories:
+            obj, created = Category.objects.get_or_create(name=cat_name)
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"Category '{cat_name}' created."))
             else:
-                self.stdout.write(self.style.WARNING(f'Category {category_name} already exists.'))
+                self.stdout.write(f"Category '{cat_name}' already exists.")
+
+        self.stdout.write(self.style.SUCCESS("All categories added/verified."))

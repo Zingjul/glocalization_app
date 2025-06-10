@@ -63,3 +63,6 @@ form{
     padding: var(--form_inner_padding);
 }
 
+[x-cloak] {
+  display: none !important;
+}

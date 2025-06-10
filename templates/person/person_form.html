@@ -50,8 +50,8 @@
         Save Changes
       </button>
 
-      {% if profile %}
-        <a href="{% url 'person_detail' profile.pk %}" class="text-sm text-gray-600 hover:text-gray-800">
+      {% if user == user.profile.user %}
+        <a href="{% url 'person_detail' user.profile.pk %}" class="text-sm text-gray-600 hover:text-gray-800">
           Cancel
         </a>
       {% else %}

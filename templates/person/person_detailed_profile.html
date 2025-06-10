@@ -12,9 +12,10 @@
     <p><strong>Business Name:</strong> {{ person.business_name }}</p>
     <p><strong>About:</strong> {{ person.about }}</p>
     <p><strong>Website:</strong> {{ person.website }}</p>
-
+{% if user == user.profile.user %}
     <a href="{% url 'person:person_profile_edit' %}" class="btn btn-primary">Edit Profile</a>
     <a href="{% url 'person:person_profile_delete' %}" class="btn btn-danger">Delete Profile</a>
     <a href="{% url 'person:toggle_business_name' %}" class="btn btn-secondary">Toggle Business Name Display</a>
+{% endif %}
 
 {% endblock content %}

@@ -18,6 +18,11 @@ class Person(models.Model):
         blank=True,
         verbose_name=_("Business Name"),
     )
+    real_name = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Real Name"),
+    )
     person_profile_picture = models.ImageField(
         upload_to='profile_pics/',
         blank=True,
@@ -70,3 +75,14 @@ class Person(models.Model):
         verbose_name = _("Profile")
         verbose_name_plural = _("Profiles")
         ordering = ["-date_joined"]  # Sort profiles by most recent users
+class Availability(models.Model):
+    person = models.ForeignKey('Person', on_delete=models.CASCADE, related_name='availabilities')
+    day_of_week = models.CharField(max_length=10, choices=[
+        ('Monday', 'Monday'), ('Tuesday', 'Tuesday'), ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'), ('Friday', 'Friday'), ('Saturday', 'Saturday'), ('Sunday', 'Sunday'),
+    ])
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    def __str__(self):
+        return f"{self.person} - {self.day_of_week}: {self.start_time} to {self.end_time}"

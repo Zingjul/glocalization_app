@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Edit Product Post</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <h3>Social Media Handles</h3>
+  {{ social_form.as_p }}
+
+  <!-- <h3>Uploaded Images</h3> -->
+  {% for image in post.images.all %}
+    <div style="margin-bottom: 10px;">
+      <img src="{{ image.image.url }}" alt="Post image" style="max-height: 150px;">
+    </div>
+  {% empty %}
+    <!-- <p>No images uploaded yet.</p> -->
+  {% endfor %}
+
+  <button type="submit">Update Post</button>
+</form>
+{% endblock %}

@@ -8,9 +8,9 @@
         <li class="list-group-item">
             <strong>{{ profile.user.username }}</strong> 
             {% if profile.business_name %}
-                | <em>{{ profile.business_name }}</em>
+                | <div>{{ profile.business_name }}</div>
             {% endif %}
-            <a href="{% url 'person_detail' person.pk %}" class="btn btn-sm btn-primary">View Profile</a>
+            <a href="{% url 'person_detail' profile.pk %}" class="btn btn-sm btn-primary">View Profile</a>
         </li>
     {% endfor %}
 </ul>

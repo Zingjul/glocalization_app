@@ -67,11 +67,11 @@ class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [
-            'person_profile_picture', 'business_name', 'about', 'website', 'continent', 'country', 'state', 'town', 'continent_input', 'country_input', 'state_input', 'town_input',
+            'person_profile_picture', 'real_name', 'business_name', 'about', 'website', 'continent', 'country', 'state', 'town', 'continent_input', 'country_input', 'state_input', 'town_input',
         ]
 
-        
         labels = {
+            'real_name': _("Provide your real name!"),
             'business_name': _("What's the name of your awesome business/service?"),
             'person_profile_picture': _("Add a photo that shows your style!"),
             'about': _("Share your story!"),
@@ -84,6 +84,7 @@ class PersonForm(forms.ModelForm):
         }
         help_texts = {
             'person_profile_picture': _("Make your profile stand out with a picture!"),
+            'real_name': _("What's the story behind you or your brand?"),
             'about': _("What's the story behind you or your brand?"),
             'website': _("Your personal or business website (optional)."),
             'continent': _("Choose the continent where you live."),

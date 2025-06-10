@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>My Pending Posts</h1>
+
+  {% if pending_posts %}
+    <ul>
+      {% for post in pending_posts %}
+        <li>
+          <a href="{% url 'post_edit' post.pk %}">{{ post.product_name|default:"(No Title)" }}</a> 
+          - Submitted on: {{ post.created_at|date:"SHORT_DATE_FORMAT" }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no pending posts.</p>
+  {% endif %}
+{% endblock %}

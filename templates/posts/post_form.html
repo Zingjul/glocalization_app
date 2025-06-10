@@ -1,98 +1,88 @@
 {% extends "base.html" %}
 {% load static %}
-<script src="{% static 'search/location_autocomplete.js' %}"></script>
 
 {% block content %}
-<h2 class="text-3xl font-extrabold mb-6 text-gray-900">Create a New Post</h2>
+<h2>Create a Post</h2>
 
-{% if not user.profile.continent or not user.profile.country or not user.profile.state or not user.profile.town or not user.profile.business_name %}
-  <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 mb-8 rounded shadow" role="alert">
-    <p class="font-semibold mb-1">Warning:</p>
-    <p>
-      Please
-      <a href="{% url 'person_edit' user.profile.pk %}" class="underline text-yellow-600 hover:text-yellow-800 font-medium">complete your profile</a>
-      before posting a product.
-    </p>
-  </div>
-{% endif %}
+<form method="post" enctype="multipart/form-data" x-data="postFormHandler()" @change="handleCategoryChange">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto space-y-8 bg-white p-8 rounded-lg shadow-md">
-  {% csrf_token %}
-
-  <div class="space-y-1">
-    {{ form.category.label_tag }}
-    {{ form.category }}
-  </div>
-
-  <div class="space-y-1">
-    {{ form.product_name.label_tag }}
-    {{ form.product_name }}
-  </div>
-
-  <div class="space-y-1">
-    {{ form.description.label_tag }}
-    {{ form.description }}
-  </div>
-
-  <div class="space-y-1">
-    {{ form.author_phone_number.label_tag }}
-    {{ form.author_phone_number }}
-  </div>
-
-  <div class="space-y-1">
-    {{ form.author_email.label_tag }}
-    {{ form.author_email }}
-  </div>
-
-  <!-- Use default profile location toggle -->
-  <div class="flex items-center space-x-3">
-    {{ form.use_default_location }}
-    <label for="{{ form.use_default_location.id_for_label }}" class="cursor-pointer text-gray-700 font-medium select-none">Use my profile location</label>
-  </div>
-
-  <!-- Location input fields, initially hidden -->
-  <div id="location_fields" class="space-y-6 mt-6 hidden">
-
-    {% for field, text_id, placeholder in location_fields %}
-    <div class="space-y-1">
-      <label for="{{ field.id_for_label }}" class="block font-semibold mb-1 text-gray-800">{{ field.label }}</label>
-      {{ field }}
-      <input
-          type="text"
-          id="{{ text_id }}"
-          name="{{ text_id }}"
-          placeholder="{{ placeholder }}"
-          autocomplete="off"
-          class="block w-full mt-1 border border-gray-300 rounded px-3 py-2"
-      >
+    <!-- Category Selection -->
+    <div>
+        {{ form.category.label_tag }}
+        <select name="category" id="id_category" x-model="category">
+            <option value="">Select Category</option>
+            {% for choice in form.category.field.choices %}
+                {% if choice.0 %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
     </div>
-  {% endfor %}
 
-  </div>
+    <p>Chosen category: <span x-text="category"></span></p>
 
-  <button
-    type="submit"
-    class="w-full bg-green-600 text-white font-semibold py-3 rounded-md hover:bg-green-700 transition duration-300"
-  >
-    Submit Post
-  </button>
+    <!-- Basic Fields -->
+    <div>{{ form.product_name.label_tag }} {{ form.product_name }}</div>
+    <div>{{ form.description.label_tag }} {{ form.description }}</div>
+    <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
+    <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
+
+    <!-- Location Fields -->
+    <div>{{ form.use_default_location.label_tag }} {{ form.use_default_location }}</div>
+    <div>{{ form.post_continent.label_tag }} {{ form.post_continent }}</div>
+    <div>{{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}</div>
+    <div>{{ form.post_country.label_tag }} {{ form.post_country }}</div>
+    <div>{{ form.post_country_input.label_tag }} {{ form.post_country_input }}</div>
+    <div>{{ form.post_state.label_tag }} {{ form.post_state }}</div>
+    <div>{{ form.post_state_input.label_tag }} {{ form.post_state_input }}</div>
+    <div>{{ form.post_town.label_tag }} {{ form.post_town }}</div>
+    <div>{{ form.post_town_input.label_tag }} {{ form.post_town_input }}</div>
+
+    <!-- Images -->
+    <div>{{ form.image1.label_tag }} {{ form.image1 }}</div>
+    <div>{{ form.image2.label_tag }} {{ form.image2 }}</div>
+    <div>{{ form.image3.label_tag }} {{ form.image3 }}</div>
+    <div>{{ form.image4.label_tag }} {{ form.image4 }}</div>
+    <div>{{ form.image5.label_tag }} {{ form.image5 }}</div>
+    <div>{{ form.image6.label_tag }} {{ form.image6 }}</div>
+
+    <!-- Product Fields -->
+    <div x-show="category === 'Product'" x-cloak>
+        <h4>Product Fields</h4>
+        <div>{{ form.color.label_tag }} {{ form.color }}</div>
+        <div>{{ form.brand.label_tag }} {{ form.brand }}</div>
+        <div>{{ form.condition.label_tag }} {{ form.condition }}</div>
+        <div>{{ form.model_version.label_tag }} {{ form.model_version }}</div>
+        <div>{{ form.technical_specs.label_tag }} {{ form.technical_specs }}</div>
+        <div>{{ form.warranty.label_tag }} {{ form.warranty }}</div>
+    </div>
+
+    <!-- Service Fields -->
+    <div x-show="category === 'Service'" x-cloak>
+        <h4>Service Fields</h4>
+        <div>{{ form.service_details.label_tag }} {{ form.service_details }}</div>
+        <div>{{ form.experience_qualifications.label_tag }} {{ form.experience_qualifications }}</div>
+        <div>{{ form.availability.label_tag }} {{ form.availability }}</div>
+        <div>{{ form.region_served.label_tag }} {{ form.region_served }}</div>
+        <div>{{ form.service_duration.label_tag }} {{ form.service_duration }}</div>
+        <div>{{ form.service_policies.label_tag }} {{ form.service_policies }}</div>
+    </div>
+
+    <!-- Labor Fields -->
+    <div x-show="category === 'Labor'" x-cloak>
+        <h4>Labor Fields</h4>
+        <div>{{ form.labor_type.label_tag }} {{ form.labor_type }}</div>
+        <div>{{ form.labor_skills.label_tag }} {{ form.labor_skills }}</div>
+        <div>{{ form.labor_experience.label_tag }} {{ form.labor_experience }}</div>
+        <div>{{ form.labor_availability.label_tag }} {{ form.labor_availability }}</div>
+        <div>{{ form.labor_location.label_tag }} {{ form.labor_location }}</div>
+        <div>{{ form.labor_references.label_tag }} {{ form.labor_references }}</div>
+    </div>
+
+    <button type="submit">Submit</button>
 </form>
 
-<script>
-  const useDefaultLocationCheckbox = document.getElementById("{{ form.use_default_location.id_for_label }}");
-  const locationFields = document.getElementById("location_fields");
-
-  function toggleLocationFields() {
-    if (useDefaultLocationCheckbox.checked) {
-      locationFields.classList.add("hidden");
-    } else {
-      locationFields.classList.remove("hidden");
-    }
-  }
-
-  useDefaultLocationCheckbox.addEventListener("change", toggleLocationFields);
-
-  // Initialize visibility on page load
-  toggleLocationFields();
-</script>
+<script src="{% static 'js/post_form.js' %}"></script>
 {% endblock %}

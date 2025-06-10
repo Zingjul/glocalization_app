@@ -19,7 +19,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
     
     <!-- Alpine.js (always use latest 3.x version) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
 
     <!-- htmx (always use latest) -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -42,6 +44,7 @@
     <!-- jQuery (single instance) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{% static 'js/accounts/logout.js' %}"></script>
+    <script src="{% static 'js/post_form.js' %}"></script>
     <!-- Additional head content -->
     {% block extra_head %}
     {% endblock extra_head %}

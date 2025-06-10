@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="text-xl font-semibold mb-4">Create Labor Post</h2>
+
+  <form method="post" enctype="multipart/form-data" id="postForm">
+    {% csrf_token %}
+    
+    <!-- 🔽 Renders all form fields including image1–image6 -->
+    {{ form.as_p }}
+    <div id="imagePreviewContainer" class="flex flex-wrap gap-3 mt-4 mb-6"></div>
+    <!-- Social Media Form -->
+    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
+    {{ social_form.as_p }}
+
+    <!-- 🔽 Image Preview Area -->
+   
+
+    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+      Submit
+    </button>
+  </form>
+
+  <!-- ✅ JavaScript for auto-previewing images -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const previewContainer = document.getElementById("imagePreviewContainer");
+  
+      for (let i = 1; i <= 6; i++) {
+        const input = document.querySelector(`input[name="image${i}"]`);
+        if (input) {
+          input.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            const previewId = `preview-image${i}`;
+  
+            // Remove previous preview if it exists
+            const existingPreview = document.getElementById(previewId);
+            if (existingPreview) {
+              existingPreview.remove();
+            }
+  
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = document.createElement("img");
+                img.id = previewId;
+                img.src = e.target.result;
+                img.className = "w-28 h-28 object-cover rounded shadow border";
+                previewContainer.appendChild(img);
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+      }
+    });
+  </script>
+{% endblock %}

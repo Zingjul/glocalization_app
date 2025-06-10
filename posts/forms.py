@@ -1,70 +1,345 @@
 from django import forms
-from .models import Post
+from .models import Post, SocialMediaHandle
 from custom_search.models import Continent, Country, State, Town
 from phonenumber_field.formfields import PhoneNumberField
 
-class PostForm(forms.ModelForm):
-    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890', 'class':'w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent'}))
-
-    use_default_location = forms.ChoiceField(
-        choices=[(True, "Use my default location"), (False, "Specify a custom location")],
-        widget=forms.RadioSelect,
-        initial=True,
-        label="Location Option",
+# Reusable mixin: contains only post location input fields (no logic)
+class LocationFieldsMixin:
+    post_continent = forms.ModelChoiceField(
+        queryset=Continent.objects.all(), required=False, empty_label="Tell buyer what continent are you posting from?"
     )
+    post_continent_input = forms.CharField(
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Type a continent"})
+    )
+    post_country = forms.ModelChoiceField(
+        queryset=Country.objects.all(), required=False, empty_label="Tell buyer what country you are posting from"
+    )
+    post_country_input = forms.CharField(
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Type a country"})
+    )
+    post_state = forms.ModelChoiceField(
+        queryset=State.objects.all(), required=False, empty_label="Tell buyer name of state or province you are posting from"
+    )
+    post_state_input = forms.CharField(
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Type a state"})
+    )
+    post_town = forms.ModelChoiceField(
+        queryset=Town.objects.all(), required=False, empty_label="Tell buyer the name of the town you are posting from"
+    )
+    post_town_input = forms.CharField(
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Type a town"})
+    )
+# General-purpose post form
+class PostForm(forms.ModelForm, LocationFieldsMixin):
+    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
 
-    # 🔥 Dual input fields: Dropdown & Text Input (Auto-Suggest)
-    continent = forms.ModelChoiceField(queryset=Continent.objects.all(), required=False, empty_label="Select Continent")
-    continent_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a continent", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
-
-    country = forms.ModelChoiceField(queryset=Country.objects.all(), required=False, empty_label="Select Country")
-    country_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a country", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
-
-    state = forms.ModelChoiceField(queryset=State.objects.all(), required=False, empty_label="Select State")
-    state_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a state", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
-
-    town = forms.ModelChoiceField(queryset=Town.objects.all(), required=False, empty_label="Select Town")
-    town_text = forms.CharField(required=False, widget=forms.TextInput(attrs={"placeholder": "Type a town", "class":"w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"}))
+    image1 = forms.ImageField(required=False)
+    image2 = forms.ImageField(required=False)
+    image3 = forms.ImageField(required=False)
+    image4 = forms.ImageField(required=False)
+    image5 = forms.ImageField(required=False)
+    image6 = forms.ImageField(required=False)
+    # PRODUCT
+    color = forms.CharField(required=False)
+    brand = forms.CharField(required=False)
+    condition = forms.ChoiceField(choices=[("new", "New"), ("fairly Used", "Fairly Used")], required=False)
+    model_version = forms.CharField(required=False)
+    technical_specifications = forms.CharField(widget=forms.Textarea, required=False)
+    warranty = forms.CharField(required=False)
+    # SERVICE
+    service_details = forms.CharField(widget=forms.Textarea, required=False)
+    qualifications = forms.CharField(required=False)
+    availability_schedule = forms.CharField(required=False)
+    service_guarantees = forms.CharField(required=False)
+    # LABOR
+    labor_experience_years = forms.IntegerField(required=False)
+    labor_availability = forms.CharField(required=False)
 
     class Meta:
         model = Post
-        fields = ["category", "product_name", "description", "author_phone_number", "author_email", "use_default_location"]
+        fields = [
+            "product_name", "description",
+            "author_phone_number", "author_email",
+            # Post Location Fields
+            "post_continent", "post_continent_input",
+            "post_country", "post_country_input",
+            "post_state", "post_state_input",
+            "post_town", "post_town_input",
+            # Images
+            "image1", "image2", "image3", "image4", "image5", "image6",
+            # Product
+            "color", "brand", "condition", "model_version", "technical_specifications", "warranty",
+            # Service
+            "service_details", "qualifications", "availability_schedule", "service_guarantees",
+            # Labor
+            "labor_experience_years", "labor_availability",
+        ]
 
-    def clean(self):
-        cleaned_data = super().clean()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Labels
+        self.fields['product_name'].label = "Name of your product?"
+        self.fields['description'].label = "Brief details you may want buyers to see"
+        self.fields['author_email'].label = "Your email address"
+        self.fields['author_phone_number'].label = "Your phone number, so a buyer can call you"
+        # Placeholders
+        self.fields['product_name'].widget.attrs['placeholder'] = "E.g., Guitar, Watches, iPhone 13, Dumbells, Pots, Desks, Bicycles, Hammer, Skrewdrivers"
+        self.fields['description'].widget.attrs['placeholder'] = "Descriptions you provide helps buyer reach to your product easily"
+        self.fields['author_email'].widget.attrs['placeholder'] = "e.g., you@example.com"
+        self.fields['author_phone_number'].widget.attrs['placeholder'] = "e.g., +1234567890"
+        # You can do the same for location fields
+        self.fields['post_continent'].label = "Tell buyer what continent are you posting from?"
+        self.fields['post_continent_input'].label = ""
+        self.fields['post_continent_input'].widget.attrs['placeholder'] = "Or simply enter continent name"
+        self.fields['post_country'].label = "Tell buyer what country you are posting from"
+        self.fields['post_country_input'].label = ""
+        self.fields['post_country_input'].widget.attrs['placeholder'] = "Or simply type country name"
+        self.fields['post_state'].label = "Tell buyer name of state or province you are posting from"
+        self.fields['post_state_input'].label = ""
+        self.fields['post_state_input'].widget.attrs['placeholder'] = "Or simply type State name"
+        self.fields['post_town'].label = "Tell buyer the name of the town you are posting from"
+        self.fields['post_town_input'].label = ""
+        self.fields['post_town_input'].widget.attrs['placeholder'] = "Or simply type Town name"
+# Product-specific post form
+class ProductPostForm(forms.ModelForm, LocationFieldsMixin):
+    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
 
-        # 🔥 Validate user-typed location input
-        def validate_field(field_name, model):
-            user_input = cleaned_data.get(f"{field_name}_text")
-            if user_input:
-                if not model.objects.filter(name__iexact=user_input).exists():
-                    self.add_error(f"{field_name}_text", f"Invalid {field_name}. Please select from the list.")
-                else:
-                    cleaned_data[field_name] = model.objects.get(name__iexact=user_input)
+    image1 = forms.ImageField(required=False)
+    image2 = forms.ImageField(required=False)
+    image3 = forms.ImageField(required=False)
+    image4 = forms.ImageField(required=False)
+    image5 = forms.ImageField(required=False)
+    image6 = forms.ImageField(required=False)
 
-        validate_field("continent", Continent)
-        validate_field("country", Country)
-        validate_field("state", State)
-        validate_field("town", Town)
+    class Meta:
+        model = Post
+        fields = [
+            "product_name", "description",
+            "author_phone_number", "author_email",
 
-        return cleaned_data
+            # Post Location Fields
+            "post_continent", "post_continent_input",
+            "post_country", "post_country_input",
+            "post_state", "post_state_input",
+            "post_town", "post_town_input",
 
-    def save(self, commit=True):
-        post = super().save(commit=False)
+            # Product-specific
+            "color", "brand", "condition", "model_version", "technical_specifications", "warranty",
 
-        # 🔥 Assign location automatically if user selects "default location"
-        if post.use_default_location:
-            profile = post.author.profile
-            post.continent = profile.continent
-            post.country = profile.country
-            post.state = profile.state
-            post.town = profile.town
-        else:
-            post.continent = self.cleaned_data.get("continent")
-            post.country = self.cleaned_data.get("country")
-            post.state = self.cleaned_data.get("state")
-            post.town = self.cleaned_data.get("town")
+            # Images
+            "image1", "image2", "image3", "image4", "image5", "image6",
+        ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        if commit:
-            post.save()
-        return post
+        # Labels
+        self.fields['product_name'].label = "Name of your product?"
+        self.fields['description'].label = "Describe your product to a buyer(Very Important)"
+        self.fields['author_email'].label = "Your email address"
+        self.fields['author_phone_number'].label = "Your phone number"
+
+        # Placeholders
+        self.fields['product_name'].widget.attrs['placeholder'] = "E.g., Guitar, Watches, iPhone 13, Dumbells, Pots, Desks, Bicycles, Hammer, Skrewdrivers"
+        self.fields['description'].widget.attrs['placeholder'] = "The description you provide helps potential buyers and audience in need of such product reach to your product, brand or company faster and easier"
+        self.fields['author_email'].widget.attrs['placeholder'] = "e.g., you@example.com"
+        self.fields['author_phone_number'].widget.attrs['placeholder'] = "e.g., +1234567890"
+
+        self.fields['image1'].label = "Front view"
+        self.fields['image2'].label = "Back view"
+        self.fields['image3'].label = "Right side view"
+        self.fields['image4'].label = "Left side view"
+        self.fields['image5'].label = "Top view"
+        self.fields['image6'].label = "Bottom view"
+
+        # You can do the same for location fields
+        self.fields['post_continent'].label = "Tell buyer what continent are you posting from?"
+        self.fields['post_continent_input'].label = ""
+        self.fields['post_continent_input'].widget.attrs['placeholder'] = "Or simply enter continent name here"
+        self.fields['post_country'].label = "Tell buyer what country you are posting from"
+        self.fields['post_country_input'].label = ""
+        self.fields['post_country_input'].widget.attrs['placeholder'] = "Or simply enter country name here"
+        self.fields['post_state'].label = "Tell buyer name of state or province you are posting from"
+        self.fields['post_state_input'].label = ""
+        self.fields['post_state_input'].widget.attrs['placeholder'] = "Or simply enter State name here"
+        self.fields['post_town'].label = "Tell buyer the name of the town you are posting from"
+        self.fields['post_town_input'].label = ""
+        self.fields['post_town_input'].widget.attrs['placeholder'] = "Or simply enter Town name here"
+
+        self.fields['color'].label = "Color of product"
+        self.fields['brand'].label = "What brand(optional)"
+        self.fields['condition'].label = "Is this product new or fFairly used"
+        self.fields['model_version'].label = "Model Version(optional)"
+        self.fields['technical_specifications'].label = "Technical specifications(optional)"
+        self.fields['warranty'].label = "Give product warranty(optional)"
+
+        self.fields['brand'].widget.attrs['placeholder'] = "Enter brand name" 
+        self.fields['color'].widget.attrs['placeholder'] = "Enter product color" 
+        self.fields['condition'].widget.attrs['placeholder'] = "Is product New or Not" 
+        self.fields['model_version'].widget.attrs['placeholder'] = "e.g Release 2027, Version 12" 
+        self.fields['technical_specifications'].widget.attrs['placeholder'] = "" 
+        self.fields['warranty'].widget.attrs['placeholder'] = "Enter warranty if any" 
+# Service-specific post form
+class ServicePostForm(forms.ModelForm, LocationFieldsMixin):
+    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
+
+    image1 = forms.ImageField(required=False)
+    image2 = forms.ImageField(required=False)
+    image3 = forms.ImageField(required=False)
+    image4 = forms.ImageField(required=False)
+    image5 = forms.ImageField(required=False)
+    image6 = forms.ImageField(required=False)
+
+    class Meta:
+        model = Post
+        fields = [
+            "product_name", "description",
+            "author_phone_number", "author_email",
+
+            # Post Location Fields
+            "post_continent", "post_continent_input",
+            "post_country", "post_country_input",
+            "post_state", "post_state_input",
+            "post_town", "post_town_input",
+
+            # Service-specific
+            "service_details", "qualifications", "availability_schedule",
+            "service_guarantees",
+
+            # Images
+            "image1", "image2", "image3", "image4", "image5", "image6",
+        ]
+
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            # Labels
+            self.fields['product_name'].label = "What services are you offering?"
+            self.fields['description'].label = "Describe your services to a buyer (Very Important)"
+            self.fields['author_email'].label = "Your email address"
+            self.fields['author_phone_number'].label = "Your phone number"
+
+            # Placeholders
+            self.fields['product_name'].widget.attrs['placeholder'] = "E.g., Guitar, Watches, iPhone 13, Dumbells, Pots, Desks, Bicycles, Hammer, Skrewdrivers"
+            self.fields['description'].widget.attrs['placeholder'] = "The descriptions you provide helps potential buyers and audience in need of such services reach to you faster and easier"
+            self.fields['author_email'].widget.attrs['placeholder'] = "e.g., you@example.com"
+            self.fields['author_phone_number'].widget.attrs['placeholder'] = "e.g., +1234567890"
+
+            self.fields['image1'].label = "Front view"
+            self.fields['image2'].label = "Back view"
+            self.fields['image3'].label = "Right side view"
+            self.fields['image4'].label = "Left side view"
+            self.fields['image5'].label = "Top view"
+            self.fields['image6'].label = "Bottom view"
+
+            # You can do the same for location fields
+            self.fields['post_continent'].label = "Tell buyer what continent are you posting from?"
+            self.fields['post_continent_input'].label = ""
+            self.fields['post_continent_input'].widget.attrs['placeholder'] = "Or simply enter continent name here"
+            self.fields['post_country'].label = "Tell buyer what country you are posting from"
+            self.fields['post_country_input'].label = ""
+            self.fields['post_country_input'].widget.attrs['placeholder'] = "Or simply enter country name here"
+            self.fields['post_state'].label = "Tell buyer name of state or province you are posting from"
+            self.fields['post_state_input'].label = ""
+            self.fields['post_state_input'].widget.attrs['placeholder'] = "Or simply enter State name here"
+            self.fields['post_town'].label = "Tell buyer the name of the town you are posting from"
+            self.fields['post_town_input'].label = ""
+            self.fields['post_town_input'].widget.attrs['placeholder'] = "Or simply enter Town name here"
+
+            self.fields['service_details'].label = "Do you offer outdoor services(Home services)"
+            self.fields['qualifications'].label = "Tell buyers your qualification(optional)"
+            self.fields['availability_schedule'].label = "Time"
+            self.fields['service_guarantees'].label = "Give buyers gurantees(optional)"
+
+            self.fields['service_details'].widget.attrs['placeholder'] = "Enter brand name" 
+            self.fields['qualifications'].widget.attrs['placeholder'] = "Some buyers NOT all might want to see your qualification, so that they know who they are dealing with. Feel free to share here!" 
+            self.fields['availability_schedule'].widget.attrs['placeholder'] = "active times" 
+            self.fields['service_guarantees'].widget.attrs['placeholder'] = "Enter gurantees if any"
+# Labor-specific post form
+class LaborPostForm(forms.ModelForm, LocationFieldsMixin):
+    author_phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'}))
+
+    image1 = forms.ImageField(required=False)
+    image2 = forms.ImageField(required=False)
+    image3 = forms.ImageField(required=False)
+    image4 = forms.ImageField(required=False)
+    image5 = forms.ImageField(required=False)
+    image6 = forms.ImageField(required=False)
+
+    class Meta:
+        model = Post
+        fields = [
+            "product_name", "description",
+            "author_phone_number", "author_email",
+
+            # Post Location Fields
+            "post_continent", "post_continent_input",
+            "post_country", "post_country_input",
+            "post_state", "post_state_input",
+            "post_town", "post_town_input",
+
+            # Labor-specific
+            "labor_experience_years", "labor_availability",
+
+            # Images
+            "image1", "image2", "image3", "image4", "image5", "image6",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Labels
+        self.fields['product_name'].label = "What labor work do you do"
+        self.fields['description'].label = "Give a brief description to the buyer about what labor you do (Very Important)"
+        self.fields['author_email'].label = "Your email address"
+        self.fields['author_phone_number'].label = "Your phone number"
+
+        # Placeholders
+        self.fields['product_name'].widget.attrs['placeholder'] = "E.g., Guitar, Watches, iPhone 13, Dumbells, Pots, Desks, Bicycles, Hammer, Skrewdrivers"
+        self.fields['description'].widget.attrs['placeholder'] = "The descriptions you provide helps potential buyers and audience in need of such labor reach to you faster and easier"
+        self.fields['author_email'].widget.attrs['placeholder'] = "e.g., you@example.com"
+        self.fields['author_phone_number'].widget.attrs['placeholder'] = "e.g., +1234567890"
+
+        self.fields['image1'].label = "Front view"
+        self.fields['image2'].label = "Back view"
+        self.fields['image3'].label = "Right side view"
+        self.fields['image4'].label = "Left side view"
+        self.fields['image5'].label = "Top view"
+        self.fields['image6'].label = "Bottom view"
+
+        # You can do the same for location fields
+        self.fields['post_continent'].label = "Tell buyer what continent are you posting from?"
+        self.fields['post_continent_input'].label = ""
+        self.fields['post_continent_input'].widget.attrs['placeholder'] = "Or simply enter continent name here"
+        self.fields['post_country'].label = "Tell buyer what country you are posting from"
+        self.fields['post_country_input'].label = ""
+        self.fields['post_country_input'].widget.attrs['placeholder'] = "Or simply enter country name here"
+        self.fields['post_state'].label = "Tell buyer name of state or province you are posting from"
+        self.fields['post_state_input'].label = ""
+        self.fields['post_state_input'].widget.attrs['placeholder'] = "Or simply enter State name here"
+        self.fields['post_town'].label = "Tell buyer the name of the town you are posting from"
+        self.fields['post_town_input'].label = ""
+        self.fields['post_town_input'].widget.attrs['placeholder'] = "Or simply enter Town name here"
+
+        self.fields['labor_experience_years'].label = "Years of experience(optional)"
+        self.fields['labor_availability'].label = "Time"
+
+        self.fields['labor_experience_years'].widget.attrs['placeholder'] = "Most NOT all buyers in need of such labor would like to know how long have you been into this labor field. Feel free to share!" 
+        self.fields['labor_availability'].widget.attrs['placeholder'] = "Time"
+
+# Social Media Handle Form
+class SocialMediaHandleForm(forms.ModelForm):
+    class Meta:
+        model = SocialMediaHandle
+        fields = [
+            'linkedin', 'twitter', 'youtube', 'instagram',
+            'facebook', 'whatsapp', 'website'
+        ]
+        widgets = {
+            'linkedin': forms.URLInput(attrs={'placeholder': 'https://linkedin.com/in/username'}),
+            'twitter': forms.URLInput(attrs={'placeholder': 'https://x.com/username'}),
+            'youtube': forms.URLInput(attrs={'placeholder': 'https://youtube.com/channel/...'}),
+            'instagram': forms.URLInput(attrs={'placeholder': 'https://instagram.com/username'}),
+            'facebook': forms.URLInput(attrs={'placeholder': 'https://facebook.com/username'}),
+            'whatsapp': forms.URLInput(attrs={'placeholder': 'https://wa.me/1234567890'}),
+            'website': forms.URLInput(attrs={'placeholder': 'https://yourbusiness.com'}),
+        }
