@@ -6,7 +6,10 @@
 
 <form method="post" enctype="multipart/form-data" id="postForm">
   {% csrf_token %}
-
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
   <!-- Manually render valid form fields -->
     <div>{{ form.product_name.label_tag }} {{ form.product_name }}</div>
     <div>{{ form.description.label_tag }} {{ form.description }}</div>
@@ -17,16 +20,25 @@
     <div>{{ form.availability_schedule.label_tag }} {{ form.availability_schedule }}</div>
     <div>{{ form.service_guarantees.label_tag }} {{ form.service_guarantees }}</div>
 
-    <div>
-      {{ form.availability_scope.label_tag }}
-      {{ form.availability_scope }}
+    <!-- Location Fields (optional customization) -->
+        <!-- Location Fields with wrapper -->
+    <div class="field-wrapper">
+      {{ form.post_continent.label_tag }} {{ form.post_continent }}
+      {{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_country.label_tag }} {{ form.post_country }}
+      {{ form.post_country_input.label_tag }} {{ form.post_country_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_state.label_tag }} {{ form.post_state }}
+      {{ form.post_state_input.label_tag }} {{ form.post_state_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_town.label_tag }} {{ form.post_town }}
+      {{ form.post_town_input.label_tag }} {{ form.post_town_input }}
     </div>
 
-    <!-- Location Fields (optional customization) -->
-    <div>{{ form.post_continent.label_tag }} {{ form.post_continent }}</div>
-    <div>{{ form.post_country.label_tag }} {{ form.post_country }}</div>
-    <div>{{ form.post_state.label_tag }} {{ form.post_state }}</div>
-    <div>{{ form.post_town.label_tag }} {{ form.post_town }}</div>
 
   <!-- Image Inputs -->
   <label for="image1">Image 1:</label><input type="file" name="image1"><br>

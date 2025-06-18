@@ -6,7 +6,10 @@
 
 <form method="post" enctype="multipart/form-data" id="postForm">
   {% csrf_token %}
-
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
     <!-- 🔽 Manually render each field (excluding image1–image6) -->
     <div>{{ form.labor_type.label_tag }} {{ form.labor_type }}</div>
     <div>{{ form.labor_skills.label_tag }} {{ form.labor_skills }}</div>
@@ -15,20 +18,24 @@
     <div>{{ form.description.label_tag }} {{ form.description }}</div>
     <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
     <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
-  
-    <div>
-      {{ form.availability_scope.label_tag }}
-      {{ form.availability_scope }}
-    </div>
 
-    <div>{{ form.post_continent.label_tag }} {{ form.post_continent }}</div>
-    <div>{{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}</div>
-    <div>{{ form.post_country.label_tag }} {{ form.post_country }}</div>
-    <div>{{ form.post_country_input.label_tag }} {{ form.post_country_input }}</div>
-    <div>{{ form.post_state.label_tag }} {{ form.post_state }}</div>
-    <div>{{ form.post_state_input.label_tag }} {{ form.post_state_input }}</div>
-    <div>{{ form.post_town.label_tag }} {{ form.post_town }}</div>
-    <div>{{ form.post_town_input.label_tag }} {{ form.post_town_input }}</div>
+        <!-- Location Fields with wrapper -->
+    <div class="field-wrapper">
+      {{ form.post_continent.label_tag }} {{ form.post_continent }}
+      {{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_country.label_tag }} {{ form.post_country }}
+      {{ form.post_country_input.label_tag }} {{ form.post_country_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_state.label_tag }} {{ form.post_state }}
+      {{ form.post_state_input.label_tag }} {{ form.post_state_input }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.post_town.label_tag }} {{ form.post_town }}
+      {{ form.post_town_input.label_tag }} {{ form.post_town_input }}
+    </div>
 
   <!-- Image Inputs -->
   <label for="image1">Image 1:</label><input type="file" name="image1"><br>
