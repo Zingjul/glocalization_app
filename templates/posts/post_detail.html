@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div id="profile">
+    {% if user.profile.business_name %}
+        <p> {{ user.profile.business_name }}</p>
+    {% endif %}
+</div>
+
 <h2 class="text-2xl font-bold text-green-700 mb-4">
     {% if post.category.name == 'Product' %}
         {{ post.product_name }}
@@ -20,6 +26,10 @@
             <img src="{{ image.image.url }}" alt="Post Image" class="w-36 h-36 object-cover rounded shadow">
         {% endfor %}
     </div>
+{% else %}
+    <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
+        No images uploaded for this post.
+    </div>
 {% endif %}
 
 <!-- Post Info -->
@@ -32,6 +42,12 @@
 
 <p><strong>Contact:</strong> {{ post.author_phone_number }} | {{ post.author_email }}</p>
 
+<!-- Location -->
+<p><i class='fa fa-car'></i>{% if post.post_town %}{{ post.post_town.name }}{% elif post.post_town_input %}{{ post.post_town_input }}{% endif %}</p>
+<p><i class='fa fa-car'></i>{% if post.post_state %}{{ post.post_state.name }}{% elif post.post_state_input %}{{ post.post_state_input }}{% endif %}</p>
+<p><i class='fa fa-car'></i>{% if post.post_country %}{{ post.post_country.name }}{% elif post.post_country_input %}{{ post.post_country_input }}{% endif %}</p>
+<p><i class='fa fa-car'></i>{% if post.post_continent %}{{ post.post_continent.name }}{% elif post.post_continent_input %}{{ post.post_continent_input }}{% endif %}</p>
+<!-- Location -->
 
 <!-- Timestamps -->
 <p class="text-sm text-gray-500 mt-2">
@@ -41,25 +57,29 @@
 
 <!-- Edit/Delete Buttons -->
 {% if user == post.author %}
-    <div class="mt-4 flex gap-4">
-        <form method="POST" action="{% url 'post_delete' post.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                Delete Post
-            </button>
-        </form>
-    </div>
+<div>
+    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+        {% if post.category.name == "Product" %}
+            <a href="{% url 'post_edit_product' post.pk %}">Edit</a>
+        {% elif post.category.name == "Service" %}
+            <a href="{% url 'post_edit_service' post.pk %}">Edit</a>
+        {% elif post.category.name == "Labor" %}
+            <a href="{% url 'post_edit_labor' post.pk %}">Edit</a>
+        {% endif %}
+    </button>
+    <a href="{% url 'post_home' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+        Back to Posts
+    </a>
+    <form method="POST" action="{% url 'post_delete' post.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+            Delete Post
+        </button>
+    </form>
+{% else %}
+    <a href="{% url 'post_home' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+        Back to Posts
+    </a>
+</div>
 {% endif %}
-<button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-    {% if post.category.name == "Product" %}
-        <a href="{% url 'post_edit_product' post.pk %}">Edit</a>
-    {% elif post.category.name == "Service" %}
-        <a href="{% url 'post_edit_service' post.pk %}">Edit</a>
-    {% elif post.category.name == "Labor" %}
-        <a href="{% url 'post_edit_labor' post.pk %}">Edit</a>
-    {% endif %}
-</button>
-<a href="{% url 'post_home' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-    Back to Posts
-</a>
 {% endblock %}

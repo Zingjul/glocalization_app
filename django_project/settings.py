@@ -20,8 +20,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'django_filters',
     # 3rd-party
+    'rest_framework',
     'phonenumber_field',
     'django_countries',
     'widget_tweaks',
@@ -97,7 +98,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication redirects
-LOGIN_REDIRECT_URL = 'post_home'
+LOGIN_REDIRECT_URL = 'login_successful'
 LOGOUT_REDIRECT_URL = '/accounts/logged-out/'
 
 # Email backend for development

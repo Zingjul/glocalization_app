@@ -72,7 +72,9 @@ class PerformLogoutView(View):
 class LoggedOutView(TemplateView):
     template_name = 'registration/logged_out.html'
 
-
+class SuccessfulLoginView(TemplateView):
+    template_name = 'accounts/login_successful_message.html'
+    
 # 🔐 Password Reset Views with Custom Templates and Form
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm

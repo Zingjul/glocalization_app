@@ -58,7 +58,14 @@ class PersonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse_lazy("person_detail", kwargs={"pk": self.object.pk})
 
     def test_func(self):
-        return self.get_object().user == self.request.user
+        person = self.get_object()
+        # ✅ Prevent editing if approval status is "pending"
+        return person.user == self.request.user and person.approval_status != "pending"
+
+    def handle_no_permission(self):
+        """Redirect users if they attempt to edit while pending."""
+        messages.warning(self.request, "Your profile is under review and cannot be edited until approved.")
+        return redirect("person_detail", pk=self.get_object().pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,8 +77,8 @@ class PersonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             self.object.state_input,
             self.object.town_input,
         ])
-        return context
-# Delete account view (User can delete their own account)
+        context["approval_status"] = self.object.approval_status  # ✅ Pass approval status to template
+        return context# Delete account view (User can delete their own account)
 class PersonDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomUser
     template_name = "person/person_confirm_delete.html"

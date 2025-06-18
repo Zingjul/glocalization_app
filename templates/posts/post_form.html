@@ -29,6 +29,11 @@
     <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
     <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
 
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
+    
     <!-- Location Fields -->
     <div>{{ form.use_default_location.label_tag }} {{ form.use_default_location }}</div>
     <div>{{ form.post_continent.label_tag }} {{ form.post_continent }}</div>
@@ -41,12 +46,24 @@
     <div>{{ form.post_town_input.label_tag }} {{ form.post_town_input }}</div>
 
     <!-- Images -->
-    <div>{{ form.image1.label_tag }} {{ form.image1 }}</div>
-    <div>{{ form.image2.label_tag }} {{ form.image2 }}</div>
-    <div>{{ form.image3.label_tag }} {{ form.image3 }}</div>
-    <div>{{ form.image4.label_tag }} {{ form.image4 }}</div>
-    <div>{{ form.image5.label_tag }} {{ form.image5 }}</div>
-    <div>{{ form.image6.label_tag }} {{ form.image6 }}</div>
+    <!-- Images -->
+    <label for="image1">Image 1:</label>
+    <input type="file" name="image1"><br>
+
+    <label for="image2">Image 2:</label>
+    <input type="file" name="image2"><br>
+
+    <label for="image3">Image 3:</label>
+    <input type="file" name="image3"><br>
+
+    <label for="image4">Image 4:</label>
+    <input type="file" name="image4"><br>
+
+    <label for="image5">Image 5:</label>
+    <input type="file" name="image5"><br>
+
+    <label for="image6">Image 6:</label>
+    <input type="file" name="image6"><br>
 
     <!-- Product Fields -->
     <div x-show="category === 'Product'" x-cloak>

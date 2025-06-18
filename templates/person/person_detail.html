@@ -18,8 +18,15 @@
     <p>Town: {% if profile.town %} {{ profile.town.name }} {% endif %}</p>
 </div>
 
+<!-- 🔹 Display approval status -->
+<p><strong>Approval Status:</strong> {{ profile.approval_status }}</p>
+
 {% if user == profile.user %}
-    <a href="{% url 'person_edit' profile.pk %}" class="btn btn-warning">Edit Profile</a>
+    {% if profile.approval_status != "pending" %}
+        <a href="{% url 'person_edit' profile.pk %}" class="btn btn-warning">Edit Profile</a>
+    {% else %}
+        <button class="btn btn-secondary" disabled>Your profile is under review</button>
+    {% endif %}
     <a href="{% url 'person_delete' profile.pk %}" class="btn btn-danger">Delete Account</a>
 {% endif %}
 

@@ -10,9 +10,10 @@ User = get_user_model()
 
 # 🔽 Function for dynamic image path
 def post_image_upload_path(instance, filename):
-    return f"posts/images/post_{instance.post.id}/{filename}"
-
-
+    """Store images inside a folder named after the user ID."""
+    user_folder = f"user_{instance.post.author.id}"  # Unique folder for each user
+    return f"posts/images/{user_folder}/{filename}"
+    
 class Category(models.Model):
     name = models.CharField(max_length=77, unique=True)
 
@@ -26,6 +27,22 @@ class Post(models.Model):
         ('approved', 'Approved'),
     ]
 
+    # New field to define the scope of the post's availability
+    # This will be crucial for implementing the "global within scope" logic
+    AVAILABILITY_SCOPE_CHOICES = [
+        ('global', 'Global'),
+        ('continent', 'Continent-wide'),
+        ('country', 'Country-wide'),
+        ('state', 'State-wide'),
+        ('town', 'Town-specific'),
+    ]
+    availability_scope = models.CharField(
+        max_length=10,
+        choices=AVAILABILITY_SCOPE_CHOICES,
+        default='town', # Default to most specific
+        help_text="Defines the scope of availability for this post (e.g., specific town, entire state, etc.)."
+    )
+ 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False, editable=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
 

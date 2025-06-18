@@ -2,24 +2,88 @@
 {% load static %}
 
 {% block content %}
-<h2>Edit Product Post</h2>
+<h2 class="text-xl font-semibold mb-4">Edit Product Post</h2>
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" id="postForm">
   {% csrf_token %}
-  {{ form.as_p }}
 
-  <h3>Social Media Handles</h3>
+    <div>{{ form.product_name.label_tag }} {{ form.product_name }}</div>
+    <div>{{ form.description.label_tag }} {{ form.description }}</div>
+    <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
+    <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
+    <div>{{ form.color.label_tag }} {{ form.color }}</div>
+    <div>{{ form.brand.label_tag }} {{ form.brand }}</div>
+    <div>{{ form.condition.label_tag }} {{ form.condition }}</div>
+    <div>{{ form.model_version.label_tag }} {{ form.model_version }}</div>
+    <div>{{ form.technical_specifications.label_tag }} {{ form.technical_specifications }}</div>
+    <div>{{ form.warranty.label_tag }} {{ form.warranty }}</div>
+
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
+
+    <div>{{ form.post_continent.label_tag }} {{ form.post_continent }}</div>
+    <div>{{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}</div>
+    <div>{{ form.post_country.label_tag }} {{ form.post_country }}</div>
+    <div>{{ form.post_country_input.label_tag }} {{ form.post_country_input }}</div>
+    <div>{{ form.post_state.label_tag }} {{ form.post_state }}</div>
+    <div>{{ form.post_state_input.label_tag }} {{ form.post_state_input }}</div>
+    <div>{{ form.post_town.label_tag }} {{ form.post_town }}</div>
+    <div>{{ form.post_town_input.label_tag }} {{ form.post_town_input }}</div>
+
+  <!-- Image Inputs -->
+  <label for="image1">Image 1:</label><input type="file" name="image1"><br>
+  <label for="image2">Image 2:</label><input type="file" name="image2"><br>
+  <label for="image3">Image 3:</label><input type="file" name="image3"><br>
+  <label for="image4">Image 4:</label><input type="file" name="image4"><br>
+  <label for="image5">Image 5:</label><input type="file" name="image5"><br>
+  <label for="image6">Image 6:</label><input type="file" name="image6"><br>
+
+  <div id="imagePreviewContainer" class="flex flex-wrap gap-3 mt-4 mb-6"></div>
+
+  {% if post.images.all %}
+    <h3 class="mt-6 text-lg font-semibold">Current Images</h3>
+    <div class="flex flex-wrap gap-2 mb-6">
+      {% for img in post.images.all %}
+        <img src="{{ img.image.url }}" alt="Existing Image" class="w-24 h-24 object-cover rounded shadow">
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
   {{ social_form.as_p }}
 
-  <!-- <h3>Uploaded Images</h3> -->
-  {% for image in post.images.all %}
-    <div style="margin-bottom: 10px;">
-      <img src="{{ image.image.url }}" alt="Post image" style="max-height: 150px;">
-    </div>
-  {% empty %}
-    <!-- <p>No images uploaded yet.</p> -->
-  {% endfor %}
-
-  <button type="submit">Update Post</button>
+  <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+    Update
+  </button>
 </form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const previewContainer = document.getElementById("imagePreviewContainer");
+    for (let i = 1; i <= 6; i++) {
+      const input = document.querySelector(`input[name="image${i}"]`);
+      if (input) {
+        input.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          const previewId = `preview-image${i}`;
+          const existing = document.getElementById(previewId);
+          if (existing) existing.remove();
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = document.createElement("img");
+              img.id = previewId;
+              img.src = e.target.result;
+              img.className = "w-28 h-28 object-cover rounded shadow border";
+              previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    }
+  });
+</script>
 {% endblock %}

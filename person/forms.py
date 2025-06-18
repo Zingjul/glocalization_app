@@ -9,32 +9,32 @@ class PersonForm(forms.ModelForm):
         queryset=Continent.objects.all(),
         required=False,
         empty_label=_("Select Continent"),
-        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
     country = forms.ModelChoiceField(
         queryset=Country.objects.all(),
         required=False,
         empty_label=_("Select Country"),
-        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
     state = forms.ModelChoiceField(
         queryset=State.objects.all(),
         required=False,
         empty_label=_("Select State"),
-        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
     town = forms.ModelChoiceField(
         queryset=Town.objects.all(),
         required=False,
         empty_label=_("Select Town"),
-        widget=forms.Select(attrs={'class': 'form-select form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     # NEW text input fields for user to type location if not listed
     continent_input = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
             # 'placeholder': _('Type your continent if not listed'),
         }),
         label=_("Or enter your continent")
@@ -42,7 +42,7 @@ class PersonForm(forms.ModelForm):
     country_input = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
             # 'placeholder': _('Type your country if not listed'),
         }),
         label=_("Or enter your country")
@@ -50,7 +50,7 @@ class PersonForm(forms.ModelForm):
     state_input = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
             # 'placeholder': _('Type your state if not listed'),
         }),
         label=_("Or enter your state")
@@ -58,7 +58,7 @@ class PersonForm(forms.ModelForm):
     town_input = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
+            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
             # 'placeholder': _('Type your town if not listed'),
         }),
         label=_("Or enter your town")

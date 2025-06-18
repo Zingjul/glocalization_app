@@ -1,7 +1,7 @@
 # accounts/urls.py
 
 from django.urls import path
-from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView 
+from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView, SuccessfulLoginView
 
 urlpatterns = [
     # Auth routes
@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/confirm/', ConfirmLogoutView.as_view(), name='confirm_logout'),
     path('logout/', PerformLogoutView.as_view(), name='logout'),
     path('logged-out/', LoggedOutView.as_view(), name='logged_out'),
+    path('login_true/', SuccessfulLoginView.as_view(), name='login_successful'),
 
     # Password reset flow
     path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),

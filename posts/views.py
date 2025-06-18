@@ -8,7 +8,10 @@ from django.views.decorators.http import require_GET
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from .models import Post, Category, SocialMediaHandle, PostImage
-from .forms import PostForm, ProductPostForm, ServicePostForm, LaborPostForm, SocialMediaHandleForm
+from .forms import ProductPostForm, ServicePostForm, LaborPostForm, SocialMediaHandleForm
+from .forms import SocialMediaHandleForm
+import logging
+logger = logging.getLogger(__name__)
 
 class CategoryListView(ListView):
     model = Category
@@ -35,42 +38,28 @@ class PostListView(LoginRequiredMixin, ListView):
         if continent or country or state or town:
             # Use search query if present
             filters = Q()
-            if continent:
-                filters &= Q(post_continent__name=continent)
-            if country:
-                filters &= Q(post_country__name=country)
-            if state:
-                filters &= Q(post_state__name=state)
             if town:
-                filters &= Q(post_town__name=town)
+                filters |= Q(post_town__name=town, availability_scope='town')
+            if state:
+                filters |= Q(post_state__name=state, availability_scope='state')
+            if country:
+                filters |= Q(post_country__name=country, availability_scope='country')
+            if continent:
+                filters |= Q(post_continent__name=continent, availability_scope='continent')
             return queryset.filter(filters).order_by('-created_at')
 
         # Otherwise, filter by user's profile location
-        if profile and profile.continent and profile.country and profile.state and profile.town:
-            return queryset.filter(
-                Q(post_continent=profile.continent, post_country=profile.country, post_state=profile.state, post_town=profile.town) |
-                Q(post_continent=profile.continent, post_country=profile.country, post_state=profile.state, post_town__isnull=True) |
-                Q(post_continent=profile.continent, post_country=profile.country, post_state__isnull=True, post_town__isnull=True) |
-                Q(post_continent=profile.continent, post_country__isnull=True, post_state__isnull=True, post_town__isnull=True)
-            ).order_by('-created_at')
-
-        elif profile and profile.continent and profile.country and profile.state:
-            return queryset.filter(
-                Q(post_continent=profile.continent, post_country=profile.country, post_state=profile.state) |
-                Q(post_continent=profile.continent, post_country=profile.country, post_state__isnull=True) |
-                Q(post_continent=profile.continent, post_country__isnull=True, post_state__isnull=True)
-            ).order_by('-created_at')
-
-        elif profile and profile.continent and profile.country:
-            return queryset.filter(
-                Q(post_continent=profile.continent, post_country=profile.country) |
-                Q(post_continent=profile.continent, post_country__isnull=True)
-            ).order_by('-created_at')
-
-        elif profile and profile.continent:
-            return queryset.filter(
-                Q(post_continent=profile.continent)
-            ).order_by('-created_at')
+        if profile:
+            filters = Q()
+            if profile.town:
+                filters |= Q(post_town=profile.town, availability_scope='town')
+            if profile.state:
+                filters |= Q(post_state=profile.state, availability_scope='state')
+            if profile.country:
+                filters |= Q(post_country=profile.country, availability_scope='country')
+            if profile.continent:
+                filters |= Q(post_continent=profile.continent, availability_scope='continent')
+            return queryset.filter(filters).order_by('-created_at')
 
         # Fallback: show all approved posts if user has no location info
         return queryset.order_by('-created_at')
@@ -93,7 +82,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             return ServicePostForm
         elif category == "labor":
             return LaborPostForm
-        return PostForm
 
     def get_template_names(self):
         category = (self.request.GET.get("category") or self.request.POST.get("category") or "").lower()
@@ -121,11 +109,26 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
         # Set author and approval fields
         form.instance.author = self.request.user
-        form.instance.is_approved = False
+        form.instance.status = "pending"
 
         # Attach category to the post
         category_param = (self.request.GET.get("category") or self.request.POST.get("category") or "").strip().lower()
         form.instance.category = get_object_or_404(Category, name__iexact=category_param)
+
+        # ✅ Explicitly set `post_state` based on input values
+        post_state_id = self.request.POST.get("post_state")
+        if post_state_id:
+            form.instance.post_state = get_object_or_404(State, id=post_state_id)
+
+        # Set availability_scope based on user selection
+        if form.instance.post_town:
+            form.instance.availability_scope = "town"
+        elif form.instance.post_state:
+            form.instance.availability_scope = "state"
+        elif form.instance.post_country:
+            form.instance.availability_scope = "country"
+        elif form.instance.post_continent:
+            form.instance.availability_scope = "continent"
 
         # Save the main Post instance
         response = super().form_valid(form)
@@ -136,15 +139,18 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         social_handle.save()
 
         # Save uploaded images
+        self.object = form.save()
+
+    # ✅ Now, save the images after the post exists
         for i in range(1, 7):
             image = self.request.FILES.get(f"image{i}")
             if image:
                 PostImage.objects.create(post=self.object, image=image)
 
+        return super().form_valid(form)
         # Success message
         messages.success(self.request, "Post submitted successfully and is under review!")
         return response
-
 
 class PostUpdateView(LoginRequiredMixin, UpdateView):
     model = Post
@@ -157,7 +163,6 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
             return ServicePostForm
         elif category == "labor":
             return LaborPostForm
-        return PostForm
 
     def get_template_names(self):
         category = self.object.category.name.lower()
@@ -210,17 +215,36 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         social_form = SocialMediaHandleForm(self.request.POST)
-        if social_form.is_valid():
-            form.instance.user = self.request.user
-            form.instance.is_approved = False
-            form.instance.category = get_object_or_404(Category, name__iexact="Product")
-            response = super().form_valid(form)
-            SocialMediaHandle.objects.create(post=self.object, **social_form.cleaned_data)
-            messages.success(self.request, "Product post submitted successfully and under review!")
-            return response
-        return self.form_invalid(form)
+        if not social_form.is_valid():
+            return self.form_invalid(form)
 
+        # ✅ Ensure the author is assigned
+        form.instance.author = self.request.user  
+        form.instance.status = "pending"
 
+        # ✅ Set availability_scope dynamically based on user selection
+        if form.instance.post_town:
+            form.instance.availability_scope = "town"
+        elif form.instance.post_state:
+            form.instance.availability_scope = "state"
+        elif form.instance.post_country:
+            form.instance.availability_scope = "country"
+        elif form.instance.post_continent:
+            form.instance.availability_scope = "continent"
+
+        # Attach category to the post
+        form.instance.category = get_object_or_404(Category, name__iexact="Product")
+
+        # Save the main Post instance
+        response = super().form_valid(form)
+
+        # Save the social media handle
+        social_handle = social_form.save(commit=False)
+        social_handle.post = self.object
+        social_handle.save()
+
+        messages.success(self.request, "Product post submitted successfully and is under review!")
+        return response
 class ServicePostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = ServicePostForm
@@ -234,17 +258,36 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         social_form = SocialMediaHandleForm(self.request.POST)
-        if social_form.is_valid():
-            form.instance.user = self.request.user
-            form.instance.is_approved = False
-            form.instance.category = get_object_or_404(Category, name__iexact="Service")
-            response = super().form_valid(form)
-            SocialMediaHandle.objects.create(post=self.object, **social_form.cleaned_data)
-            messages.success(self.request, "Service post submitted successfully and under review!")
-            return response
-        return self.form_invalid(form)
+        if not social_form.is_valid():
+            return self.form_invalid(form)
 
+        # ✅ Ensure the author is assigned
+        form.instance.author = self.request.user  
+        form.instance.status = "pending"
 
+        # ✅ Set availability_scope dynamically based on user selection
+        if form.instance.post_town:
+            form.instance.availability_scope = "town"
+        elif form.instance.post_state:
+            form.instance.availability_scope = "state"
+        elif form.instance.post_country:
+            form.instance.availability_scope = "country"
+        elif form.instance.post_continent:
+            form.instance.availability_scope = "continent"
+
+        # Attach category to the post
+        form.instance.category = get_object_or_404(Category, name__iexact="Service")
+
+        # Save the main Post instance
+        response = super().form_valid(form)
+
+        # Save the social media handle
+        social_handle = social_form.save(commit=False)
+        social_handle.post = self.object
+        social_handle.save()
+
+        messages.success(self.request, "Service post submitted successfully and is under review!")
+        return response
 class LaborPostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = LaborPostForm
@@ -258,15 +301,36 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         social_form = SocialMediaHandleForm(self.request.POST)
-        if social_form.is_valid():
-            form.instance.user = self.request.user
-            form.instance.is_approved = False
-            form.instance.category = get_object_or_404(Category, name__iexact="Labor")
-            response = super().form_valid(form)
-            SocialMediaHandle.objects.create(post=self.object, **social_form.cleaned_data)
-            messages.success(self.request, "Labor post submitted successfully and under review!")
-            return response
-        return self.form_invalid(form)
+        if not social_form.is_valid():
+            return self.form_invalid(form)
+
+        # ✅ Ensure the author is assigned
+        form.instance.author = self.request.user  
+        form.instance.status = "pending"
+
+        # ✅ Set availability_scope dynamically based on user selection
+        if form.instance.post_town:
+            form.instance.availability_scope = "town"
+        elif form.instance.post_state:
+            form.instance.availability_scope = "state"
+        elif form.instance.post_country:
+            form.instance.availability_scope = "country"
+        elif form.instance.post_continent:
+            form.instance.availability_scope = "continent"
+
+        # Attach category to the post
+        form.instance.category = get_object_or_404(Category, name__iexact="Labor")
+
+        # Save the main Post instance
+        response = super().form_valid(form)
+
+        # Save the social media handle
+        social_handle = social_form.save(commit=False)
+        social_handle.post = self.object
+        social_handle.save()
+
+        messages.success(self.request, "Labor post submitted successfully and is under review!")
+        return response
 
 class PostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
@@ -274,26 +338,115 @@ class PostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user == self.get_object().author
-
     def form_valid(self, form):
-        form.instance.author = self.request.user
+        # Save the updated post first
+        self.object = form.save()
+
+        # 🗑️ Clear out old images
+        self.object.images.all().delete()
+
+        # ✅ Then add any newly uploaded images
+        for i in range(1, 7):
+            image = self.request.FILES.get(f'image{i}')
+            if image:
+                PostImage.objects.create(post=self.object, image=image)
+
         return super().form_valid(form)
 
 
 class PostEditProductView(PostEditBaseView):
+    model = Post
     form_class = ProductPostForm
     template_name = 'posts/post_edit_product.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        else:
+            context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        # ✅ Save social media form
+        social_form = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        if social_form.is_valid():
+            social_form.save()
+
+        # 🔁 Replace images only if new ones were uploaded
+        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
+        if any(new_images):
+            self.object.images.all().delete()
+            for image in new_images:
+                if image:
+                    PostImage.objects.create(post=self.object, image=image)
+
+        return super().form_valid(form)
 
 class PostEditServiceView(PostEditBaseView):
+    model = Post
     form_class = ServicePostForm
     template_name = 'posts/post_edit_service.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        else:
+            context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        # ✅ Save social media form
+        social_form = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        if social_form.is_valid():
+            social_form.save()
+
+        # 🔁 Replace images only if new ones were uploaded
+        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
+        if any(new_images):
+            self.object.images.all().delete()
+            for image in new_images:
+                if image:
+                    PostImage.objects.create(post=self.object, image=image)
+
+        return super().form_valid(form)
+
 
 class PostEditLaborView(PostEditBaseView):
+    model = Post
     form_class = LaborPostForm
     template_name = 'posts/post_edit_labor.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        else:
+            context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        # ✅ Save social media form
+        social_form = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
+        if social_form.is_valid():
+            social_form.save()
+
+        # 🔁 Replace images only if new ones were uploaded
+        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
+        if any(new_images):
+            self.object.images.all().delete()
+            for image in new_images:
+                if image:
+                    PostImage.objects.create(post=self.object, image=image)
+
+        return super().form_valid(form)
 
 class PendingPostsByUserView(LoginRequiredMixin, ListView):
     model = Post
@@ -303,6 +456,49 @@ class PendingPostsByUserView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Post.objects.filter(author=self.request.user, status='pending').order_by('-created_at')
         
+def get_posts_visible_to_user(user):
+    location = user.profile
+    logger.info(f"User Town: {location.town} ({location.town.name})")
+
+    return Post.objects.filter(
+        Q(availability_scope='global') |
+
+        (
+            Q(availability_scope='continent') &
+            (
+                Q(post_continent=location.continent) |
+                Q(post_continent_input__iexact=location.continent.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='country') &
+            (
+                Q(post_country=location.country) |
+                Q(post_country_input__iexact=location.country.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='state') &
+            (
+                Q(post_state=location.state) |
+                Q(post_state_input__iexact=location.state.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='town') &
+            (
+                Q(post_town=location.town) |
+                Q(post_town_input__iexact=location.town.name)
+            )
+        )
+    ).distinct()
+def home(request):
+    visible_posts = get_posts_visible_to_user(request.user)
+    return render(request, 'posts/post_list.html', {'posts': visible_posts})
+    
 @require_GET
 def location_autocomplete(request):
     from custom_search.models import Continent, Country, State, Town
