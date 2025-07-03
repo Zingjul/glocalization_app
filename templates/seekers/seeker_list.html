@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2 class="mb-4">Seekers — What People Are Looking For</h2>
+
+    <form method="GET" action="{% url 'seekers:seeker_list' %}" class="mb-3">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+
+    {% if search_path %}
+      <p><strong>Searching in:</strong> {{ search_path|join:", " }}</p>
+    {% endif %}
+
+    {% if posts %}
+      <ul class="list-group">
+        {% for post in posts %}
+          <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+              <a href="{{ post.get_absolute_url }}" class="fw-bold">{{ post.title }}</a><br>
+              <small>{{ post.get_request_type_display }} / {{ post.category.name }}</small>
+              {% if post.is_fulfilled %}
+                <span class="badge bg-success ms-2">Fulfilled</span>
+              {% endif %}
+            </div>
+
+            {% if user.is_authenticated and user != post.author %}
+              <form method="post" action="{% url 'seekers:respond_to_seeker' post.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm">I Can Help</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-warning mt-4">
+        <p>No seeker posts found matching your search.</p>
+      </div>
+    {% endif %}
+  </div>
+{% endblock content %}

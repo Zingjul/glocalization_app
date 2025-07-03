@@ -11,7 +11,13 @@ from .models import Post, Category, SocialMediaHandle, PostImage
 from .forms import ProductPostForm, ServicePostForm, LaborPostForm, SocialMediaHandleForm
 from .forms import SocialMediaHandleForm
 import logging
+from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
+from comment.models import Comment
+from comment.forms import CommentForm
+
 logger = logging.getLogger(__name__)
+
 
 class CategoryListView(ListView):
     model = Category
@@ -69,6 +75,29 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     template_name = "posts/post_detail.html"
     context_object_name = "post"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = self.object
+
+        content_type = ContentType.objects.get_for_model(post)
+
+        # Fetch top-level comments and prefetch their nested replies and reply authors
+        comments = Comment.objects.filter(
+            content_type=content_type,
+            object_id=post.id,
+            parent__isnull=True
+        ).select_related("author", "parent").prefetch_related(
+            "replies",            # Direct replies
+            "replies__author",    # Authors of those replies
+            "replies__parent"     # In case of nested replies
+        ).order_by("-created_at")
+
+        context.update({
+            "comments": comments,
+            "comment_form": CommentForm(),
+        })
+
+        return context
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     template_name = "posts/post_form_generic.html"
@@ -455,7 +484,8 @@ class PendingPostsByUserView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Post.objects.filter(author=self.request.user, status='pending').order_by('-created_at')
-        
+
+
 def get_posts_visible_to_user(user):
     location = user.profile
     logger.info(f"User Town: {location.town} ({location.town.name})")

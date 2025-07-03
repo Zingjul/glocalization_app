@@ -9,6 +9,6 @@
 <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Delete</button>
-    <a href="{% url 'comment_list' comment.post.id %}" class="btn btn-secondary">Cancel</a>
+    <a href="{{ object.content_object.get_absolute_url }}" class="btn btn-secondary">Cancel</a>
 </form>
-{% endblock %}
+{% endblock content %}

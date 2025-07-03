@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2 class="mb-3">{{ post.title }}</h2>
+
+    <ul class="list-unstyled">
+      <li><strong>Posted by:</strong> {{ post.author.username }}</li>
+      <li><strong>Category:</strong> {{ post.category }}</li>
+      <li><strong>Type:</strong> {{ post.get_request_type_display }}</li>
+      <li>
+        <strong>Status:</strong> {{ post.status|title }}
+        {% if post.is_fulfilled %}
+          <span class="badge bg-success ms-2">Fulfilled</span>
+        {% endif %}
+      </li>
+    </ul>
+
+    <hr>
+
+    {% if post.description %}
+      <p>{{ post.description }}</p>
+    {% endif %}
+
+    <ul class="list-unstyled">
+      {% if post.budget %}
+        <li><strong>Budget:</strong> {{ post.budget }}</li>
+      {% endif %}
+      {% if post.preferred_fulfillment_time %}
+        <li><strong>When needed:</strong> {{ post.preferred_fulfillment_time }}</li>
+      {% endif %}
+      <li>
+        <strong>Contact:</strong> {{ post.author_phone_number }}
+        {% if post.author_email %}, {{ post.author_email }}{% endif %}
+      </li>
+    </ul>
+
+    {% if post.images.all %}
+      <h4 class="mt-4">Attached Images</h4>
+      <div class="d-flex flex-wrap">
+        {% for image in post.images.all %}
+          <img src="{{ image.image.url }}" alt="Reference" class="img-thumbnail me-2 mb-2" style="max-width: 200px;">
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <hr>
+
+    {% if user.is_authenticated and user != post.author %}
+      <form method="post" action="{% url 'seekers:respond_to_seeker' post.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">📬 I Can Help</button>
+      </form>
+    {% endif %}
+
+    <a href="{% url 'seekers:seeker_list' %}" class="btn btn-outline-primary mt-3">← Back to All Posts</a>
+  </div>
+{% endblock content %}

@@ -6,16 +6,21 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text', 'parent']
         widgets = {
-            'parent': forms.HiddenInput(),  # Hides the parent field for nested comments
             'text': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Write your comment here...',
                 'rows': 3,
-            }),  # Adds Bootstrap styling for better UI
+            }),
+            'parent': forms.HiddenInput(),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Optional: Add placeholder flexibility (if ever reused for replies)
+        self.fields['text'].widget.attrs.setdefault('placeholder', 'Write your comment...')
+
     def clean_text(self):
-        text = self.cleaned_data.get("text")
+        text = self.cleaned_data.get("text", "")
         if len(text.strip()) < 3:
             raise forms.ValidationError("Your comment must be at least 3 characters long.")
         return text

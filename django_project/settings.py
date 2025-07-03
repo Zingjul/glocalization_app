@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'django_filters',
     # 3rd-party
     'rest_framework',
@@ -34,6 +35,8 @@ INSTALLED_APPS = [
     'person',
     'posts',
     'search',
+    'postfinder',
+    'seekers',
 ]
 
 MIDDLEWARE = [

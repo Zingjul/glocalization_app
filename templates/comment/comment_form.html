@@ -7,6 +7,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-success">Submit</button>
-    <a href="{% url 'comment_list' post.id %}" class="btn btn-secondary">Cancel</a>
+    <a href="{% url 'comment_list' app_label=object.content_type.app_label model_name=object.content_type.model object_id=object.object_id %}" class="btn btn-secondary">Cancel</a>
+
 </form>
-{% endblock %}
+{% endblock content %}

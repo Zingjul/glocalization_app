@@ -1,5 +1,6 @@
 {% load static %} 
 {% load widget_tweaks %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +13,7 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
@@ -46,6 +47,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{% static 'js/accounts/logout.js' %}"></script>
     <script src="{% static 'js/post_form.js' %}"></script>
+    <script src="{% static 'js/search.js' %}"></script>
     <!-- Additional head content -->
     {% block extra_head %}
     {% endblock extra_head %}
@@ -105,7 +107,12 @@
     
     <!-- Additional scripts -->
     {% block extra_scripts %}{% endblock extra_scripts %}
-</body>
+<!-- just before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pJvT3OZlMuAHUnueVJHpxD6Ew+yRyV9p3NYHeNd2GvwduO4q3Z9Q6TpbXSk3F+iH"
+        crossorigin="anonymous"></script>
+
+  </body>
 <!-- Add this to your logout button in the template -->
 <!-- <button id="logoutBtn">Logout</button> -->
 

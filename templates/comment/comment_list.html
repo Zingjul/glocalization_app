@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Comments{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4">💬 Comments on <em>{{ target_object }}</em></h3>
+
+  {% if comments %}
+    <ul class="list-group mb-4">
+      {% for comment in comments %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <strong>{{ comment.author.username }}</strong>
+            <small class="text-muted">{{ comment.created_at|naturaltime }}</small>
+          </div>
+          <p class="mb-1">{{ comment.text }}</p>
+
+          {% if comment.author == user %}
+            <div class="mt-2">
+              <a href="{% url 'edit_comment' comment.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{% url 'delete_comment' comment.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-secondary">No comments yet. Be the first to speak up!</div>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <div class="card mt-5">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Add a Comment</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url 'create_comment' app_label model_name object_id %}">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <p class="mt-4">
+      <a href="{% url 'login' %}" class="btn btn-outline-primary">Log in</a> to leave a comment.
+    </p>
+  {% endif %}
+</div>
+{% endblock content %}

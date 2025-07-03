@@ -28,6 +28,8 @@ urlpatterns = [
     path('comments/', include("comment.urls")),
     path('search/', include("search.urls")),
     path('custom_search/', include('custom_search.urls')),
+    path('postfinder/', include("postfinder.urls")),
+    path('seekers/', include('seekers.urls', namespace="seekers")),
 ]
 
 if settings.DEBUG:

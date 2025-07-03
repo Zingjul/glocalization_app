@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Respond to: {{ seeker_post.title }}</h2>
+  <p>{{ seeker_post.description }}</p>
+
+  <p><em>This section is under construction — soon you'll be able to submit a formal offer or message.</em></p>
+
+  <p><a href="{{ seeker_post.get_absolute_url }}">← Back to Post</a></p>
+{% endblock content %}

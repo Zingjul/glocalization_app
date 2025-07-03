@@ -1,0 +1,55 @@
+<form method="post" enctype="multipart/form-data" id="seekerForm">
+  {% csrf_token %}
+  <div>
+    {{ form.availability_scope.label_tag }} {{ form.availability_scope }}
+  </div>
+
+  <div>{{ form.title.label_tag }} {{ form.title }}</div>
+  <div>{{ form.description.label_tag }} {{ form.description }}</div>
+  <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
+  <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
+
+  <div>{{ form.budget.label_tag }} {{ form.budget }}</div>
+  <div>{{ form.preferred_fulfillment_time.label_tag }} {{ form.preferred_fulfillment_time }}</div>
+
+  <!-- Location fields -->
+  <div class="field-wrapper">
+    {{ form.post_continent.label_tag }} {{ form.post_continent }}
+    {{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}
+  </div>
+  <div class="field-wrapper">
+    {{ form.post_country.label_tag }} {{ form.post_country }}
+    {{ form.post_country_input.label_tag }} {{ form.post_country_input }}
+  </div>
+  <div class="field-wrapper">
+    {{ form.post_state.label_tag }} {{ form.post_state }}
+    {{ form.post_state_input.label_tag }} {{ form.post_state_input }}
+  </div>
+  <div class="field-wrapper">
+    {{ form.post_town.label_tag }} {{ form.post_town }}
+    {{ form.post_town_input.label_tag }} {{ form.post_town_input }}
+  </div>
+
+  <!-- Image upload -->
+  <h4>Attach up to 6 images</h4>
+
+  <label for="image1">Image 1:</label><input type="file" name="image1"><br>
+  <label for="image2">Image 2:</label><input type="file" name="image2"><br>
+  <label for="image3">Image 3:</label><input type="file" name="image3"><br>
+  <label for="image4">Image 4:</label><input type="file" name="image4"><br>
+  <label for="image5">Image 5:</label><input type="file" name="image5"><br>
+  <label for="image6">Image 6:</label><input type="file" name="image6"><br>
+
+  <!-- Optional: Social Form -->
+  {% if social_form %}
+    <h4>Social Media Handles</h4>
+    {{ social_form.as_p }}
+  {% endif %}
+
+  <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 mt-4 rounded">
+    Submit Request
+  </button>
+</form>
+
+{% load static %}
+<script src="{% static 'js/post_form.js' %}"></script>

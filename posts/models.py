@@ -148,3 +148,6 @@ class SocialMediaHandle(models.Model):
 
     def __str__(self):
         return f"Handles for {self.post}"
+
+def get_absolute_url(self):
+    return reverse("posts:post_detail", kwargs={"pk": self.pk})
