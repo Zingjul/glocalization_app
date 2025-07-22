@@ -15,23 +15,38 @@ class CustomSearchForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     country = forms.ModelChoiceField(
-        queryset=Country.objects.all(),
+        queryset=Country.objects.none(),
         required=False,
         empty_label="Select Country",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     state = forms.ModelChoiceField(
-        queryset=State.objects.all(),
+        queryset=State.objects.none(),
         required=False,
         empty_label="Select State",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     town = forms.ModelChoiceField(
-        queryset=Town.objects.all(),
+        queryset=Town.objects.none(),
         required=False,
         empty_label="Select Town",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if 'continent' in self.data:
+            continent_id = self.data.get('continent')
+            self.fields['country'].queryset = Country.objects.filter(continent_id=continent_id)
+
+        if 'country' in self.data:
+            country_id = self.data.get('country')
+            self.fields['state'].queryset = State.objects.filter(country_id=country_id)
+
+        if 'state' in self.data:
+            state_id = self.data.get('state')
+            self.fields['town'].queryset = Town.objects.filter(state_id=state_id)
 
     def clean_query(self):
         query = self.cleaned_data.get("query")

@@ -53,6 +53,8 @@ class Post(models.Model):
     author_phone_number = PhoneNumberField()
     author_email = models.EmailField(max_length=254, blank=True)
     date = models.DateTimeField(auto_now_add=True)
+    
+    business_name = models.CharField(max_length=255, blank=True, null=True)
 
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

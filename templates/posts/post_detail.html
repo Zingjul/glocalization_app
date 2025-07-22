@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
-
+{% load static %}
 {% block content %}
 <!-- 🔧 Edit/Delete Post -->
 {% if user == post.author %}
@@ -101,10 +101,5 @@
 </a>
 
 <!-- 🚀 Reply Form Toggle Script -->
-<script>
-  function toggleReplyForm(commentId) {
-    const el = document.getElementById(`reply-form-${commentId}`);
-    if (el) el.classList.toggle('hidden');
-  }
-</script>
+<script src="{% static 'js/comment_toggler.js' %}"></script>
 {% endblock %}

@@ -10,6 +10,8 @@ from person.models import Person
 from posts.models import Post
 from .forms import CustomSearchForm
 
+from django.http import JsonResponse
+
 class SearchView(ListView):
     template_name = "custom_search/search_results.html"
     context_object_name = "results"
@@ -88,3 +90,18 @@ def approve_location_single(request, person_id, location_type):
         messages.success(request, f"{location_type.capitalize()} '{value}' approved and added.")
 
     return HttpResponseRedirect(reverse('approve_locations'))
+
+def countries_by_continent(request):
+    continent_id = request.GET.get("continent_id")
+    countries = Country.objects.filter(continent_id=continent_id).values("id", "name", "code")
+    return JsonResponse(list(countries), safe=False)
+
+def states_by_country(request):
+    country_id = request.GET.get("country_id")
+    states = State.objects.filter(country_id=country_id).values("id", "name", "code")
+    return JsonResponse(list(states), safe=False)
+
+def towns_by_state(request):
+    state_id = request.GET.get("state_id")
+    towns = Town.objects.filter(state_id=state_id).values("id", "name")
+    return JsonResponse(list(towns), safe=False)

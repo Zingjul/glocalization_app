@@ -1,58 +1,55 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h2 class="mb-3">{{ post.title }}</h2>
+<div class="container mt-4">
+  <h2 class="mb-3">{{ post.title }}</h2>
 
-    <ul class="list-unstyled">
-      <li><strong>Posted by:</strong> {{ post.author.username }}</li>
-      <li><strong>Category:</strong> {{ post.category }}</li>
-      <li><strong>Type:</strong> {{ post.get_request_type_display }}</li>
-      <li>
-        <strong>Status:</strong> {{ post.status|title }}
-        {% if post.is_fulfilled %}
-          <span class="badge bg-success ms-2">Fulfilled</span>
-        {% endif %}
-      </li>
-    </ul>
-
-    <hr>
-
-    {% if post.description %}
-      <p>{{ post.description }}</p>
-    {% endif %}
-
-    <ul class="list-unstyled">
-      {% if post.budget %}
-        <li><strong>Budget:</strong> {{ post.budget }}</li>
-      {% endif %}
-      {% if post.preferred_fulfillment_time %}
-        <li><strong>When needed:</strong> {{ post.preferred_fulfillment_time }}</li>
-      {% endif %}
-      <li>
-        <strong>Contact:</strong> {{ post.author_phone_number }}
-        {% if post.author_email %}, {{ post.author_email }}{% endif %}
-      </li>
-    </ul>
-
-    {% if post.images.all %}
-      <h4 class="mt-4">Attached Images</h4>
-      <div class="d-flex flex-wrap">
-        {% for image in post.images.all %}
-          <img src="{{ image.image.url }}" alt="Reference" class="img-thumbnail me-2 mb-2" style="max-width: 200px;">
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <hr>
-
-    {% if user.is_authenticated and user != post.author %}
-      <form method="post" action="{% url 'seekers:respond_to_seeker' post.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success">📬 I Can Help</button>
-      </form>
-    {% endif %}
-
-    <a href="{% url 'seekers:seeker_list' %}" class="btn btn-outline-primary mt-3">← Back to All Posts</a>
+  <div class="mb-2 text-muted">
+    Created: {{ post.created_at|date:"M d, Y" }} |
+    Scope: {{ post.availability_scope|title }}
   </div>
-{% endblock content %}
+
+  <p>{{ post.description }}</p>
+
+  {# --- Optional: Display images if any --- #}
+  {% if post.images.all %}
+    <div class="row mt-3 mb-4">
+      {% for image in post.images.all %}
+        <div class="col-md-4 mb-3">
+          <img src="{{ image.image.url }}" alt="Post Image" class="img-fluid rounded border">
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <hr>
+
+  {# --- Comments Section --- #}
+  <h5 class="mt-4">Comments</h5>
+  {% if comments %}
+    <ul class="list-group mb-4">
+      {% for comment in comments %}
+        <li class="list-group-item">
+          <strong>{{ comment.user.username }}</strong>
+          <span class="text-muted small">on {{ comment.created_at|date:"M d, Y H:i" }}</span>
+          <p>{{ comment.text }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No comments yet. Be the first to comment!</p>
+  {% endif %}
+
+  {# --- Comment Form --- #}
+  {% if request.user.is_authenticated %}
+    <form method="post" class="border p-3 rounded bg-light">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+  {% else %}
+    <p class="mt-3">You must <a href="{% url 'login' %}">log in</a> to leave a comment.</p>
+  {% endif %}
+</div>
+{% endblock %}

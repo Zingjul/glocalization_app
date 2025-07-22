@@ -34,7 +34,7 @@ def filter_posts(request):
             posts = posts.filter(
                 Q(product_name__icontains=keyword) |
                 Q(description__icontains=keyword) |
-                Q(service_details__icontains=keyword)
+                Q(business_name__icontains=keyword)
             )
         else:
             posts = Post.objects.none()
@@ -96,7 +96,7 @@ def filter_posts(request):
         posts = posts.filter(
             Q(product_name__icontains=keyword) |
             Q(description__icontains=keyword) |
-            Q(service_details__icontains=keyword)
+            Q(business_name__icontains=keyword)
         )
 
     # 📍 Construct search path for user feedback

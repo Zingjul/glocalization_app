@@ -11,49 +11,18 @@
       {{ form.availability_scope }}
     </div>
   <!-- Manually render valid form fields -->
-    <div>{{ form.product_name.label_tag }} {{ form.product_name }}</div>
-    <div>{{ form.description.label_tag }} {{ form.description }}</div>
-    <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>
-    <div>{{ form.author_email.label_tag }} {{ form.author_email }}</div>
+    {% include "posts/includes/top_fields.html" %}
     <div>{{ form.service_details.label_tag }} {{ form.service_details }}</div>
     <div>{{ form.qualifications.label_tag }} {{ form.qualifications }}</div>
     <div>{{ form.availability_schedule.label_tag }} {{ form.availability_schedule }}</div>
     <div>{{ form.service_guarantees.label_tag }} {{ form.service_guarantees }}</div>
-
-    <!-- Location Fields (optional customization) -->
-        <!-- Location Fields with wrapper -->
-    <div class="field-wrapper">
-      {{ form.post_continent.label_tag }} {{ form.post_continent }}
-      {{ form.post_continent_input.label_tag }} {{ form.post_continent_input }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.post_country.label_tag }} {{ form.post_country }}
-      {{ form.post_country_input.label_tag }} {{ form.post_country_input }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.post_state.label_tag }} {{ form.post_state }}
-      {{ form.post_state_input.label_tag }} {{ form.post_state_input }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.post_town.label_tag }} {{ form.post_town }}
-      {{ form.post_town_input.label_tag }} {{ form.post_town_input }}
-    </div>
-
-
-  <!-- Image Inputs -->
-  <label for="image1">Image 1:</label><input type="file" name="image1"><br>
-  <label for="image2">Image 2:</label><input type="file" name="image2"><br>
-  <label for="image3">Image 3:</label><input type="file" name="image3"><br>
-  <label for="image4">Image 4:</label><input type="file" name="image4"><br>
-  <label for="image5">Image 5:</label><input type="file" name="image5"><br>
-  <label for="image6">Image 6:</label><input type="file" name="image6"><br>
-
-  <div id="imagePreviewContainer" class="flex flex-wrap gap-3 mt-4 mb-6"></div>
-
-  <!-- Optional: show existing images -->
+    {% include "posts/includes/location_fields.html" %}
+    {% include "posts/includes/image_fields.html" %}
+    
+  <!-- 🧾 Existing images (from previous post) -->
   {% if post.images.all %}
     <h3 class="mt-6 text-lg font-semibold">Current Images</h3>
-    <div class="flex flex-wrap gap-2 mb-6">
+    <div class="flex flex-wrap gap-2 mb-6" id="existingImagesContainer">
       {% for img in post.images.all %}
         <img src="{{ img.image.url }}" alt="Existing Image" class="w-24 h-24 object-cover rounded shadow">
       {% endfor %}
@@ -70,31 +39,7 @@
 </form>
 
 <!-- Image Preview Script -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const previewContainer = document.getElementById("imagePreviewContainer");
-    for (let i = 1; i <= 6; i++) {
-      const input = document.querySelector(`input[name="image${i}"]`);
-      if (input) {
-        input.addEventListener("change", (event) => {
-          const file = event.target.files[0];
-          const previewId = `preview-image${i}`;
-          const existing = document.getElementById(previewId);
-          if (existing) existing.remove();
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const img = document.createElement("img");
-              img.id = previewId;
-              img.src = e.target.result;
-              img.className = "w-28 h-28 object-cover rounded shadow border";
-              previewContainer.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-      }
-    }
-  });
-</script>
+{% load static %}
+<script src="{% static 'js/multi_image_preview.js' %}"></script>
+
 {% endblock content %}

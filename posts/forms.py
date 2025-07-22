@@ -6,6 +6,8 @@ from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin  # <-- import you
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from .models import SocialMediaHandle
+from posts.utils.location_assignment import assign_location_fields
+from posts.utils.location_scope_guard import apply_location_scope_fallback
 
 # forms.py
 
@@ -40,7 +42,7 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
 
         self.fields['brand'].label = "Brand name (optional)"
         self.fields['brand'].widget.attrs['placeholder'] = "E.g., Apple, Samsung, Nike, etc."
-
+    
         self.fields['condition'].label = "Condition of the product"
         self.fields['condition'].widget.attrs['placeholder'] = "E.g., New, Fairly used, Broken"
 
@@ -50,49 +52,15 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
 
     def clean(self):
         cleaned_data = super().clean()
-        scope = cleaned_data.get("availability_scope")
+        return apply_location_scope_fallback(cleaned_data, self)
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        assign_location_fields(self)  # manually inject location fields from cleaned_data to model instance
 
-        town = cleaned_data.get("post_town")
-        town_input = cleaned_data.get("post_town_input")
-        state = cleaned_data.get("post_state")
-        state_input = cleaned_data.get("post_state_input")
-        country = cleaned_data.get("post_country")
-        country_input = cleaned_data.get("post_country_input")
-        continent = cleaned_data.get("post_continent")
-        continent_input = cleaned_data.get("post_continent_input")
+        if commit:
+            instance.save()
+        return instance
 
-        # 🛡️ Guard: Scope is 'town' but town is missing
-        if scope == "town" and not (town or town_input):
-            if state or state_input:
-                cleaned_data["availability_scope"] = "state"
-            elif country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_town", "You selected 'Town-specific', but no town, state, country, or continent was provided.")
-        
-        # 🛡️ Guard: Scope is 'state' but state is missing
-        elif scope == "state" and not (state or state_input):
-            if country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_state", "You selected 'State-wide', but no state, country, or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'country' but country is missing
-        elif scope == "country" and not (country or country_input):
-            if continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_country", "You selected 'Country-wide', but no country or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'continent' but continent is missing
-        elif scope == "continent" and not (continent or continent_input):
-            self.add_error("post_continent", "You selected 'Continent-wide', but no continent was provided.")
-
-        return cleaned_data
 
 # Service-specific post form
 class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
@@ -142,50 +110,15 @@ class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
 
     def clean(self):
         cleaned_data = super().clean()
-        scope = cleaned_data.get("availability_scope")
+        return apply_location_scope_fallback(cleaned_data, self)
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        assign_location_fields(self)  # manually inject location fields from cleaned_data to model instance
 
-        town = cleaned_data.get("post_town")
-        town_input = cleaned_data.get("post_town_input")
-        state = cleaned_data.get("post_state")
-        state_input = cleaned_data.get("post_state_input")
-        country = cleaned_data.get("post_country")
-        country_input = cleaned_data.get("post_country_input")
-        continent = cleaned_data.get("post_continent")
-        continent_input = cleaned_data.get("post_continent_input")
-
-        # 🛡️ Guard: Scope is 'town' but town is missing
-        if scope == "town" and not (town or town_input):
-            if state or state_input:
-                cleaned_data["availability_scope"] = "state"
-            elif country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_town", "You selected 'Town-specific', but no town, state, country, or continent was provided.")
-        
-        # 🛡️ Guard: Scope is 'state' but state is missing
-        elif scope == "state" and not (state or state_input):
-            if country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_state", "You selected 'State-wide', but no state, country, or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'country' but country is missing
-        elif scope == "country" and not (country or country_input):
-            if continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_country", "You selected 'Country-wide', but no country or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'continent' but continent is missing
-        elif scope == "continent" and not (continent or continent_input):
-            self.add_error("post_continent", "You selected 'Continent-wide', but no continent was provided.")
-
-        return cleaned_data
-
+        if commit:
+            instance.save()
+        return instance
+    
 
 # Labor-specific post form
 class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
@@ -198,7 +131,7 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
             "product_name", "description", "author_phone_number", "author_email",
             "post_continent", "post_continent_input", "post_country", "post_country_input",
             "post_state", "post_state_input", "post_town", "post_town_input",
-            "labor_experience_years", "labor_availability",          
+            "labor_experience_years",          
         ]
 
     def __init__(self, *args, **kwargs):
@@ -208,9 +141,7 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
         self.fields['product_name'].widget.attrs['placeholder'] = "E.g., Plumbing, Carpentry, Welding..."
 
         self.fields['description'].label = "Give a brief description to the buyer about what labor you do (Very Important)"
-        self.fields['description'].widget.attrs['placeholder'] = (
-            "The descriptions you provide help potential buyers reach you faster"
-        )
+        self.fields['description'].widget.attrs['placeholder'] = "The descriptions you provide help potential buyers reach you faster"
 
         self.fields['author_email'].label = "Your email address"
         self.fields['author_email'].widget.attrs['placeholder'] = "e.g., you@example.com"
@@ -221,57 +152,20 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
         self.fields['labor_experience_years'].label = "Years of experience (optional)"
         self.fields['labor_experience_years'].widget.attrs['placeholder'] = "E.g., 3"
 
-        self.fields['labor_availability'].label = "Time"
-        self.fields['labor_availability'].widget.attrs['placeholder'] = "active times"
-
         self.init_image_labels()
         self.init_location_labels_and_placeholders()
-
+        self.init_location_queryset() 
     def clean(self):
         cleaned_data = super().clean()
-        scope = cleaned_data.get("availability_scope")
+        return apply_location_scope_fallback(cleaned_data, self)
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        assign_location_fields(self)  # manually inject location fields from cleaned_data to model instance
 
-        town = cleaned_data.get("post_town")
-        town_input = cleaned_data.get("post_town_input")
-        state = cleaned_data.get("post_state")
-        state_input = cleaned_data.get("post_state_input")
-        country = cleaned_data.get("post_country")
-        country_input = cleaned_data.get("post_country_input")
-        continent = cleaned_data.get("post_continent")
-        continent_input = cleaned_data.get("post_continent_input")
+        if commit:
+            instance.save()
+        return instance
 
-        # 🛡️ Guard: Scope is 'town' but town is missing
-        if scope == "town" and not (town or town_input):
-            if state or state_input:
-                cleaned_data["availability_scope"] = "state"
-            elif country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_town", "You selected 'Town-specific', but no town, state, country, or continent was provided.")
-        
-        # 🛡️ Guard: Scope is 'state' but state is missing
-        elif scope == "state" and not (state or state_input):
-            if country or country_input:
-                cleaned_data["availability_scope"] = "country"
-            elif continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_state", "You selected 'State-wide', but no state, country, or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'country' but country is missing
-        elif scope == "country" and not (country or country_input):
-            if continent or continent_input:
-                cleaned_data["availability_scope"] = "continent"
-            else:
-                self.add_error("post_country", "You selected 'Country-wide', but no country or continent was provided.")
-
-        # 🛡️ Guard: Scope is 'continent' but continent is missing
-        elif scope == "continent" and not (continent or continent_input):
-            self.add_error("post_continent", "You selected 'Continent-wide', but no continent was provided.")
-
-        return cleaned_data
 
 # Social Media Handle Form (unchanged)
 class SocialMediaHandleForm(forms.ModelForm):

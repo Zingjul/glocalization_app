@@ -257,7 +257,7 @@ continent_mapping = {
 }
 
 class Command(BaseCommand):
-    help = "Populates the Country model with all valid countries using correct country codes."
+    help = "Populates the Country model with country codes, names, and continent relations."
 
     def handle(self, *args, **kwargs):
         created_count = 0
@@ -272,9 +272,10 @@ class Command(BaseCommand):
             continent, _ = Continent.objects.get_or_create(name=continent_name)
 
             country, created = Country.objects.get_or_create(
-                country_code=code,
+                code=code,  # 🆕 uses 'code' as a lookup key
                 defaults={
                     "name": name,
+                    "country_code": code,  # 🌐 django_countries field
                     "continent": continent,
                 }
             )
@@ -286,5 +287,6 @@ class Command(BaseCommand):
                 skipped_count += 1
                 self.stdout.write(self.style.NOTICE(f"ℹ️ Skipped existing: {name} ({code})"))
 
-        self.stdout.write(self.style.SUCCESS(f"\n🎉 Done! {created_count} countries added, {skipped_count} skipped."))
-
+        self.stdout.write(self.style.SUCCESS(
+            f"\n🎉 Done! {created_count} countries added, {skipped_count} skipped."
+        ))

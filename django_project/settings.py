@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'search',
     'postfinder',
     'seekers',
+    'seekersfinder',
 ]
 
 MIDDLEWARE = [

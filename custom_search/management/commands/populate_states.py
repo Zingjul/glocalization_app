@@ -134,13 +134,27 @@ class Command(BaseCommand):
                     state_name = state["name"]
                     state_id = state["id"]
 
-                    _, created = State.objects.get_or_create(id=state_id, name=state_name, country=country_obj)
+                    # 🔡 Generate state code from country code and cleaned state name
+                    country_code = country_obj.code.upper()
+                    state_code_raw = state_name.strip().replace(" ", "").replace("-", "")
+                    state_code = f"{country_code}-{state_code_raw.upper()[:6]}"
+
+                    # ✅ Create state with ID, name, country, and generated code
+                    _, created = State.objects.get_or_create(
+                        id=state_id,
+                        defaults={
+                            "name": state_name,
+                            "country": country_obj,
+                            "code": state_code,
+                        }
+                    )
+
                     if created:
                         total_states += 1
 
-                    # Progress logging every 100
-                    if total_states % 100 == 0:
-                        self.stdout.write(f"🔄 Added {total_states} states so far...")
+                        # ⏱ Progress log every 100 states added
+                        if total_states % 100 == 0:
+                            self.stdout.write(f"🔄 Added {total_states} states so far...")
 
             self.stdout.write(self.style.SUCCESS(f"\n✅ Successfully populated {total_states} states!"))
 

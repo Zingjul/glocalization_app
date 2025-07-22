@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Post, Category, PostImage, SocialMediaHandle
+from custom_search.models import PendingLocationRequest, Country, State
 from person.models import Person
 
 
@@ -31,7 +32,10 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('status', 'category', 'created_at')
     search_fields = ('product_name', 'author__username', 'author__email')
     inlines = [PostImageInline, SocialMediaHandleInline]
-    readonly_fields = ['author', 'get_owner_name', 'created_at', 'updated_at', 'get_location_info', 'preview_social_handles']
+    readonly_fields = [
+        'author', 'get_owner_name', 'created_at', 'updated_at',
+        'get_location_info', 'preview_social_handles'
+    ]
     actions = ['approve_selected_posts']
 
     fieldsets = (
@@ -78,6 +82,44 @@ class PostAdmin(admin.ModelAdmin):
     def approve_selected_posts(self, request, queryset):
         updated = queryset.update(status='approved')
         self.message_user(request, f"{updated} post(s) marked as approved.")
+
+
+@admin.register(PendingLocationRequest)
+class PendingLocationRequestAdmin(admin.ModelAdmin):
+    list_display = [
+        "user", "typed_continent", "typed_country", "typed_state", "typed_town",
+        "is_reviewed", "approved", "submitted_at"
+    ]
+    list_filter = ["is_reviewed", "approved"]
+    search_fields = ["user__username", "typed_state", "typed_country", "typed_town"]
+    actions = ["approve_location"]
+
+    @admin.action(description="Approve and create official location entries")
+    def approve_location(self, request, queryset):
+        for pending in queryset:
+            if pending.typed_state and pending.typed_country:
+                country_obj = Country.objects.filter(name__iexact=pending.typed_country).first()
+                if not country_obj:
+                    self.message_user(request, f"❌ Country '{pending.typed_country}' not found for {pending.user}", level="error")
+                    continue
+
+                # Generate state code
+                country_code = country_obj.code.upper()
+                raw = pending.typed_state.strip().replace(" ", "").replace("-", "")
+                state_code = f"{country_code}-{raw.upper()[:6]}"
+
+                # Avoid duplicates
+                if State.objects.filter(name__iexact=pending.typed_state, country=country_obj).exists():
+                    self.message_user(request, f"⚠️ State '{pending.typed_state}' already exists under '{pending.typed_country}'", level="warning")
+                else:
+                    State.objects.create(name=pending.typed_state, country=country_obj, code=state_code)
+                    self.message_user(request, f"✅ Created state '{pending.typed_state}' with code '{state_code}'")
+
+                pending.is_reviewed = True
+                pending.approved = True
+                pending.save()
+
+        self.message_user(request, f"🎯 Reviewed and processed {queryset.count()} pending location request(s).")
 
 
 admin.site.register(Category)

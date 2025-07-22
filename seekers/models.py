@@ -8,12 +8,6 @@ from custom_search.models import Continent, Country, State, Town
 
 User = get_user_model()
 
-class SeekerCategory(models.Model):
-    name = models.CharField(max_length=77, unique=True)
-
-    def __str__(self):
-        return self.name
-
 class SeekerPost(models.Model):
     REQUEST_TYPES = [
         ('product', 'Product'),
@@ -36,13 +30,12 @@ class SeekerPost(models.Model):
         User, on_delete=models.CASCADE,
         related_name="seekers_posts"
     )
-    category = models.ForeignKey(
-        SeekerCategory, on_delete=models.CASCADE,
-        related_name="seeker_posts"
-    )
+
     request_type = models.CharField(max_length=20, choices=REQUEST_TYPES)
     availability_scope = models.CharField(max_length=10, choices=AVAILABILITY_SCOPE_CHOICES, default='town')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    business_name = models.CharField(max_length=255, blank=True, null=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -104,3 +97,12 @@ class SeekerImage(models.Model):
     def clean(self):
         if self.image.size > 6 * 1024 * 1024:
             raise ValidationError("Each image must be under 6MB.")
+
+class SeekerResponse(models.Model):
+    seeker_post = models.ForeignKey("SeekerPost", on_delete=models.CASCADE, related_name="responses")
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_responses")
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="received_responses")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} → {self.receiver} ({self.seeker_post.title})"

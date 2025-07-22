@@ -1,45 +1,93 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h2 class="mb-4">Seekers — What People Are Looking For</h2>
 
-    <form method="GET" action="{% url 'seekers:seeker_list' %}" class="mb-3">
-      <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
-        <button type="submit" class="btn btn-primary">Search</button>
-      </div>
-    </form>
-
-    {% if search_path %}
-      <p><strong>Searching in:</strong> {{ search_path|join:", " }}</p>
-    {% endif %}
-
-    {% if posts %}
-      <ul class="list-group">
-        {% for post in posts %}
-          <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-              <a href="{{ post.get_absolute_url }}" class="fw-bold">{{ post.title }}</a><br>
-              <small>{{ post.get_request_type_display }} / {{ post.category.name }}</small>
-              {% if post.is_fulfilled %}
-                <span class="badge bg-success ms-2">Fulfilled</span>
-              {% endif %}
-            </div>
-
-            {% if user.is_authenticated and user != post.author %}
-              <form method="post" action="{% url 'seekers:respond_to_seeker' post.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">I Can Help</button>
-              </form>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="alert alert-warning mt-4">
-        <p>No seeker posts found matching your search.</p>
-      </div>
-    {% endif %}
+<!-- 👤 Authenticated user links (optional) -->
+{% if user.is_authenticated %}
+  <div class="mb-4">
+    <p><a href="{% url 'person_detail' user.pk %}">(You)</a></p>
+    <p><a href="{% url 'person_list' %}">Other users</a></p>
+    <p><a href="{% url 'seekers:seeker_create' %}">+Post a request</a></p>
+    <p><a href="{% url 'post_home' %}">Basic Section</a></p>
   </div>
+{% endif %}
+
+<!-- 👇 Expose user's town to JavaScript -->
+<script>
+  const currentUserTown = "{{ user.profile.town.name|lower }}";
+</script>
+
+<div class="container mx-auto px-4 py-6">
+  <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Find a Seeker Request</h2>
+
+  {% if form %}
+    <form method="get" class="mb-6 bg-white p-4 rounded-lg shadow">
+      {{ form.as_p }}
+      <button type="submit" class="btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Search
+      </button>
+    </form>
+  {% endif %}
+
+  {% if search_path %}
+    <div class="mb-3 text-sm text-gray-600">
+      <strong>Filtered by:</strong> {{ search_path|join:" → " }}
+    </div>
+  {% endif %}
+
+  <div id="seekerContainer" style="display: none;">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for post in posts %}
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden transition-transform hover:scale-105"
+             data-scope="{{ post.availability_scope }}"
+             data-town="{{ post.post_town.name|default:post.post_town_input|lower }}">
+
+          {% if post.images.all %}
+            <img src="{{ post.images.all.0.image.url }}" alt="Post image" class="w-full h-48 object-cover">
+          {% else %}
+            <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+              No Image
+            </div>
+          {% endif %}
+
+          <div class="p-4">
+            <h3 class="text-xl font-semibold text-green-700">{{ post.title }}</h3>
+
+            <p class="text-gray-700 text-sm mb-3">{{ post.description|truncatewords:20 }}</p>
+
+            <p class="text-xs inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded mb-2">
+              {{ post.get_availability_scope_display }}
+            </p>
+
+            <p class="text-xs text-red-600">
+              Post town: {{ post.post_town_input }} | Scope: {{ post.availability_scope }}
+            </p>
+
+            <p><i class='fa fa-car'></i>{% if post.post_town %}{{ post.post_town.name }}{% elif post.post_town_input %}{{ post.post_town_input }}{% endif %}</p>
+            <p><i class='fa fa-car'></i>{% if post.post_state %}{{ post.post_state.name }}{% elif post.post_state_input %}{{ post.post_state_input }}{% endif %}</p>
+            <p><i class='fa fa-car'></i>{% if post.post_country %}{{ post.post_country.name }}{% elif post.post_country_input %}{{ post.post_country_input }}{% endif %}</p>
+            <p><i class='fa fa-car'></i>{% if post.post_continent %}{{ post.post_continent.name }}{% elif post.post_continent_input %}{{ post.post_continent_input }}{% endif %}</p>
+
+            <p class="text-xs text-gray-400 mb-2">
+              Posted by: {{ post.author.profile.business_name|default:post.author.username }}
+            </p>
+
+            <a href="{% url 'seekers:seeker_detail' post.pk %}"
+               class="inline-block px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+              View Details
+            </a>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-gray-500">No seeker posts available in your area.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- 🧠 JS: hide posts that don't match user's town or scope -->
+<script src="{% static 'js/seekers_render_onload.js' %}"></script>
+<script src="{% static 'js/seekers_scope_filter.js' %}"></script>
+
 {% endblock content %}

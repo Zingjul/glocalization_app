@@ -14,4 +14,8 @@
             <p>You can now <a class="alert alert-warning" href="{% url 'login' %}" class="btn btn-primary">Login</a></p>
         </div>
     </div>
+
+{% load static %}
+<script src="{% static 'js/accounts/logout.js' %}"></script>
+
 {% endblock content %}

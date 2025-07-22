@@ -24,12 +24,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),  # ✅ Your custom views
     path('user/', include("person.urls")),
+    path("api/", include("custom_search.urls")),  # ✅ This must be here!
+    
     path('', include("posts.urls")),
     path('comments/', include("comment.urls")),
     path('search/', include("search.urls")),
     path('custom_search/', include('custom_search.urls')),
     path('postfinder/', include("postfinder.urls")),
     path('seekers/', include('seekers.urls', namespace="seekers")),
+    path('seekersfinder/', include('seekersfinder.urls', namespace="seekersfinder")),
 ]
 
 if settings.DEBUG:
