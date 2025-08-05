@@ -24,5 +24,5 @@ class Command(BaseCommand):
             )
             action = "✅ Created" if created else "🔄 Updated"
             self.stdout.write(f"{action}: {obj.name} (ID {obj.id})")
-
+# little change
         self.stdout.write(self.style.SUCCESS("🌍 Continent table populated successfully with manual IDs."))
