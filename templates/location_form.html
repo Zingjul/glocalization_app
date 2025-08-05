@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Location Form{% endblock title %}
+
+{% block content %}
+    <h1>Location Form</h1>
+
+    <form id="location-form" method="get">  {# Add id to the form #}
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.continent.label_tag }} {{ form.continent }} {{ form.continent.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.country.label_tag }} {{ form.country }} {{ form.country.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.state.label_tag }} {{ form.state }} {{ form.state.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.town.label_tag }} {{ form.town }} {{ form.town.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  {# Include jQuery #}
+    <script>
+        $(document).ready(function() {  
+            $("#location-form").change(function() { 
+                $.ajax({
+                    url: '',  // Same URL as the form
+                    data: $(this).serialize(),  // Serialize form data (continent, country, etc.)
+                    dataType: 'html',  // Expect HTML response
+                    success: function(data) {
+                        $("#location-form").html(data);  // Replace the form with updated HTML
+                    },
+                    error: function(xhr, status, error) { // Handle potential errors
+                        console.error("AJAX Error:", status, error); // Log the error to the console
+                        alert("An error occurred while updating the form."); // Display an alert to the user
+                    }
+
+                });
+            });
+        });
+    </script>
+
+{% endblock content %}

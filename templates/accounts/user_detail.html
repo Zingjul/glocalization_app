@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Profile of {{ user.profile.real_name }}</h2>
+
+{% if profile.person_profile_picture %}
+    <img src="{{ profile.person_profile_picture.url }}" alt="Profile Picture" width="150">
+{% endif %}
+
+<p><strong>Business Name:</strong> {{ user.profile.business_name }}</p>
+<p><strong>About:</strong> {{ user.profile.about }}</p>
+<p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ user.profile.website }}</a></p>
+
+<div><strong>Location:</strong> 
+    <p>Continent: {% if profile.continent %} {{ user.profile.continent.name }} {% endif %}</p>
+    <p>Country: {% if profile.country %} {{ user.profile.country.name }} {% endif %}</p>
+    <p>State/Province: {% if profile.state %} {{ user.profile.state.name }} {% endif %}</p>
+    <p>Town: {% if profile.town %} {{ user.profile.town.name }} {% endif %}</p>
+</div>
+
+{% if user == user.profile.user %}
+    <a href="{% url 'person_edit' user.profile.pk %}" class="btn btn-warning">Edit Profile</a>
+    <a href="{% url 'person_delete' user.profile.pk %}" class="btn btn-danger">Delete Account</a>
+    <a href="{% url 'post_home' %}" class="btn btn-secondary">Back to homepage</a>
+{% else %}
+<a href="{% url 'person_list' %}" class="btn btn-secondary">Back to Profiles</a>
+{% endif %}
+{% endblock %}

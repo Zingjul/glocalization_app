@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="text-xl font-semibold mb-4">Seek Service</h2>
+
+  <form method="post" enctype="multipart/form-data" id="postForm">
+    {% csrf_token %}
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
+    <!-- 🔽 Manually render each field (excluding image1–image6) -->
+   <!-- am using the "include" in order to fetch template data from a seperate file this is in order to avoid retyping similar code over and over again -->
+    {% include "posts/includes/top_fields.html" %}
+    <p>{{% form.preferred_fulfillment_time.label_tag %}} </p>  
+    <p>{{% form.preferred_fulfillment_time %}} </p>
+    <p>{{% form.budget.label_tag %}}</p>  
+    <p>{{% form.budget %}}</p>
+    {% include "posts/includes/location_fields.html" %}
+    {% include "posts/includes/image_fields.html" %}
+    
+    <!-- 🔗 Social Media Handles -->
+    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
+    {{ social_form.as_p }}
+
+    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+      Submit
+    </button>
+  </form>
+
+  <!-- ✅ Image Preview Script -->
+  {% load static %}
+  <script src="{% static 'js/post_form.js' %}"></script>
+  <script src="{% static 'js/multi_image_preview.js' %}"></script>
+  {% endblock content %}

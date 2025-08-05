@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Delete Your Account</h2>
+  <p>Please confirm your password to permanently delete your account.</p>
+
+  <form method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger">Delete My Account</button>
+    <a href="{% url 'post_home' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

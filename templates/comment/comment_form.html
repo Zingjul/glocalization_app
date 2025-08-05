@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{% if form.instance.pk %}Edit Comment{% else %}Add a Comment{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="{% url 'comment_list' app_label=object.content_type.app_label model_name=object.content_type.model object_id=object.object_id %}" class="btn btn-secondary">Cancel</a>
+
+</form>
+{% endblock content %}

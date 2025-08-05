@@ -1,0 +1,14 @@
+:root {
+    --primary-color: #83e602;
+    --primary-darkest: #091000;
+    --primary-darker: #142400;
+    --primary-dark: #1f3700;
+    --primary-mid: #4c8501;
+    --primary-light: #a0fd26;
+    --primary-lighter: #d3fe9a;
+    --primary-lightest: #f5ffe8;
+  
+    --font-main: 'Montserrat', sans-serif;
+    --font-alt: 'Open Sans', sans-serif;
+  }
+  

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="text-xl font-semibold mb-4">Create Labor Post</h2>
+
+  <form method="post" enctype="multipart/form-data" id="postForm">
+    {% csrf_token %}
+    <div>
+      {{ form.availability_scope.label_tag }}
+      {{ form.availability_scope }}
+    </div>
+    <!-- 🔽 Manually render each field (excluding image1–image6) -->
+    {% include "posts/includes/top_fields.html" %}
+    <div>{{ form.labor_experience_years.label_tag }} {{ form.labor_experience_years }}</div>
+    {% include "posts/includes/location_fields.html" %}
+    {% include "posts/includes/image_fields.html" %}
+    
+    <!-- 🔗 Social Media Handles -->
+    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
+    {{ social_form.as_p }}
+
+    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+      Submit
+    </button>
+  </form>
+<!-- import scripts -->
+    {% include "posts/includes/js_imports.html" %}
+  {% endblock content %}

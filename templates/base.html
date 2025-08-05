@@ -1,0 +1,114 @@
+{% load static %} 
+{% load widget_tweaks %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Website{% endblock title %}</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    
+    <!-- Alpine.js (always use latest 3.x version) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
+
+    <!-- htmx (always use latest) -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'glocalization_app/css/colors.css' %}">
+
+    <!-- react -->
+    <script type="text/babel" src="{% static 'js/components/Header.jsx' %}"></script>
+
+    <!-- jQuery (single instance) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Additional head content -->
+    {% block extra_head %}
+    {% endblock extra_head %}
+
+</head>
+<body>
+  <div id="react-header"></div>
+    <header class="bg-dark text-white py-3">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            
+            <!-- Brand / Logo -->
+            <div class="col-md-3 col-6">
+              <a class="navbar-brand text-primary-custom fw-bold" href="/">Website</a>
+            </div>
+      
+            <!-- Authenticated Links -->
+            {% if user.is_authenticated %}
+            <div class="col-md-9 col-6 text-end">
+              <a class="btn btn-link text-white me-2" href="/">Home</a>
+              <a class="btn btn-link text-white me-2" href="{% url 'logout' %}">Logout</a>
+              <!-- <a class="btn btn-link text-white me-2"  id="logoutBtn"  href="{% url 'logout' %}">Logout</a> -->
+              <a class="btn btn-outline-danger" href="{% url 'delete_account' %}">Delete Account</a>
+            </div>
+      
+            <!-- Unauthenticated Links -->
+            {% else %}
+            <div class="col-md-9 col-6 text-end">
+              <a class="btn btn-link text-white me-2" href="{% url 'signup' %}">Sign up</a>
+              <a class="btn btn-link text-white" href="{% url 'login' %}">Login</a>
+            </div>
+            {% endif %}
+      
+          </div>
+        </div>
+      </header>   
+      
+    <div class="container mt-3">
+        {% block messages %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endblock messages %}
+        
+        <div class="container">
+            {% block content %}{% endblock content %} <br>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    
+    <!-- Additional scripts -->
+    {% block extra_scripts %}{% endblock extra_scripts %}
+<!-- just before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-pJvT3OZlMuAHUnueVJHpxD6Ew+yRyV9p3NYHeNd2GvwduO4q3Z9Q6TpbXSk3F+iH" crossorigin="anonymous"></script>
+
+  </body>
+<!-- Add this to your logout button in the template -->
+<!-- <button id="logoutBtn">Logout</button> -->
+
+
+<script type="text/babel">
+  // Place the Header component code here (from above)
+  // Example usage:
+  ReactDOM.render(
+    <Header isAuthenticated={window.isAuthenticated || false} />,
+    document.getElementById('react-header')
+  );
+</script>
+</html>

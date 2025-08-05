@@ -1,0 +1,42 @@
+{% load humanize %}
+
+<li class="border-l-2 pl-4 my-2">
+  <div>
+    <strong>{{ comment.author.username }}</strong>
+    <small class="text-gray-500">
+      {% if comment.parent %}
+        replied to <strong>{{ comment.parent.author.username }}</strong> • 
+      {% endif %}
+      {{ comment.created_at|naturaltime }}
+    </small>
+    <p class="mt-1">{{ comment.text }}</p>
+  </div>
+
+  {% if comment.author == user %}
+    <div class="text-sm mt-1 space-x-2">
+      <a href="{% url 'edit_comment' comment.id %}" class="text-blue-600 hover:underline">Edit</a>
+      <a href="{% url 'delete_comment' comment.id %}" class="text-red-600 hover:underline">Delete</a>
+    </div>
+  {% endif %}
+
+  <button onclick="toggleReplyForm({{ comment.id }})" type="button" class="text-sm text-blue-600 mt-2 underline">
+    Reply
+  </button>
+
+  <div id="reply-form-{{ comment.id }}" class="hidden mt-2">
+    <form method="post" action="{% url 'create_comment' 'posts' 'post' post.id %}">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <input type="hidden" name="parent" value="{{ comment.id }}">
+      <button type="submit" class="bg-blue-600 text-white px-3 py-1 text-sm rounded mt-2">Submit Reply</button>
+    </form>
+  </div>
+
+  {% if comment.replies.all %}
+    <ul class="mt-2 space-y-2 ml-4">
+      {% for reply in comment.replies.all %}
+        {% include "comment/partials/comment_thread.html" with comment=reply post=post comment_form=comment_form %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>You to the World...</h2>
+  <p>Select the category under which your post matches! <a href="#">Need help?</a></p>
+    <hr>
+  <div style="display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
+    <a href="{% url 'create_product' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+      <h3>🛒 Product</h3>
+      <p>Make your product known, reach all potential leads.</p>
+    </a>
+
+    <a href="{% url 'create_service' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+      <h3>🧰 Service</h3>
+      <p>Show the world what you can do! there's a lot out there waiting for you</p>
+    </a>
+
+    <a href="{% url 'create_labor' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+      <h3>💪 Labor</h3>
+      <p>Increase your reach! make yourself and team known, show the world what you are perfect at!</p>
+    </a>
+  </div>
+{% endblock content %}

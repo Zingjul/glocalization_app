@@ -1,0 +1,30 @@
+# Ignore virtual environment
+venv/
+env/
+
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+
+# Ignore Django secret files
+*.env
+db.sqlite3
+
+# Ignore migrations
+*/migrations/*
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore static files
+staticfiles/
+media/
+
+# Ignore VS Code & IDE settings
+.vscode/
+.idea/
+
+# Ignore dependency files
+node_modules/
+package-lock.json

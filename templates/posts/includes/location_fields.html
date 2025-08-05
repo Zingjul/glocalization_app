@@ -1,0 +1,28 @@
+<!-- 🌍 Continent Dropdown Only -->
+<div class="field-wrapper">
+  <p id="location_field_continent">
+      {{ form.post_continent.label_tag }} {{ form.post_continent }}
+  </p>
+</div>
+
+<!-- 🌐 Country Dropdown Only -->
+<div class="field-wrapper">
+  <p id="location_field_country">
+      {{ form.post_country.label_tag }} {{ form.post_country }}
+  </p>
+</div>
+
+<!-- 🏛 State Dropdown Only -->
+<div class="field-wrapper">
+  <p id="location_field_state">
+      {{ form.post_state.label_tag }} {{ form.post_state }}
+  </p>
+</div>
+
+<!-- 🏙️ Town Dropdown + Optional Input -->
+<div class="field-wrapper">
+  <p id="location_field_town">
+      {{ form.post_town.label_tag }} {{ form.post_town }}
+      {{ form.post_town_input.label_tag }} {{ form.post_town_input }}        
+  </p>
+</div>
