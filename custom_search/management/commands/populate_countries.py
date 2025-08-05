@@ -1,292 +1,46 @@
-# populate_countries.py (place inside a management/commands/ directory)
+import json
+import os
 from django.core.management.base import BaseCommand
-from django_countries import countries
 from custom_search.models import Country, Continent
 
-# You can expand this mapping to cover all countries
-continent_mapping = {
-    # Add more mappings: Americas, Asia, Europe, Oceania, Antarctica...
-    "AF": "Africa",
-    "AX": "Europe",
-    "AL": "Europe",
-    "DZ": "Africa",
-    "AS": "Oceania",
-    "AD": "Europe",
-    "AO": "Africa",
-    "AI": "North America",
-    "AQ": "Antarctica",
-    "AG": "North America",
-    "AR": "South America",
-    "AM": "Asia",
-    "AW": "North America",
-    "AU": "Oceania",
-    "AT": "Europe",
-    "AZ": "Asia",
-    "BS": "North America",
-    "BH": "Asia",
-    "BD": "Asia",
-    "BB": "North America",
-    "BY": "Europe",
-    "BE": "Europe",
-    "BZ": "North America",
-    "BJ": "Africa",
-    "BM": "North America",
-    "BT": "Asia",
-    "BO": "South America",
-    "BQ": "North America",
-    "BA": "Europe",
-    "BW": "Africa",
-    "BV": "Antarctica",
-    "BR": "South America",
-    "IO": "Asia",
-    "BN": "Asia",
-    "BG": "Europe",
-    "BF": "Africa",
-    "BI": "Africa",
-    "CV": "Africa",
-    "KH": "Asia",
-    "CM": "Africa",
-    "CA": "North America",
-    "KY": "North America",
-    "CF": "Africa",
-    "TD": "Africa",
-    "CL": "South America",
-    "CN": "Asia",
-    "CX": "Asia",
-    "CC": "Asia",
-    "CO": "South America",
-    "KM": "Africa",
-    "CG": "Africa",
-    "CD": "Africa",
-    "CK": "Oceania",
-    "CR": "North America",
-    "CI": "Africa",
-    "HR": "Europe",
-    "CU": "North America",
-    "CW": "North America",
-    "CY": "Asia",
-    "CZ": "Europe",
-    "DK": "Europe",
-    "DJ": "Africa",
-    "DM": "North America",
-    "DO": "North America",
-    "EC": "South America",
-    "EG": "Africa",
-    "SV": "North America",
-    "GQ": "Africa",
-    "ER": "Africa",
-    "EE": "Europe",
-    "ET": "Africa",
-    "FK": "South America",
-    "FO": "Europe",
-    "FJ": "Oceania",
-    "FI": "Europe",
-    "FR": "Europe",
-    "GF": "South America",
-    "PF": "Oceania",
-    "TF": "Antarctica",
-    "GA": "Africa",
-    "GM": "Africa",
-    "GE": "Asia",
-    "DE": "Europe",
-    "GH": "Africa",
-    "GI": "Europe",
-    "GR": "Europe",
-    "GL": "North America",
-    "GD": "North America",
-    "GP": "North America",
-    "GU": "Oceania",
-    "GT": "North America",
-    "GG": "Europe",
-    "GN": "Africa",
-    "GW": "Africa",
-    "GY": "South America",
-    "HT": "North America",
-    "HM": "Antarctica",
-    "VA": "Europe",
-    "HN": "North America",
-    "HK": "Asia",
-    "HU": "Europe",
-    "IS": "Europe",
-    "IN": "Asia",
-    "ID": "Asia",
-    "IR": "Asia",
-    "IQ": "Asia",
-    "IE": "Europe",
-    "IM": "Europe",
-    "IL": "Asia",
-    "IT": "Europe",
-    "JM": "North America",
-    "JP": "Asia",
-    "JE": "Europe",
-    "JO": "Asia",
-    "KZ": "Asia",
-    "KE": "Africa",
-    "KI": "Oceania",
-    "KP": "Asia",
-    "KR": "Asia",
-    "KW": "Asia",
-    "KG": "Asia",
-    "LA": "Asia",
-    "LV": "Europe",
-    "LB": "Asia",
-    "LS": "Africa",
-    "LR": "Africa",
-    "LY": "Africa",
-    "LI": "Europe",
-    "LT": "Europe",
-    "LU": "Europe",
-    "MO": "Asia",
-    "MK": "Europe",
-    "MG": "Africa",
-    "MW": "Africa",
-    "MY": "Asia",
-    "MV": "Asia",
-    "ML": "Africa",
-    "MT": "Europe",
-    "MH": "Oceania",
-    "MQ": "North America",
-    "MR": "Africa",
-    "MU": "Africa",
-    "YT": "Africa",
-    "MX": "North America",
-    "FM": "Oceania",
-    "MD": "Europe",
-    "MC": "Europe",
-    "MN": "Asia",
-    "ME": "Europe",
-    "MS": "North America",
-    "MA": "Africa",
-    "MZ": "Africa",
-    "MM": "Asia",
-    "NA": "Africa",
-    "NR": "Oceania",
-    "NP": "Asia",
-    "NL": "Europe",
-    "NC": "Oceania",
-    "NZ": "Oceania",
-    "NI": "North America",
-    "NE": "Africa",
-    "NG": "Africa",
-    "NU": "Oceania",
-    "NF": "Oceania",
-    "MP": "Oceania",
-    "NO": "Europe",
-    "OM": "Asia",
-    "PK": "Asia",
-    "PW": "Oceania",
-    "PS": "Asia",
-    "PA": "North America",
-    "PG": "Oceania",
-    "PY": "South America",
-    "PE": "South America",
-    "PH": "Asia",
-    "PN": "Oceania",
-    "PL": "Europe",
-    "PT": "Europe",
-    "PR": "North America",
-    "QA": "Asia",
-    "RE": "Africa",
-    "RO": "Europe",
-    "RU": "Europe",
-    "RW": "Africa",
-    "BL": "North America",
-    "SH": "Africa",
-    "KN": "North America",
-    "LC": "North America",
-    "MF": "North America",
-    "PM": "North America",
-    "VC": "North America",
-    "WS": "Oceania",
-    "SM": "Europe",
-    "ST": "Africa",
-    "SA": "Asia",
-    "SN": "Africa",
-    "RS": "Europe",
-    "SC": "Africa",
-    "SL": "Africa",
-    "SG": "Asia",
-    "SX": "North America",
-    "SK": "Europe",
-    "SI": "Europe",
-    "SB": "Oceania",
-    "SO": "Africa",
-    "ZA": "Africa",
-    "GS": "Antarctica",
-    "SS": "Africa",
-    "ES": "Europe",
-    "LK": "Asia",
-    "SD": "Africa",
-    "SR": "South America",
-    "SJ": "Europe",
-    "SE": "Europe",
-    "CH": "Europe",
-    "SY": "Asia",
-    "TW": "Asia",
-    "TJ": "Asia",
-    "TZ": "Africa",
-    "TH": "Asia",
-    "TL": "Asia",
-    "TG": "Africa",
-    "TK": "Oceania",
-    "TO": "Oceania",
-    "TT": "North America",
-    "TN": "Africa",
-    "TR": "Asia",
-    "TM": "Asia",
-    "TC": "North America",
-    "TV": "Oceania",
-    "UG": "Africa",
-    "UA": "Europe",
-    "AE": "Asia",
-    "GB": "Europe",
-    "US": "North America",
-    "UM": "Oceania",
-    "UY": "South America",
-    "UZ": "Asia",
-    "VU": "Oceania",
-    "VE": "South America",
-    "VN": "Asia",
-    "VG": "North America",
-    "VI": "North America",
-    "WF": "Oceania",
-    "EH": "Africa",
-    "YE": "Asia",
-    "ZM": "Africa",
-    "ZW": "Africa"
-}
-
 class Command(BaseCommand):
-    help = "Populates the Country model with country codes, names, and continent relations."
+    help = "Populate countries from JSON file"
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **options):
+        json_path = os.path.join(
+            os.path.dirname(__file__),
+            "..", "..", "..", "data_generator", "raw", "countries.json"
+        )
+        json_path = os.path.abspath(json_path)
+
+        with open(json_path, "r", encoding="utf-8") as f:
+            countries_data = json.load(f)
+
+        self.stdout.write(self.style.SUCCESS(f"Loaded {len(countries_data)} countries from JSON"))
+
         created_count = 0
-        skipped_count = 0
 
-        for code, name in countries:
-            continent_name = continent_mapping.get(code)
-            if not continent_name:
-                self.stdout.write(self.style.WARNING(f"⚠️ Skipped {name} ({code}) — No continent mapping"))
+        for entry in countries_data:
+            try:
+                continent = Continent.objects.get(id=entry["region_id"])
+            except Continent.DoesNotExist:
+                self.stdout.write(self.style.WARNING(
+                    f"❌ Skipped {entry['name']}: Continent with ID {entry['region_id']} not found"
+                ))
                 continue
 
-            continent, _ = Continent.objects.get_or_create(name=continent_name)
-
             country, created = Country.objects.get_or_create(
-                code=code,  # 🆕 uses 'code' as a lookup key
+                id=entry["id"],
                 defaults={
-                    "name": name,
-                    "country_code": code,  # 🌐 django_countries field
+                    "code": entry["iso2"],
+                    "name": entry["name"],
+                    "country_code": entry["iso2"],
                     "continent": continent,
                 }
             )
 
             if created:
                 created_count += 1
-                self.stdout.write(self.style.SUCCESS(f"✅ Added: {name} ({code})"))
-            else:
-                skipped_count += 1
-                self.stdout.write(self.style.NOTICE(f"ℹ️ Skipped existing: {name} ({code})"))
+                self.stdout.write(self.style.SUCCESS(f"✅ Created: {country.name}"))
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\n🎉 Done! {created_count} countries added, {skipped_count} skipped."
-        ))
+        self.stdout.write(self.style.SUCCESS(f"\n🎉 Done! Total countries created: {created_count}"))

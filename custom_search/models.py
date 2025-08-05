@@ -3,7 +3,7 @@ from django_countries.fields import CountryField
 from django.conf import settings
 
 class Continent(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)  # manually assigned
     code = models.CharField(max_length=5, unique=True, db_index=True, default="TEMP")
     name = models.CharField(max_length=100, unique=True, db_index=True)
 
@@ -15,7 +15,7 @@ class Continent(models.Model):
 
 
 class Country(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)  # manually assigned
     code = models.CharField(max_length=5, unique=True, db_index=True, default="TEMP")
     name = models.CharField(max_length=100, blank=True, unique=True, null=True)
     country_code = CountryField(blank_label='(select country)')
@@ -29,7 +29,7 @@ class Country(models.Model):
 
 
 class State(models.Model):
-    id = models.CharField(max_length=20, primary_key=True)  # Can be something like 'NG-KD'
+    id = models.IntegerField(primary_key=True)  # manually assigned
     code = models.CharField(max_length=5, unique=True, db_index=True, default="TEMP")
     name = models.CharField(max_length=100)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="states", db_index=True)
@@ -42,7 +42,7 @@ class State(models.Model):
 
 
 class Town(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)  # manually assigned
     code = models.CharField(max_length=5, unique=True, db_index=True, default="TEMP")
     name = models.CharField(max_length=100)
     state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="towns", db_index=True)
@@ -61,7 +61,6 @@ class Town(models.Model):
 
 
 class PendingLocationRequest(models.Model):
-    id = models.AutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pending_location')
     typed_continent = models.CharField(max_length=100, blank=True, null=True)
     typed_country = models.CharField(max_length=100, blank=True, null=True)
