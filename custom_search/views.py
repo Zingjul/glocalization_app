@@ -92,16 +92,18 @@ def approve_location_single(request, person_id, location_type):
     return HttpResponseRedirect(reverse('approve_locations'))
 
 def countries_by_continent(request):
-    continent_id = request.GET.get("continent_id")
-    countries = Country.objects.filter(continent_id=continent_id).values("id", "name", "code")
+    continent_id = request.GET.get("continent") or request.GET.get("continent_id")
+    countries = Country.objects.filter(continent_id=continent_id).values("id", "name") if continent_id else []
     return JsonResponse(list(countries), safe=False)
 
+
 def states_by_country(request):
-    country_id = request.GET.get("country_id")
-    states = State.objects.filter(country_id=country_id).values("id", "name", "code")
+    country_id = request.GET.get("country") or request.GET.get("country_id")
+    states = State.objects.filter(country_id=country_id).values("id", "name") if country_id else []
     return JsonResponse(list(states), safe=False)
 
+
 def towns_by_state(request):
-    state_id = request.GET.get("state_id")
-    towns = Town.objects.filter(state_id=state_id).values("id", "name")
+    state_id = request.GET.get("state") or request.GET.get("state_id")
+    towns = Town.objects.filter(state_id=state_id).values("id", "name") if state_id else []
     return JsonResponse(list(towns), safe=False)

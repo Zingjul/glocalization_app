@@ -14,6 +14,7 @@ import logging
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from comment.models import Comment
+from .models import Post, Continent, Country, State, Town
 from comment.forms import CommentForm
 from person.models import Person  # Make sure this is imported
 from posts.utils.location_assignment import assign_location_fields
@@ -163,9 +164,12 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['social_form'] = SocialMediaHandleForm(self.request.POST or None, self.request.FILES or None)
+        context['social_form'] = SocialMediaHandleForm(
+            self.request.POST or None,
+            self.request.FILES or None
+        )
         return context
-        
+
     def form_valid(self, form):
         user = self.request.user
         social_form = SocialMediaHandleForm(self.request.POST, self.request.FILES)
@@ -182,38 +186,29 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = user
         form.instance.status = "pending"
 
-        # ✅ Set availability_scope dynamically based on location fields
-        if form.instance.post_town:
-            form.instance.availability_scope = "town"
-        elif form.instance.post_state:
-            form.instance.availability_scope = "state"
-        elif form.instance.post_country:
-            form.instance.availability_scope = "country"
-        elif form.instance.post_continent:
-            form.instance.availability_scope = "continent"
-
-        # 🧭 Attach product category to this post
+        # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Product")
 
-        # explicitly making sure location fields are saved based on user input 
-        assign_location_fields(form)
-
-        # ✅ Save the main Post
+        # 💾 Save the post
         response = super().form_valid(form)
 
-        # 📸 Save uploaded images
+        # 📸 Save uploaded images (up to 6)
         for i in range(1, 7):
             image = self.request.FILES.get(f'image{i}')
             if image:
                 PostImage.objects.create(post=self.object, image=image)
-       
-        # 📎 Save social media handles
+
+        # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
         social_handle.save()
 
-        messages.success(self.request, "Product post submitted successfully and is under review!")
+        messages.success(
+            self.request,
+            "Product post submitted successfully and is under review!"
+        )
         return response
+
 class ServicePostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = ServicePostForm
@@ -222,9 +217,12 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['social_form'] = SocialMediaHandleForm(self.request.POST or None, self.request.FILES or None)
+        context['social_form'] = SocialMediaHandleForm(
+            self.request.POST or None,
+            self.request.FILES or None
+        )
         return context
-        
+
     def form_valid(self, form):
         user = self.request.user
         social_form = SocialMediaHandleForm(self.request.POST, self.request.FILES)
@@ -241,26 +239,12 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = user
         form.instance.status = "pending"
 
-        # 🧭 Scope assignment
-        if form.instance.post_town:
-            form.instance.availability_scope = "town"
-        elif form.instance.post_state:
-            form.instance.availability_scope = "state"
-        elif form.instance.post_country:
-            form.instance.availability_scope = "country"
-        elif form.instance.post_continent:
-            form.instance.availability_scope = "continent"
-
-        # 🏷️ Attach post category
+        # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Service")
 
-
-        # explicitly making sure location fields are saved based on user input 
-        assign_location_fields(form)
-
-        # Save post
+        # 💾 Save the post
         response = super().form_valid(form)
-
+ 
         # 📸 Save uploaded images
         for i in range(1, 7):
             image = self.request.FILES.get(f'image{i}')
@@ -272,7 +256,10 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
         social_handle.post = self.object
         social_handle.save()
 
-        messages.success(self.request, "Service post submitted successfully and is under review!")
+        messages.success(
+            self.request, 
+            "Service post submitted successfully and is under review!"
+        )
         return response
         
 class LaborPostCreateView(LoginRequiredMixin, CreateView):
@@ -283,13 +270,16 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['social_form'] = SocialMediaHandleForm(self.request.POST or None, self.request.FILES or None)
+        context['social_form'] = SocialMediaHandleForm(
+            self.request.POST or None,
+            self.request.FILES or None
+        )
         return context
 
     def form_valid(self, form):
         user = self.request.user
         social_form = SocialMediaHandleForm(self.request.POST, self.request.FILES)
-        
+
         if not social_form.is_valid():
             return self.form_invalid(form)
 
@@ -302,39 +292,29 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = user
         form.instance.status = "pending"
 
-        # 🧭 Scope detection
-        if form.instance.post_town:
-            form.instance.availability_scope = "town"
-        elif form.instance.post_state:
-            form.instance.availability_scope = "state"
-        elif form.instance.post_country:
-            form.instance.availability_scope = "country"
-        elif form.instance.post_continent:
-            form.instance.availability_scope = "continent"
-
         # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Labor")
-
-        # explicitly making sure location fields are saved based on user input 
-        assign_location_fields(form)
 
         # 💾 Save the post
         response = super().form_valid(form)
 
-        # 📸 Save uploaded images
+        # 📸 Save uploaded images (up to 6)
         for i in range(1, 7):
             image = self.request.FILES.get(f'image{i}')
             if image:
                 PostImage.objects.create(post=self.object, image=image)
-        
+
         # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
         social_handle.save()
 
-        messages.success(self.request, "Labor post submitted successfully and is under review!")
+        messages.success(
+            self.request,
+            "Labor post submitted successfully and is under review!"
+        )
         return response
-        
+       
 class PostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     success_url = reverse_lazy('post_home')

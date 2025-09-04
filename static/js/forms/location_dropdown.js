@@ -1,83 +1,118 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const continentSelect = document.getElementById("id_post_continent");
-    const countrySelect = document.getElementById("id_post_country");
-    const stateSelect = document.getElementById("id_post_state");
-    const townSelect = document.getElementById("id_post_town");
+document.addEventListener("DOMContentLoaded", () => {
+    const $ = id => document.getElementById(id);
 
-    function clearDropdown(select) {
-        select.innerHTML = '<option value="">Select an option</option>';
+    const continentSelect = $("id_post_continent");
+    const countrySelect = $("id_post_country");
+    const stateSelect = $("id_post_state");
+    const townSelect = $("id_post_town");
+
+    if (!continentSelect || !countrySelect || !stateSelect || !townSelect) {
+        return;
     }
 
-    function fetchLocations(level, parentId) {
-        const endpoints = {
-            country: `/api/countries/?continent_id=${parentId}`,
-            state: `/api/states/?country_id=${parentId}`,
-            town: `/api/towns/?state_id=${parentId}`,
+    // --- Helper functions ---
+
+    /**
+     * Resets a select element completely, clearing all its options.
+     * @param {HTMLSelectElement} select The select element to clear.
+     */
+    function clearSelect(select) {
+        select.innerHTML = "";
+    }
+
+    /**
+     * Fills a select element with options from an array of items.
+     * @param {HTMLSelectElement} select The select element to fill.
+     * @param {Array<Object>} items The array of items, each with an 'id' and 'name' property.
+     */
+    function fillOptions(select, items) {
+        clearSelect(select);
+        const frag = document.createDocumentFragment();
+        items.forEach(({ id, name }) => {
+            const opt = document.createElement("option");
+            opt.value = String(id);
+            opt.textContent = name;
+            frag.appendChild(opt);
+        });
+        select.appendChild(frag);
+    }
+
+    // Abort controllers to avoid race conditions and ensure only the latest request is processed.
+    const ctrls = {
+        country: new AbortController(),
+        state: new AbortController(),
+        town: new AbortController(),
+    };
+
+    /**
+     * Fetches a list of locations from the API based on the parent ID.
+     * @param {string} level The level to fetch ('country', 'state', or 'town').
+     * @param {string|number} parentId The ID of the parent location.
+     * @returns {Promise<Array<Object>>} A promise that resolves to an array of location objects.
+     */
+    async function fetchList(level, parentId) {
+        const urls = {
+            country: `/api/countries/?continent_id=${encodeURIComponent(parentId)}`,
+            state: `/api/states/?country_id=${encodeURIComponent(parentId)}`,
+            town: `/api/towns/?state_id=${encodeURIComponent(parentId)}`
         };
-        console.log("📡 Fetching:", endpoints[level]);
-        return fetch(endpoints[level])
-            .then(res => res.json())
-            .catch(err => {
-                console.error("Fetch failed:", err);
-                return [];
-            });
+
+        ctrls[level].abort(); // Abort any previous fetch for this level
+        ctrls[level] = new AbortController();
+
+        try {
+            console.log(`📡 Fetching [${level}]: ${urls[level]}`);
+            const res = await fetch(urls[level], { signal: ctrls[level].signal });
+            if (!res.ok) {
+                throw new Error(`${res.status} ${res.statusText}`);
+            }
+            return await res.json();
+        } catch (e) {
+            if (e.name !== "AbortError") {
+                console.error(`[${level}] fetch failed:`, e);
+            }
+            return [];
+        }
     }
 
+    // --- Event Handlers ---
 
-
-    continentSelect?.addEventListener("change", function () {
-        clearDropdown(countrySelect);
-        clearDropdown(stateSelect);
-        clearDropdown(townSelect);
-
+    continentSelect.addEventListener("change", async function() {
         const continentId = this.value;
-        if (continentId) {
-            fetchLocations("country", continentId).then(countries => {
-                countries.forEach(country => {
-                    const opt = document.createElement("option");
-                    opt.value = country.id;
-                    opt.textContent = country.name;
-                    countrySelect.appendChild(opt);
-                });
-            });
-        }
+        fillOptions(countrySelect, []); // Reset subsequent dropdowns
+        fillOptions(stateSelect, []);
+        fillOptions(townSelect, []);
+        if (!continentId) return;
+
+        const countries = await fetchList("country", continentId);
+        fillOptions(countrySelect, countries);
     });
 
-    countrySelect?.addEventListener("change", function () {
-        clearDropdown(stateSelect);
-        clearDropdown(townSelect);
-
+    countrySelect.addEventListener("change", async function() {
         const countryId = this.value;
-        console.log("this is console, country id: ", countryId)
-        const selectedCountryName = this.options[this.selectedIndex].text;
+        fillOptions(stateSelect, []); // Reset subsequent dropdowns
+        fillOptions(townSelect, []);
+        if (!countryId) return;
 
-        if (AfricanStateFetchers[selectedCountryName]) {
-            AfricanStateFetchers[selectedCountryName](); // external source
-        } else if (countryId) {
-            fetchLocations("state", countryId).then(states => {
-                states.forEach(state => {
-                    const opt = document.createElement("option");
-                    opt.value = state.id;
-                    opt.textContent = state.name;
-                    stateSelect.appendChild(opt);
-                });
-            });
-        }
+        const states = await fetchList("state", countryId);
+        fillOptions(stateSelect, states);
     });
-    
-    stateSelect?.addEventListener("change", function () {
-        clearDropdown(townSelect);
 
+    stateSelect.addEventListener("change", async function() {
         const stateId = this.value;
-        if (stateId) {
-            fetchLocations("town", stateId).then(towns => {
-                towns.forEach(town => {
-                    const opt = document.createElement("option");
-                    opt.value = town.id;
-                    opt.textContent = town.name;
-                    townSelect.appendChild(opt);
-                });
-            });
+        fillOptions(townSelect, []); // Reset subsequent dropdown
+        if (!stateId) return;
+
+        const towns = await fetchList("town", stateId);
+        fillOptions(townSelect, towns);
+    });
+
+    // --- Initial setup on page load ---
+
+    // Ensure selects keep the value rendered by Django or fall back to the first option.
+    [continentSelect, countrySelect, stateSelect, townSelect].forEach(s => {
+        if (!s.value && s.options.length > 0) {
+            s.selectedIndex = 0;
         }
     });
 });

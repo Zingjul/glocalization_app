@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Post, Category, PostImage, SocialMediaHandle
-from custom_search.models import PendingLocationRequest, Country, State
+from .models import Post, Category, PostImage, SocialMediaHandle, PendingLocationRequest
+from custom_search.models import Continent, Country, State, Town
 from person.models import Person
-
+from django.contrib import admin, messages
+from django.db.models import Q
+from django.db import transaction
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
@@ -43,9 +45,9 @@ class PostAdmin(admin.ModelAdmin):
             'fields': (
                 'author', 'get_owner_name', 'category', 'product_name', 'status',
                 'description', 'availability',
+                # keep FK dropdowns + free-text town input
                 'post_continent', 'post_country', 'post_state', 'post_town',
-                'post_continent_input', 'post_country_input',
-                'post_state_input', 'post_town_input',
+                'post_town_input',
                 'created_at', 'updated_at', 'get_location_info',
                 'preview_social_handles',
             )
@@ -59,12 +61,12 @@ class PostAdmin(admin.ModelAdmin):
 
     def get_location_info(self, obj):
         loc_parts = [
-            obj.post_town.name if obj.post_town else obj.post_town_input,
-            obj.post_state.name if obj.post_state else obj.post_state_input,
-            obj.post_country.name if obj.post_country else obj.post_country_input,
-            obj.post_continent.name if obj.post_continent else obj.post_continent_input,
+            obj.post_town.name if obj.post_town else None,
+            obj.post_state.name if obj.post_state else None,
+            obj.post_country.name if obj.post_country else None,
+            obj.post_continent.name if obj.post_continent else None,
         ]
-        return ', '.join(part for part in loc_parts if part)
+        return ', '.join([part for part in loc_parts if part])
     get_location_info.short_description = "Post Location"
 
     def preview_social_handles(self, obj):
@@ -83,43 +85,111 @@ class PostAdmin(admin.ModelAdmin):
         updated = queryset.update(status='approved')
         self.message_user(request, f"{updated} post(s) marked as approved.")
 
-
 @admin.register(PendingLocationRequest)
 class PendingLocationRequestAdmin(admin.ModelAdmin):
-    list_display = [
-        "user", "typed_continent", "typed_country", "typed_state", "typed_town",
-        "is_reviewed", "approved", "submitted_at"
-    ]
-    list_filter = ["is_reviewed", "approved"]
-    search_fields = ["user__username", "typed_state", "typed_country", "typed_town"]
-    actions = ["approve_location"]
+    list_display = (
+        'id',
+        'get_post_title',
+        'get_typed_town',
+        'get_parent_state',
+        'is_reviewed',
+        'approved',
+        'submitted_at',
+    )
+    list_filter = ('is_reviewed', 'approved', 'submitted_at')
+    actions = ["approve_pending_towns", "reject_pending_towns"]
 
-    @admin.action(description="Approve and create official location entries")
-    def approve_location(self, request, queryset):
-        for pending in queryset:
-            if pending.typed_state and pending.typed_country:
-                country_obj = Country.objects.filter(name__iexact=pending.typed_country).first()
-                if not country_obj:
-                    self.message_user(request, f"❌ Country '{pending.typed_country}' not found for {pending.user}", level="error")
-                    continue
+    def get_post_title(self, obj):
+        return f"{obj.post.product_name} (Post #{obj.post.id})"
+    get_post_title.short_description = "Post"
 
-                # Generate state code
-                country_code = country_obj.code.upper()
-                raw = pending.typed_state.strip().replace(" ", "").replace("-", "")
-                state_code = f"{country_code}-{raw.upper()[:6]}"
+    def get_typed_town(self, obj):
+        return obj.typed_town or "—"
+    get_typed_town.short_description = "Typed Town"
 
-                # Avoid duplicates
-                if State.objects.filter(name__iexact=pending.typed_state, country=country_obj).exists():
-                    self.message_user(request, f"⚠️ State '{pending.typed_state}' already exists under '{pending.typed_country}'", level="warning")
-                else:
-                    State.objects.create(name=pending.typed_state, country=country_obj, code=state_code)
-                    self.message_user(request, f"✅ Created state '{pending.typed_state}' with code '{state_code}'")
+    def get_parent_state(self, obj):
+        return obj.parent_state or "—"
+    get_parent_state.short_description = "Parent State"
 
-                pending.is_reviewed = True
-                pending.approved = True
-                pending.save()
+    @admin.action(description="Approve selected pending towns")
+    def approve_pending_towns(self, request, queryset):
+        approved_count = 0
+        skipped_count = 0
 
-        self.message_user(request, f"🎯 Reviewed and processed {queryset.count()} pending location request(s).")
+        for pending in queryset.filter(is_reviewed=False, approved=False):
+            typed_town = pending.typed_town
+            parent_state = pending.parent_state
 
+            if not typed_town or not parent_state:
+                skipped_count += 1
+                continue
+
+            normalized_name = typed_town.strip().title()
+
+            # Case-insensitive check
+            town = Town.objects.filter(
+                Q(state=parent_state) & Q(name__iexact=normalized_name)
+            ).first()
+
+            if not town:
+                with transaction.atomic():
+                    last_town = Town.objects.order_by("-id").first()
+                    next_id = (last_town.id + 1) if last_town else 1
+                    prefix = normalized_name[:2].lower()
+                    code = f"{prefix}{next_id}"
+
+                    town = Town.objects.create(
+                        id=next_id,
+                        code=code,
+                        name=normalized_name,
+                        state=parent_state
+                    )
+
+            # Link town to post + approve post
+            post = pending.post
+            post.post_town = town
+            post.status = "approved"
+            post.save(update_fields=["post_town", "status"])
+
+            # Mark request reviewed + approved
+            pending.approved = True
+            pending.is_reviewed = True
+            pending.save()
+
+            approved_count += 1
+
+        if approved_count:
+            self.message_user(
+                request,
+                f"✅ {approved_count} pending town(s) approved and linked to posts.",
+                level=messages.SUCCESS
+            )
+        if skipped_count:
+            self.message_user(
+                request,
+                f"⚠️ {skipped_count} request(s) skipped (missing typed_town or parent_state).",
+                level=messages.WARNING
+            )
+
+    @admin.action(description="Reject selected pending towns")
+    def reject_pending_towns(self, request, queryset):
+        rejected_count = 0
+
+        for pending in queryset.filter(is_reviewed=False):
+            post = pending.post
+            post.status = "pending"  # stays pending
+            post.save(update_fields=["status"])
+
+            pending.is_reviewed = True
+            pending.approved = False
+            pending.save()
+
+            rejected_count += 1
+
+        self.message_user(
+            request,
+            f"🚫 {rejected_count} pending town(s) rejected.",
+            level=messages.INFO
+        )
 
 admin.site.register(Category)

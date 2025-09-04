@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Continent, Country, State, Town, PendingLocationRequest
-
+from .models import Continent, Country, State, Town
 # 🔗 Inline: Countries shown within a Continent
 class CountryInline(admin.TabularInline):
     model = Country

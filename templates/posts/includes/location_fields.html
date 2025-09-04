@@ -17,9 +17,11 @@
           {{ form.post_state_input.label_tag }} {{ form.post_state_input }}
       </p>
     </div>
-    <div class="field-wrapper">
-      <p id="location_field_town">
-        {{ form.post_town.label_tag }} {{ form.post_town }}
-        {{ form.post_town_input.label_tag }} {{ form.post_town_input }}        
-      </p>
+    <div data-town-sync>
+      <div class="field-wrapper">
+        <p id="location_field_town">
+          {{ form.post_town.label_tag }} {{ form.post_town }}
+          {{ form.post_town_input.label_tag }} {{ form.post_town_input }}        
+        </p>
+      </div>
     </div>

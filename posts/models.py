@@ -61,19 +61,19 @@ class Post(models.Model):
 
     # 🔽 Post-specific location (dropdown selection from custom_search)
     post_continent = models.ForeignKey(
-        Continent, on_delete=models.SET_NULL, blank=True, null=True,
+        Continent, on_delete=models.SET_NULL, default=0, blank=True, null=True,
         related_name='post_specific_continent'
     )
     post_country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, blank=True, null=True,
+        Country, on_delete=models.SET_NULL, default=0, blank=True, null=True,
         related_name='post_specific_country'
     )
     post_state = models.ForeignKey(
-        State, on_delete=models.SET_NULL, blank=True, null=True,
+        State, on_delete=models.SET_NULL, default=0, blank=True, null=True,
         related_name='post_specific_state'
     )
     post_town = models.ForeignKey(
-        Town, on_delete=models.SET_NULL, blank=True, null=True,
+        Town, on_delete=models.SET_NULL, default=0, blank=True, null=True,
         related_name='post_specific_town'
     )
 
@@ -117,6 +117,52 @@ class Post(models.Model):
     class Meta:
         ordering = ["-date"]
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # ✅ If user typed something into the input field
+        if self.post_town_input:
+            normalized_town = self.post_town_input.strip().title()
+
+            pending, created = PendingLocationRequest.objects.get_or_create(
+                post=self,
+                defaults={
+                    "typed_town": normalized_town,
+                    "parent_state": self.post_state
+                }
+            )
+
+            if not created:
+                # Update the existing pending request if user edited the input/state
+                pending.typed_town = normalized_town
+                pending.parent_state = self.post_state
+                pending.is_reviewed = False
+                pending.approved = False
+                pending.save()
+        else:
+            # ✅ If input is empty, remove stale pending requests
+            PendingLocationRequest.objects.filter(post=self).delete()
+                
+class PendingLocationRequest(models.Model):
+    post = models.OneToOneField(
+        "posts.Post",
+        on_delete=models.CASCADE,
+        related_name="pending_location_request"
+    )
+    typed_town = models.CharField(max_length=100, blank=True, null=True)  # NEW: what user typed
+    parent_state = models.ForeignKey(  # NEW: link to the state
+        "custom_search.State",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="pending_requests"
+    )
+    is_reviewed = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Pending town '{self.typed_town}' for Post #{self.post.id}"
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")

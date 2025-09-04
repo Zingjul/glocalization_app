@@ -1,0 +1,52 @@
+<!-- Continent -->
+<p> 
+<label for="id_continent">Continent:</label>
+<select id="id_continent" name="continent">
+    {% for continent in continents %}
+        <option value="{{ continent.id }}">{{ continent.name }}</option>
+    {% endfor %}
+</select>
+
+<!-- Country -->
+ </p>
+<p> 
+<label for="id_country">Country:</label>
+<select id="id_country" name="country">
+    {% for country in countries %}
+        <option value="{{ country.id }}" data-continent="{{ country.continent_id }}">
+            {{ country.name }}
+        </option>
+    {% endfor %}
+</select>
+</p>
+
+<!-- State -->
+<p> 
+<label for="id_state">State:</label>
+<select id="id_state" name="state">
+    {% for state in states %}
+        <option value="{{ state.id }}" data-country="{{ state.country_id }}">
+            {{ state.name }}
+        </option>
+    {% endfor %}
+</select>
+</p>
+
+<!-- Town -->
+<p> 
+<div data-town-sync>
+    <label for="id_town">Town:</label>
+    <select id="id_town" name="town">
+        {% for town in towns %}
+            <option value="{{ town.id }}" data-state="{{ town.state_id }}">
+                {{ town.name }}
+            </option>
+        {% endfor %}
+    </select>
+    </p>
+
+    <p> 
+    <!-- <label for="id_town">Town:</label> -->
+    {{ form.town_input }}
+    </p>
+</div>

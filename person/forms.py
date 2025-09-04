@@ -1,73 +1,28 @@
+# person/forms.py
 from django import forms
 from .models import Person
 from custom_search.models import Continent, Country, State, Town
 from django.utils.translation import gettext_lazy as _
 
-class PersonForm(forms.ModelForm):
-    # Dropdown fields (existing)
-    continent = forms.ModelChoiceField(
-        queryset=Continent.objects.all(),
-        required=False,
-        empty_label=_("Select Continent"),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    country = forms.ModelChoiceField(
-        queryset=Country.objects.all(),
-        required=False,
-        empty_label=_("Select Country"),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    state = forms.ModelChoiceField(
-        queryset=State.objects.all(),
-        required=False,
-        empty_label=_("Select State"),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    town = forms.ModelChoiceField(
-        queryset=Town.objects.all(),
-        required=False,
-        empty_label=_("Select Town"),
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
+from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin
+from posts.utils.location_assignment import assign_location_fields
 
-    # NEW text input fields for user to type location if not listed
-    continent_input = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
-            # 'placeholder': _('Type your continent if not listed'),
-        }),
-        label=_("Or enter your continent")
-    )
-    country_input = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
-            # 'placeholder': _('Type your country if not listed'),
-        }),
-        label=_("Or enter your country")
-    )
-    state_input = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
-            # 'placeholder': _('Type your state if not listed'),
-        }),
-        label=_("Or enter your state")
-    )
-    town_input = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            # 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
-            # 'placeholder': _('Type your town if not listed'),
-        }),
-        label=_("Or enter your town")
-    )
 
+class PersonForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
     class Meta:
         model = Person
         fields = [
-            'person_profile_picture', 'real_name', 'business_name', 'about', 'website', 'continent', 'country', 'state', 'town', 'continent_input', 'country_input', 'state_input', 'town_input',
+            "person_profile_picture",
+            "real_name",
+            "business_name",
+            "about",
+            "website",
+            "continent",
+            "country",
+            "state",
+            "town",
+            "town_input",
+            "use_business_name",
         ]
 
         labels = {
@@ -82,6 +37,7 @@ class PersonForm(forms.ModelForm):
             'state': _("Select Your State"),
             'town': _("Select Your Town"),
         }
+
         help_texts = {
             'person_profile_picture': _("Make your profile stand out with a picture!"),
             'real_name': _("What's the story behind you or your brand?"),
@@ -92,22 +48,23 @@ class PersonForm(forms.ModelForm):
             'state': _("Pick your state."),
             'town': _("Select your town for precise location."),
         }
+
         widgets = {
-            'business_name': forms.TextInput(attrs={
+                'business_name': forms.TextInput(attrs={
                 'class': 'form-input block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900'
             }),
-            'about': forms.Textarea(attrs={
+                'about': forms.Textarea(attrs={
                 'class': 'form-textarea block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900',
                 'rows': 4,
             }),
-            'website': forms.URLInput(attrs={
+                'website': forms.URLInput(attrs={
                 'class': 'form-input block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 text-gray-900'
             }),
-            'use_business_name': forms.CheckboxInput(attrs={
+                'use_business_name': forms.CheckboxInput(attrs={
                 'class': 'form-checkbox h-4 w-4 text-green-600 transition duration-150 ease-in-out'
             }),
-            # Your existing widget styles here...
         }
+
         error_messages = {
             'business_name': {
                 'required': _("Please enter the name of your business or service."),
@@ -120,32 +77,40 @@ class PersonForm(forms.ModelForm):
                 'invalid': _("Please enter a valid website URL."),
             },
             'continent': {
-                'required': _("Please select your continent or type it below."),
+                'required': _("Please select your continent."),
             },
             'country': {
-                'required': _("Please select your country or type it below."),
+                'required': _("Please select your country."),
             },
             'state': {
-                'required': _("Please select your state or type it below."),
-            },
-            'town': {
-                'required': _("Please select your town or type it below."),
+                'required': _("Please select your state."),
             },
         }
-    def clean(self):
-        cleaned_data = super().clean()
 
-        # For each location, prefer typed input if filled, else dropdown selection
-        for loc in ['continent', 'country', 'state', 'town']:
-            typed_value = cleaned_data.get(f"{loc}_input")
-            dropdown_value = cleaned_data.get(loc)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-            if typed_value:
-                # User typed custom value; store it and clear dropdown field to avoid conflicts
-                cleaned_data[loc] = None  # Clear the dropdown value
-                cleaned_data[f"{loc}_input"] = typed_value.strip()
-            else:
-                # No typed input; use dropdown value, clear typed input
-                cleaned_data[f"{loc}_input"] = None
+        # ✅ Force "Unspecified" into all dropdowns
+        self.fields['continent'].queryset = Continent.objects.filter(id=0) | Continent.objects.all()
+        self.fields['country'].queryset = Country.objects.filter(id=0) | Country.objects.all()
+        self.fields['state'].queryset = State.objects.filter(id=0) | State.objects.all()
+        self.fields['town'].queryset = Town.objects.filter(id=0) | Town.objects.all()
 
-        return cleaned_data
+        # ✅ Remove Django’s default “------”
+        for field in ["continent", "country", "state", "town"]:
+            if field in self.fields:
+                self.fields[field].empty_label = None
+
+        # ✅ Default initial = "Unspecified"
+        self.fields["continent"].initial = Continent.objects.filter(id=0).first()
+        self.fields["country"].initial = Country.objects.filter(id=0).first()
+        self.fields["state"].initial = State.objects.filter(id=0).first()
+        self.fields["town"].initial = Town.objects.filter(id=0).first()
+
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        assign_location_fields(self)  # ✅ injects location data (dropdown or typed input)
+        if commit:
+            instance.save()
+        return instance

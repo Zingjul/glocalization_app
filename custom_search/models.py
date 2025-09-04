@@ -58,17 +58,3 @@ class Town(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.type})"
-
-
-class PendingLocationRequest(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pending_location')
-    typed_continent = models.CharField(max_length=100, blank=True, null=True)
-    typed_country = models.CharField(max_length=100, blank=True, null=True)
-    typed_state = models.CharField(max_length=100, blank=True, null=True)
-    typed_town = models.CharField(max_length=100, blank=True, null=True)
-    is_reviewed = models.BooleanField(default=False)
-    approved = models.BooleanField(default=False)
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Location request by {self.user.username}"

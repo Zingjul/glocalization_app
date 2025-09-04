@@ -29,15 +29,20 @@
     </div>
   {% endif %}
 
-  <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
-  {{ social_form.as_p }}
-
+    <!-- 🔗 Social Media Handles -->
+    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
+    {{ social_form.as_p }}
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {{ form.errors }}
+        </div>
+    {% endif %}
+    
   <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
     Update
   </button>
 </form>
 
-{% load static %}
-<script src="{% static 'js/multi_image_preview.js' %}"></script>
-
-{% endblock content %}
+<!-- import scripts -->
+    {% include "posts/includes/js_imports.html" %}
+  {% endblock content %}
