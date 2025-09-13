@@ -30,11 +30,9 @@ class ImageFieldsMixin:
         max_bytes = self.max_file_size_mb * 1024 * 1024
         if image.size > max_bytes:
             raise ValidationError({field_name: f"Image file too large (>{self.max_file_size_mb}MB). Please upload a smaller image."})
-
         valid_types = ['image/jpeg', 'image/png', 'image/webp']
         if hasattr(image, 'content_type') and image.content_type not in valid_types:
             raise ValidationError({field_name: "Only JPEG, PNG, or WEBP image formats are allowed."})
-
         # Optional: Check dimensions
         try:
             img = Image.open(image)
@@ -43,7 +41,6 @@ class ImageFieldsMixin:
                 raise ValidationError({field_name: f"Image too large in dimensions (max {max_width}x{max_height}px)."})
         except Exception as e:
             raise ValidationError({field_name: "Invalid image file."})
-
 
 class ImageFieldsMixin:
     image1 = forms.ImageField(required=False)
@@ -62,7 +59,6 @@ class ImageFieldsMixin:
             field = f'image{i}'
             if field in self.fields:
                 self.fields[field].label = label
-
 
 class LocationFieldsSetupMixin:
     def init_location_labels_and_placeholders(self):

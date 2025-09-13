@@ -32,7 +32,7 @@ class PostAdmin(admin.ModelAdmin):
         'created_at', 'get_location_info', 'availability'
     )
     list_filter = ('status', 'category', 'created_at')
-    search_fields = ('product_name', 'author__username', 'author__email')
+    search_fields = ('product_name', 'author__username', 'author__email', 'description')
     inlines = [PostImageInline, SocialMediaHandleInline]
     readonly_fields = [
         'author', 'get_owner_name', 'created_at', 'updated_at',
@@ -70,13 +70,30 @@ class PostAdmin(admin.ModelAdmin):
     get_location_info.short_description = "Post Location"
 
     def preview_social_handles(self, obj):
-        handles = SocialMediaHandle.objects.filter(post=obj)
-        if not handles.exists():
+        try:
+            handles = obj.social_handles
+        except:
             return "-"
-        html = "<ul>"
-        for handle in handles:
-            html += f"<li><strong>{handle.platform}:</strong> {handle.handle}</li>"
+
+        if not handles:
+            return "-"
+
+        fields = {
+            "LinkedIn": handles.linkedin,
+            "Twitter": handles.twitter,
+            "YouTube": handles.youtube,
+            "Instagram": handles.instagram,
+            "Facebook": handles.facebook,
+            "WhatsApp": handles.whatsapp,
+            "Website": handles.website,
+        }
+
+        html = "<ul style='margin:0;padding-left:15px;'>"
+        for platform, url in fields.items():
+            if url:
+                html += f"<li><strong>{platform}:</strong> <a href='{url}' target='_blank'>{url}</a></li>"
         html += "</ul>"
+
         return format_html(html)
     preview_social_handles.short_description = "Social Media Handles"
 
@@ -192,4 +209,20 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
             level=messages.INFO
         )
 
-admin.site.register(Category)
+# --- Inline for Posts under a Category ---
+class PostInline(admin.TabularInline):
+    model = Post
+    extra = 0
+    fields = ("product_name", "author", "status", "created_at")
+    readonly_fields = ("product_name", "author", "status", "created_at")
+    show_change_link = True  # allows clicking through to the Post edit page
+
+
+# --- Category Admin ---
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)
+    inlines = [PostInline]
+
+# admin.site.register(Category)

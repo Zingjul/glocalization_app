@@ -22,12 +22,10 @@ from posts.utils.location_scope_guard import apply_location_scope_fallback
 
 logger = logging.getLogger(__name__)
 
-
 class CategoryListView(ListView):
     model = Category
     template_name = "posts/category_list.html"
     context_object_name = "categories"
-
 
 class PostListView(LoginRequiredMixin, ListView):
     model = Post
@@ -398,7 +396,6 @@ class PostEditServiceView(PostEditBaseView):
                     PostImage.objects.create(post=self.object, image=image)
 
         return super().form_valid(form)
-
 
 class PostEditLaborView(PostEditBaseView):
     model = Post

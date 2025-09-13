@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_search.models import Continent, Country, State, Town
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -19,7 +20,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class Post(models.Model):
     STATUS_CHOICES = [
@@ -52,8 +52,7 @@ class Post(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     author_phone_number = PhoneNumberField()
     author_email = models.EmailField(max_length=254, blank=True)
-    date = models.DateTimeField(auto_now_add=True)
-    
+    date = models.DateTimeField(default=timezone.now, editable=False)
     business_name = models.CharField(max_length=255, blank=True, null=True)
 
     # Status
@@ -145,9 +144,9 @@ class Post(models.Model):
                 
 class PendingLocationRequest(models.Model):
     post = models.OneToOneField(
-        "posts.Post",
+        Post,
         on_delete=models.CASCADE,
-        related_name="pending_location_request"
+        related_name="post_location_requests"
     )
     typed_town = models.CharField(max_length=100, blank=True, null=True)  # NEW: what user typed
     parent_state = models.ForeignKey(  # NEW: link to the state
@@ -155,7 +154,7 @@ class PendingLocationRequest(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="pending_requests"
+        related_name="post_pending_requests"
     )
     is_reviewed = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
@@ -196,6 +195,3 @@ class SocialMediaHandle(models.Model):
 
     def __str__(self):
         return f"Handles for {self.post}"
-
-def get_absolute_url(self):
-    return reverse("posts:post_detail", kwargs={"pk": self.pk})

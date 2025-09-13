@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+
 <!-- 🔧 Edit/Delete Post -->
 {% if user == post.author %}
   <div class="mt-6 space-y-2">
@@ -17,6 +18,7 @@
   </div>
 {% endif %}
 
+<!-- Owner Info -->
 <div id="profile">
   {% if user.profile.business_name %}
     <p>{{ user.profile.business_name }}</p>
@@ -58,9 +60,9 @@
 
 <!-- Location -->
 <p><i class="fa fa-map-marker"></i> {{ post.post_town.name|default:post.post_town_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_state.name|default:post.post_state_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_country.name|default:post.post_country_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_continent.name|default:post.post_continent_input }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_state.name }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_country.name }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_continent.name }}</p>
 
 <!-- Timestamps -->
 <p class="text-sm text-gray-500 mt-2">
@@ -68,33 +70,8 @@
   Last updated: {{ post.updated_at|date:"F j, Y, g:i a" }}
 </p>
 
-<!-- 💬 Comments Section -->
-<div class="mt-6 border-t pt-4">
-  <h3 class="text-xl font-semibold mb-3">💬 Comments</h3>
-
-  {% if comments %}
-    <ul class="space-y-4">
-      {% for comment in comments %}
-        {% include "comment/partials/comment_thread.html" with comment=comment post=post comment_form=comment_form %}
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-gray-500">No comments yet. Be the first to speak up!</p>
-  {% endif %}
-
-  {% if user.is_authenticated %}
-    <div class="mt-6 bg-white p-4 rounded shadow">
-      <h5 class="font-semibold mb-2">Add a Comment</h5>
-      <form method="post" action="{% url 'create_comment' 'posts' 'post' post.id %}">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Submit</button>
-      </form>
-    </div>
-  {% else %}
-    <p><a href="{% url 'login' %}" class="text-blue-600 underline">Log in</a> to post a comment.</p>
-  {% endif %}
-</div>
+<!-- 💬 Comments -->
+{% include "comment/partials/comment_section.html" with comments=comments comment_form=comment_form target_object=post app_label="posts" model_name="post" %}
 
 <a href="{% url 'post_home' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
   Back to Posts

@@ -19,12 +19,14 @@
     </div>
   {% endif %}
 
+  <!-- Reply button -->
   <button onclick="toggleReplyForm({{ comment.id }})" type="button" class="text-sm text-blue-600 mt-2 underline">
     Reply
   </button>
 
+  <!-- Reply form -->
   <div id="reply-form-{{ comment.id }}" class="hidden mt-2">
-    <form method="post" action="{% url 'create_comment' 'posts' 'post' post.id %}">
+    <form method="post" action="{% url 'create_comment' app_label model_name target_object.id %}">
       {% csrf_token %}
       {{ comment_form.as_p }}
       <input type="hidden" name="parent" value="{{ comment.id }}">
@@ -32,10 +34,11 @@
     </form>
   </div>
 
+  <!-- Nested replies -->
   {% if comment.replies.all %}
     <ul class="mt-2 space-y-2 ml-4">
       {% for reply in comment.replies.all %}
-        {% include "comment/partials/comment_thread.html" with comment=reply post=post comment_form=comment_form %}
+        {% include "comment/partials/comment_thread.html" with comment=reply target_object=target_object comment_form=comment_form app_label=app_label model_name=model_name %}
       {% endfor %}
     </ul>
   {% endif %}

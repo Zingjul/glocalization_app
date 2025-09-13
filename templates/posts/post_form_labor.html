@@ -5,10 +5,7 @@
 
   <form method="post" enctype="multipart/form-data" id="postForm">
     {% csrf_token %}
-    <div>
-      {{ form.availability_scope.label_tag }}
-      {{ form.availability_scope }}
-    </div>
+ 
     
     <!-- 🔽 Manually render each field (excluding image1–image6) -->
     {% include "posts/includes/top_fields.html" %}

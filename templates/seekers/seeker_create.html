@@ -4,18 +4,15 @@
 {% block content %}
   <h2>What do you need?</h2>
   <p>Select the type of request you want to make:</p>
-
   <div style="display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
     <a href="{% url 'seekers:create_product_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
       <h3>🛒 Product</h3>
       <p>Looking for a specific product? Post a request and let suppliers find you.</p>
     </a>
-
     <a href="{% url 'seekers:create_service_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
       <h3>🧰 Service</h3>
       <p>Need help with something? Describe the service you’re looking for.</p>
     </a>
-
     <a href="{% url 'seekers:create_labor_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
       <h3>💪 Labor</h3>
       <p>Hiring hands-on help? Request laborers based on skills and location.</p>

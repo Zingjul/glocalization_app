@@ -43,8 +43,8 @@
              data-scope="{{ post.availability_scope }}"
              data-town="{{ post.post_town.name|default:post.post_town_input|lower }}">
 
-          {% if post.images.all %}
-            <img src="{{ post.images.all.0.image.url }}" alt="Post image" class="w-full h-48 object-cover">
+          {% if post.seeker_images.all %}
+            <img src="{{ post.seeker_images.all.0.image.url }}" alt="Post image" class="w-full h-48 object-cover">
           {% else %}
             <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
               No Image
