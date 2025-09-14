@@ -10,6 +10,8 @@
 <p><strong>Business Name:</strong> {{ profile.business_name }}</p>
 <p><strong>About:</strong> {{ profile.about }}</p>
 <p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
+<p><strong>Call:</strong> {{ user.phone_number }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
 
 <div><strong>Location:</strong> 
     <p>Continent: {% if profile.continent %} {{ profile.continent.name }} {% endif %}</p>
