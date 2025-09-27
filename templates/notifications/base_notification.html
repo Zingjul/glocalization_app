@@ -1,0 +1,9 @@
+<li class="notification {% if not notification.read %}unread{% endif %}">
+  {% if notification.actor %}
+    <strong>{{ notification.actor.username }}</strong>
+  {% else %}
+    <strong>System</strong>
+  {% endif %}
+  {{ notification.verb }}
+  <span class="timestamp">{{ notification.created_at|timesince }} ago</span>
+</li>

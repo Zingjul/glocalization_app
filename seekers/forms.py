@@ -11,6 +11,10 @@ from .models import (
 )
 from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin
 from .utils.location_assignment import assign_location_fields  # reuse the posts util if it handles generic location injection
+# --- Media forms for SeekerPosts ---
+from django.forms import modelformset_factory
+from media_app.models import MediaFile
+
 
 
 # Base form used by specific seeker forms
@@ -41,7 +45,7 @@ class BaseSeekerPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupM
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
         # Ensure the location dropdowns include any "Unspecified" entries (id=0) if seeded
         self.fields["post_continent"].queryset = Continent.objects.filter(id=0) | Continent.objects.all()
         self.fields["post_country"].queryset = Country.objects.filter(id=0) | Country.objects.all()
@@ -107,7 +111,10 @@ class BaseSeekerPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupM
         elif scope == "state":
             cleaned["post_town"] = unspecified_town
         elif scope == "town":
-            pass  # keep town as provided
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
+
         else:  # unspecified or global fallback
             cleaned["post_continent"] = unspecified_continent
             cleaned["post_country"] = unspecified_country
@@ -136,7 +143,7 @@ class BaseSeekerPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupM
 class ProductSeekerForm(BaseSeekerPostForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
         # product-specific tweaks
         self.fields["title"].label = "Product you're seeking"
         self.fields["title"].widget.attrs["placeholder"] = "E.g., iPhone 13, Samsung TV"
@@ -144,11 +151,56 @@ class ProductSeekerForm(BaseSeekerPostForm):
         self.fields["budget"].label = "Budget (optional)"
         self.fields["budget"].widget.attrs["placeholder"] = "E.g., 15000.00"
 
+    def clean(self):
+        cleaned = super().clean()
+        scope = cleaned.get("availability_scope")
+
+        unspecified_continent = Continent.objects.filter(id=0).first()
+        unspecified_country = Country.objects.filter(id=0).first()
+        unspecified_state = State.objects.filter(id=0).first()
+        unspecified_town = Town.objects.filter(id=0).first()
+
+        # Apply scope fallback same as posts forms
+        if scope == "continent":
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "country":
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "state":
+            cleaned["post_town"] = unspecified_town
+        elif scope == "town":
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
+
+        else:  # unspecified or global fallback
+            cleaned["post_continent"] = unspecified_continent
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # use existing utility to populate/normalize location-related fields
+        try:
+            assign_location_fields(self)
+        except Exception:
+            # don't break saving if assign_location_fields is not available or fails;
+            # let the caller handle or log as needed
+            pass
+
+        if commit:
+            instance.save()
+        return instance
 
 class ServiceSeekerForm(BaseSeekerPostForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
         # service-specific tweaks
         self.fields["title"].label = "Service you're seeking"
         self.fields["title"].widget.attrs["placeholder"] = "E.g., Plumbing service, Guitar lessons"
@@ -156,11 +208,56 @@ class ServiceSeekerForm(BaseSeekerPostForm):
         self.fields["preferred_fulfillment_time"].label = "When do you need the service?"
         self.fields["preferred_fulfillment_time"].widget.attrs["placeholder"] = "E.g., Weekdays, Mornings, ASAP"
 
+    def clean(self):
+        cleaned = super().clean()
+        scope = cleaned.get("availability_scope")
+
+        unspecified_continent = Continent.objects.filter(id=0).first()
+        unspecified_country = Country.objects.filter(id=0).first()
+        unspecified_state = State.objects.filter(id=0).first()
+        unspecified_town = Town.objects.filter(id=0).first()
+
+        # Apply scope fallback same as posts forms
+        if scope == "continent":
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "country":
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "state":
+            cleaned["post_town"] = unspecified_town
+        elif scope == "town":
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
+
+        else:  # unspecified or global fallback
+            cleaned["post_continent"] = unspecified_continent
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # use existing utility to populate/normalize location-related fields
+        try:
+            assign_location_fields(self)
+        except Exception:
+            # don't break saving if assign_location_fields is not available or fails;
+            # let the caller handle or log as needed
+            pass
+
+        if commit:
+            instance.save()
+        return instance
 
 class LaborSeekerForm(BaseSeekerPostForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
         # labor-specific tweaks
         self.fields["title"].label = "Labor / Skill you're seeking"
         self.fields["title"].widget.attrs["placeholder"] = "E.g., Electrician, Carpenter"
@@ -168,6 +265,51 @@ class LaborSeekerForm(BaseSeekerPostForm):
         self.fields["preferred_fulfillment_time"].label = "Preferred timing (optional)"
         self.fields["preferred_fulfillment_time"].widget.attrs["placeholder"] = "E.g., Immediate, within 3 days"
 
+    def clean(self):
+        cleaned = super().clean()
+        scope = cleaned.get("availability_scope")
+
+        unspecified_continent = Continent.objects.filter(id=0).first()
+        unspecified_country = Country.objects.filter(id=0).first()
+        unspecified_state = State.objects.filter(id=0).first()
+        unspecified_town = Town.objects.filter(id=0).first()
+
+        # Apply scope fallback same as posts forms
+        if scope == "continent":
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "country":
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+        elif scope == "state":
+            cleaned["post_town"] = unspecified_town
+        elif scope == "town":
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
+
+        else:  # unspecified or global fallback
+            cleaned["post_continent"] = unspecified_continent
+            cleaned["post_country"] = unspecified_country
+            cleaned["post_state"] = unspecified_state
+            cleaned["post_town"] = unspecified_town
+
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # use existing utility to populate/normalize location-related fields
+        try:
+            assign_location_fields(self)
+        except Exception:
+            # don't break saving if assign_location_fields is not available or fails;
+            # let the caller handle or log as needed
+            pass
+
+        if commit:
+            instance.save()
+        return instance
 
 # --- Social Media Handle Form for Seekers ---
 class SeekerSocialMediaHandleForm(forms.ModelForm):
@@ -202,3 +344,22 @@ class SeekerSocialMediaHandleForm(forms.ModelForm):
                         f"Invalid URL provided for {field_name}. Please use a valid format starting with https://"
                     )
         return cleaned_data
+
+
+
+class SeekerMediaForm(forms.ModelForm):
+    """
+    Handles uploads of media (images/videos) for SeekerPosts.
+    """
+    class Meta:
+        model = MediaFile
+        fields = ["file", "file_type", "caption", "is_public"]
+
+
+# A formset allows multiple uploads at once
+SeekerMediaFormSet = modelformset_factory(
+    MediaFile,
+    form=SeekerMediaForm,
+    extra=1,        # one empty form for new upload
+    can_delete=True # allow removing existing uploads
+)

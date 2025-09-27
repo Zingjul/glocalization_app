@@ -6,20 +6,21 @@ from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_search.models import Continent, Country, State, Town
 from django.utils import timezone
+from django.contrib.contenttypes.fields import GenericRelation
+from media_app.models import MediaFile   # ✅ proper import
+from datetime import timedelta
 
 User = get_user_model()
 
-# 🔽 Function for dynamic image path
-def post_image_upload_path(instance, filename):
-    """Store images inside a folder named after the user ID."""
-    user_folder = f"user_{instance.post.author.id}"  # Unique folder for each user
-    return f"posts/images/{user_folder}/{filename}"
-    
+def default_expiry():
+    return timezone.now() + timedelta(days=7)
+
 class Category(models.Model):
     name = models.CharField(max_length=77, unique=True)
 
     def __str__(self):
         return self.name
+
 
 class Post(models.Model):
     STATUS_CHOICES = [
@@ -27,8 +28,6 @@ class Post(models.Model):
         ('approved', 'Approved'),
     ]
 
-    # New field to define the scope of the post's availability
-    # This will be crucial for implementing the "global within scope" logic
     AVAILABILITY_SCOPE_CHOICES = [
         ('global', 'Global'),
         ('continent', 'Continent-wide'),
@@ -36,14 +35,15 @@ class Post(models.Model):
         ('state', 'State-wide'),
         ('town', 'Town-specific'),
     ]
+
     availability_scope = models.CharField(
         max_length=10,
         choices=AVAILABILITY_SCOPE_CHOICES,
-        default='town', # Default to most specific
-        help_text="Defines the scope of availability for this post (e.g., specific town, entire state, etc.)."
+        default='town',
+        help_text="Defines the scope of availability for this post."
     )
- 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False, editable=True)
+
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
 
     # Common fields
@@ -55,28 +55,31 @@ class Post(models.Model):
     date = models.DateTimeField(default=timezone.now, editable=False)
     business_name = models.CharField(max_length=255, blank=True, null=True)
 
+    # ✅ Generic relation to MediaFile (no duplication)
+    media_files = GenericRelation(MediaFile, related_query_name="posts")
+
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
-    # 🔽 Post-specific location (dropdown selection from custom_search)
+    # 🔽 Post-specific location (dropdown selection)
     post_continent = models.ForeignKey(
-        Continent, on_delete=models.SET_NULL, default=0, blank=True, null=True,
-        related_name='post_specific_continent'
+        Continent, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name='post_specific_continent', default=0
     )
     post_country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, default=0, blank=True, null=True,
-        related_name='post_specific_country'
+        Country, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name='post_specific_country', default=0
     )
     post_state = models.ForeignKey(
-        State, on_delete=models.SET_NULL, default=0, blank=True, null=True,
-        related_name='post_specific_state'
+        State, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name='post_specific_state', default=0
     )
     post_town = models.ForeignKey(
-        Town, on_delete=models.SET_NULL, default=0, blank=True, null=True,
-        related_name='post_specific_town'
+        Town, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name='post_specific_town', default=0
     )
 
-    # 📝 Post-specific location (text input fallback if dropdowns don’t cover it)
+    # Fallback location inputs
     post_continent_input = models.CharField(max_length=100, blank=True, null=True)
     post_country_input = models.CharField(max_length=100, blank=True, null=True)
     post_state_input = models.CharField(max_length=100, blank=True, null=True)
@@ -85,13 +88,21 @@ class Post(models.Model):
     # Product-specific fields
     color = models.CharField(max_length=100, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)
-    condition = models.CharField(max_length=50, choices=[('new', 'New'), ('fairly used', 'Fairly Used')], blank=True, null=True)
+    condition = models.CharField(
+        max_length=50,
+        choices=[('new', 'New'), ('fairly used', 'Fairly Used')],
+        blank=True, null=True
+    )
     model_version = models.CharField(max_length=100, blank=True, null=True)
     technical_specifications = models.TextField(blank=True, null=True)
     warranty = models.CharField(max_length=255, blank=True, null=True)
 
     # Service-specific fields
-    service_details = models.CharField(max_length=50, choices=[('yes', 'Yes'), ('no', 'No')], blank=True, null=True)
+    service_details = models.CharField(
+        max_length=50,
+        choices=[('yes', 'Yes'), ('no', 'No')],
+        blank=True, null=True
+    )
     qualifications = models.TextField(blank=True, null=True)
     availability_schedule = models.CharField(max_length=255, blank=True, null=True)
     service_guarantees = models.TextField(blank=True, null=True)
@@ -107,6 +118,16 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    expires_at = models.DateTimeField(default=default_expiry)
+
+    @property
+    def images(self):
+        return self.media_files.filter(file_type="image")
+
+    @property
+    def videos(self):
+        return self.media_files.filter(file_type="video")
+
     def __str__(self):
         return f"{self.product_name} by {self.author.username} on {self.date}"
 
@@ -119,7 +140,6 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # ✅ If user typed something into the input field
         if self.post_town_input:
             normalized_town = self.post_town_input.strip().title()
 
@@ -132,28 +152,26 @@ class Post(models.Model):
             )
 
             if not created:
-                # Update the existing pending request if user edited the input/state
                 pending.typed_town = normalized_town
                 pending.parent_state = self.post_state
                 pending.is_reviewed = False
                 pending.approved = False
                 pending.save()
         else:
-            # ✅ If input is empty, remove stale pending requests
             PendingLocationRequest.objects.filter(post=self).delete()
-                
+
+
 class PendingLocationRequest(models.Model):
     post = models.OneToOneField(
         Post,
         on_delete=models.CASCADE,
         related_name="post_location_requests"
     )
-    typed_town = models.CharField(max_length=100, blank=True, null=True)  # NEW: what user typed
-    parent_state = models.ForeignKey(  # NEW: link to the state
+    typed_town = models.CharField(max_length=100, blank=True, null=True)
+    parent_state = models.ForeignKey(
         "custom_search.State",
         on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
+        blank=True, null=True,
         related_name="post_pending_requests"
     )
     is_reviewed = models.BooleanField(default=False)
@@ -162,17 +180,6 @@ class PendingLocationRequest(models.Model):
 
     def __str__(self):
         return f"Pending town '{self.typed_town}' for Post #{self.post.id}"
-
-class PostImage(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to=post_image_upload_path)
-
-    def __str__(self):
-        return f"Image for post: {self.post.product_name or 'No Title'}"
-
-    def clean(self):
-        if self.image.size > 6 * 1024 * 1024:
-            raise ValidationError("Each image must be under 6MB.")
 
 
 class SocialPlatform(models.Model):
@@ -184,7 +191,7 @@ class SocialPlatform(models.Model):
 
 
 class SocialMediaHandle(models.Model):
-    post = models.OneToOneField('Post', on_delete=models.CASCADE, related_name='social_handles')
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='social_handles')
     linkedin = models.URLField(blank=True, null=True)
     twitter = models.URLField(blank=True, null=True)
     youtube = models.URLField(blank=True, null=True)

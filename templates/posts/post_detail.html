@@ -19,9 +19,11 @@
 {% endif %}
 
 <!-- Owner Info -->
-<div id="profile">
-  {% if user.profile.business_name %}
-    <p>{{ user.profile.business_name }}</p>
+<div id="profile" class="mb-4">
+  {% if post.author.profile and post.author.profile.business_name %}
+    <p class="font-semibold">{{ post.author.profile.business_name }}</p>
+  {% else %}
+    <p class="font-semibold">{{ post.author.username }}</p>
   {% endif %}
 </div>
 
@@ -37,18 +39,8 @@
   {% endif %}
 </h2>
 
-<!-- Images -->
-{% if post.images.all %}
-  <div class="flex flex-wrap gap-4 mb-4">
-    {% for image in post.images.all %}
-      <img src="{{ image.image.url }}" alt="Post Image" class="w-36 h-36 object-cover rounded shadow">
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
-    No images uploaded for this post.
-  </div>
-{% endif %}
+<!-- Media Files -->
+{% include "media_app/current_images.html" %}
 
 <!-- Post Info -->
 <p><strong>Category:</strong> {{ post.category.name }}</p>
@@ -60,9 +52,9 @@
 
 <!-- Location -->
 <p><i class="fa fa-map-marker"></i> {{ post.post_town.name|default:post.post_town_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_state.name }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_country.name }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_continent.name }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_state.name|default:post.post_state_input }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_country.name|default:post.post_country_input }}</p>
+<p><i class="fa fa-map-marker"></i> {{ post.post_continent.name|default:post.post_continent_input }}</p>
 
 <!-- Timestamps -->
 <p class="text-sm text-gray-500 mt-2">

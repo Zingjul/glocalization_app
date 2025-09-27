@@ -12,5 +12,4 @@ urlpatterns = [
     path("countries/", views.countries_by_continent, name="api_countries_by_continent"),
     path("states/", views.states_by_country, name="api_states_by_country"),
     path("towns/", views.towns_by_state, name="api_towns_by_state"),
-
 ]

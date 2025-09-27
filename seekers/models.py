@@ -6,16 +6,14 @@ from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_search.models import Continent as SeekerContinent, Country as SeekerCountry, State as SeekerState, Town as SeekerTown
 from django.utils import timezone
+from django.contrib.contenttypes.fields import GenericRelation
+from media_app.models import MediaFile
+from datetime import timedelta
 
 User = get_user_model()
 
-
-# function for dynamic image path
-def seeker_image_upload_path(instance, filename):
-    """Store images inside a folder named after the user ID."""
-    user_folder = f"user_{instance.post.author.id}"  # Unique folder for each user
-    return f"seekers/images/{user_folder}/{filename}"
-
+def default_expiry():
+    return timezone.now() + timedelta(days=7)
 
 class SeekerCategory(models.Model):
     """Separate category model for seekers to avoid collision with posts.Category."""
@@ -69,6 +67,17 @@ class SeekerPost(models.Model):
     author_phone_number = PhoneNumberField()
     author_email = models.EmailField(blank=True, null=True)
 
+    # ✅ Generic relation to MediaFile (no duplication)
+    media_files = GenericRelation(MediaFile, related_query_name="seeker_posts")
+
+    @property
+    def images(self):
+        return self.media_files.filter(file_type="image")
+
+    @property
+    def videos(self):
+        return self.media_files.filter(file_type="video")
+
     post_continent = models.ForeignKey(
         SeekerContinent, on_delete=models.SET_NULL, blank=True, null=True,
         related_name="seeker_posts_continent"
@@ -99,6 +108,9 @@ class SeekerPost(models.Model):
     # timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# here we can increase the number of days a post will last after successful upload, before it expires and gets deleted from the database
+    expires_at = models.DateTimeField(default=default_expiry)
 
     class Meta:
         db_table = "seeker_post"
@@ -162,23 +174,6 @@ class PendingSeekerLocationRequest(models.Model):
 
     def __str__(self):
         return f"Pending town '{self.typed_town}' for SeekerPost #{self.post.id}"
-
-
-class SeekerImage(models.Model):
-    post = models.ForeignKey(SeekerPost, on_delete=models.CASCADE, related_name="seeker_images")
-    image = models.ImageField(upload_to=seeker_image_upload_path)
-
-    class Meta:
-        db_table = "seeker_image"
-        verbose_name = "Seeker Image"
-        verbose_name_plural = "Seeker Images"
-
-    def __str__(self):
-        return f"Image for post: {self.post.title or 'No Title'}"
-
-    def clean(self):
-        if self.image.size > 6 * 1024 * 1024:
-            raise ValidationError("Each image must be under 6MB.")
 
 
 class SeekerResponse(models.Model):

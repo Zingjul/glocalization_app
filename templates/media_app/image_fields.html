@@ -1,0 +1,20 @@
+<div id="fileInputsContainer">
+  <!-- Initial input -->
+  <input 
+    type="file" 
+    name="media_files[]" 
+    multiple 
+    accept="image/*,video/*" 
+    class="file-input"
+    id="firstFileInput">
+</div>
+
+<!-- Hidden initially -->
+<button type="button" 
+        id="addMoreBtn" 
+        class="bg-blue-500 text-white px-3 py-1 rounded mt-2 hidden">
+  ➕ Add More
+</button>
+
+<!-- Previews -->
+<div id="newImagePreviewContainer" class="flex flex-wrap gap-2 mt-2"></div>

@@ -2,7 +2,7 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 from .models import Post, SocialMediaHandle
-from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin  # <-- import your mixins here
+from .mixins import LocationFieldsSetupMixin
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from .models import SocialMediaHandle
@@ -12,7 +12,7 @@ from custom_search.models import Continent, Country, State, Town
 
 # forms.py
 
-class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
+class ProductPostForm(forms.ModelForm, LocationFieldsSetupMixin):
     author_phone_number = PhoneNumberField(
         widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'})
     )
@@ -27,8 +27,20 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
         ]
 
     def __init__(self, *args, **kwargs):
+        # ✅ Extract user from kwargs if passed by the view
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        # ✅ Pre-fill phone/email from user
+        if user:
+            if hasattr(user, "phone_number") and user.phone_number:
+                self.fields["author_phone_number"].initial = user.phone_number
+            if hasattr(user, "email") and user.email:
+                self.fields["author_email"].initial = user.email
+
+        super().__init__(*args, **kwargs)
+
+        
         # Always include "Unspecified"
         self.fields["post_continent"].queryset = Continent.objects.all()
         self.fields["post_country"].queryset = Country.objects.all()
@@ -73,7 +85,6 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
         self.fields['condition'].widget.attrs['placeholder'] = "E.g., New, Fairly used, Broken"
 
         # 🔹 Init mixin helpers
-        self.init_image_labels()
         self.init_location_labels_and_placeholders()
         self.init_location_queryset()
 
@@ -101,7 +112,9 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
             cleaned["post_town"] = unspecified_town
 
         elif scope == "town":
-            pass  # lowest level, leave as-is
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
 
         else:  # unspecified
             cleaned["post_continent"] = unspecified_continent
@@ -121,7 +134,7 @@ class ProductPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
 
 
 # Service-specific post form
-class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
+class ServicePostForm(forms.ModelForm, LocationFieldsSetupMixin):
     author_phone_number = PhoneNumberField(
         widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'})
     )
@@ -136,7 +149,19 @@ class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
         ]
 
     def __init__(self, *args, **kwargs):
+        # ✅ Extract user from kwargs if passed by the view
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+
+        # ✅ Pre-fill phone/email from user
+        if user:
+            if hasattr(user, "phone_number") and user.phone_number:
+                self.fields["author_phone_number"].initial = user.phone_number
+            if hasattr(user, "email") and user.email:
+                self.fields["author_email"].initial = user.email
+
+        super().__init__(*args, **kwargs)
+        
         # Always include "Unspecified"
         self.fields["post_continent"].queryset = Continent.objects.all()
         self.fields["post_country"].queryset = Country.objects.all()
@@ -186,7 +211,6 @@ class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
         self.fields['service_guarantees'].widget.attrs['placeholder'] = "Enter guarantees if any"
 
         # 🔹 Init mixin helpers
-        self.init_image_labels()
         self.init_location_labels_and_placeholders()
         self.init_location_queryset()
 
@@ -214,7 +238,9 @@ class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
             cleaned["post_town"] = unspecified_town
 
         elif scope == "town":
-            pass  # lowest level, leave as-is
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
 
         else:  # unspecified
             cleaned["post_continent"] = unspecified_continent
@@ -233,7 +259,7 @@ class ServicePostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixi
         return instance
 
 # Labor-specific post form
-class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
+class LaborPostForm(forms.ModelForm, LocationFieldsSetupMixin):
     author_phone_number = PhoneNumberField(
         widget=forms.TextInput(attrs={'placeholder': 'e.g., +1234567890'})
     )
@@ -248,8 +274,19 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
         ]
 
     def __init__(self, *args, **kwargs):
+        # ✅ Extract user from kwargs if passed by the view
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        # ✅ Pre-fill phone/email from user
+        if user:
+            if hasattr(user, "phone_number") and user.phone_number:
+                self.fields["author_phone_number"].initial = user.phone_number
+            if hasattr(user, "email") and user.email:
+                self.fields["author_email"].initial = user.email
+
+        super().__init__(*args, **kwargs)
+        
         # Always include "Unspecified"
         self.fields["post_continent"].queryset = Continent.objects.all()
         self.fields["post_country"].queryset = Country.objects.all()
@@ -290,7 +327,6 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
         self.fields["labor_experience_years"].widget.attrs["placeholder"] = "E.g., 3"
 
         # 🔹 Init mixin helpers
-        self.init_image_labels()
         self.init_location_labels_and_placeholders()
         self.init_location_queryset()
 
@@ -318,7 +354,9 @@ class LaborPostForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin)
             cleaned["post_town"] = unspecified_town
 
         elif scope == "town":
-            pass  # lowest level, leave as-is
+            # ✅ If user didn’t select a town (typed instead), fallback
+            if not cleaned.get("post_town"):
+                cleaned["post_town"] = unspecified_town
 
         else:  # unspecified
             cleaned["post_continent"] = unspecified_continent

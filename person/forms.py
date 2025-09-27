@@ -3,7 +3,7 @@ from django import forms
 from .models import Person
 from custom_search.models import Continent, Country, State, Town
 from django.utils.translation import gettext_lazy as _
-
+from accounts.models import Follow
 from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin
 from posts.utils.location_assignment import assign_location_fields
 
@@ -114,3 +114,28 @@ class PersonForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
         if commit:
             instance.save()
         return instance
+
+class ProfileFollowForm(forms.ModelForm):
+    class Meta:
+        model = Follow
+        fields = []  # no manual inputs
+
+    def __init__(self, follower, following, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.follower = follower
+        self.following = following
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.follower == self.following:
+            raise forms.ValidationError("You cannot follow yourself.")
+        if Follow.objects.filter(follower=self.follower, following=self.following).exists():
+            raise forms.ValidationError("You already follow this user.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        follow = Follow(follower=self.follower, following=self.following)
+        if commit:
+            follow.save()
+        return follow
+    

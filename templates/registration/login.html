@@ -8,7 +8,6 @@
     </div>
     <form method="post" autocomplete="off" class="space-y-6">
       {% csrf_token %}
-
       {% for field in form %}
         <div>
           {{ field.label_tag}}

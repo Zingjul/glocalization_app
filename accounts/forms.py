@@ -6,7 +6,7 @@ from django.contrib.auth.forms import (
     PasswordChangeForm,
     AuthenticationForm
 )
-from .models import CustomUser
+from .models import CustomUser, Follow
 from django.core.exceptions import ValidationError
 
 
@@ -189,3 +189,9 @@ class ConfirmPasswordForm(forms.Form):
         if not self.user.check_password(password):
             raise forms.ValidationError("Incorrect password.")
         return password
+
+# just for validation
+class FollowForm(forms.ModelForm):
+    class Meta:
+        model = Follow
+        fields = []  # nothing exposed, just used for validation

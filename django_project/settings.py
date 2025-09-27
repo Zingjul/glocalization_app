@@ -32,12 +32,14 @@ INSTALLED_APPS = [
     'accounts',
     'comment',
     'custom_search',
+    'media_app',
     'person',
     'posts',
     'search',
     'postfinder',
     'seekers',
     'seekersfinder',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -114,3 +116,5 @@ SESSION_COOKIE_AGE = 86400  # Sessions last for 1 day
 SESSION_COOKIE_SECURE = True  # Ensures cookies are secure
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents logout when browser is closed
 SESSION_SAVE_EVERY_REQUEST = True  # Ensures session persistence
+# Use BigAutoField for primary keys by default
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

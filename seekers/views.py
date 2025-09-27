@@ -10,12 +10,11 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.views import View
 import logging
-
+from media_app.models import MediaFile
 from .models import (
     SeekerPost,
     SeekerCategory,
     SeekerSocialMediaHandle,
-    SeekerImage,  # ✅ correct model name
 )
 from .forms import (
     ProductSeekerForm,
@@ -228,13 +227,18 @@ class SeekerProductPostCreateView(LoginRequiredMixin, CreateView):
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Product")
 
+        # 💾 Save the post itself first
         response = super().form_valid(form)
 
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                SeekerImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
 
+        # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
         social_handle.save()
@@ -272,13 +276,18 @@ class SeekerServicePostCreateView(LoginRequiredMixin, CreateView):
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Service")
 
+        # 💾 Save the post itself first
         response = super().form_valid(form)
 
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                SeekerImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
 
+        # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
         social_handle.save()
@@ -316,13 +325,18 @@ class SeekerLaborPostCreateView(LoginRequiredMixin, CreateView):
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Labor")
 
+        # 💾 Save the post itself first
         response = super().form_valid(form)
 
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                SeekerImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
 
+        # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
         social_handle.save()
@@ -365,19 +379,23 @@ class SeekerPostEditProductView(SeekerPostEditBaseView):
 
     def form_valid(self, form):
         self.object = form.save()
+
+        # ✅ Save social media form
         social_form = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         if social_form.is_valid():
             social_form.save()
 
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.seeker_images.all().delete()
-            for image in new_images:
-                if image:
-                    SeekerImage.objects.create(post=self.object, image=image)
-
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
         return super().form_valid(form)
-
 
 class SeekerPostEditServiceView(SeekerPostEditBaseView):
     model = SeekerPost
@@ -394,19 +412,23 @@ class SeekerPostEditServiceView(SeekerPostEditBaseView):
 
     def form_valid(self, form):
         self.object = form.save()
+
+        # ✅ Save social media form
         social_form = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         if social_form.is_valid():
             social_form.save()
 
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.seeker_images.all().delete()
-            for image in new_images:
-                if image:
-                    SeekerImage.objects.create(post=self.object, image=image)
-
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
         return super().form_valid(form)
-
 
 class SeekerPostEditLaborView(SeekerPostEditBaseView):
     model = SeekerPost
@@ -423,19 +445,23 @@ class SeekerPostEditLaborView(SeekerPostEditBaseView):
 
     def form_valid(self, form):
         self.object = form.save()
+
+        # ✅ Save social media form
         social_form = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         if social_form.is_valid():
             social_form.save()
 
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.seeker_images.all().delete()
-            for image in new_images:
-                if image:
-                    SeekerImage.objects.create(post=self.object, image=image)
-
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
         return super().form_valid(form)
-
 
 class SeekerPendingPostsByUserView(LoginRequiredMixin, ListView):
     model = SeekerPost

@@ -1,7 +1,7 @@
 # accounts/urls.py
 
 from django.urls import path
-from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView, SuccessfulLoginView
+from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView, SuccessfulLoginView, toggle_follow, FollowersListView, FollowingListView
 
 urlpatterns = [
     # Auth routes
@@ -26,4 +26,9 @@ urlpatterns = [
     path('users/', UserList.as_view(), name='user_list'),
     path('users/<int:pk>/', UserDetail.as_view(), name='user_detail'),
     path('delete-account/', UserDeleteView.as_view(), name='delete_account'),
+
+    # follow feature
+    path("follow/<int:user_id>/", toggle_follow, name="toggle_follow"),
+    path("<int:user_id>/followers/", FollowersListView.as_view(), name="followers_list"),
+    path("<int:user_id>/following/", FollowingListView.as_view(), name="following_list"),
 ]

@@ -1,0 +1,8 @@
+<!-- this is the added code that we used in giving the edit form page the ability to grab user existing selections. its not the main js file but it works with it in making it happen. Unlike the extra_script_js.html fill which works with other js files  -->
+<script>
+  // 🔹 Saved post location IDs (these are the ones we want for prefill)
+  window.savedPostContinent = "{{ form.instance.continent.id|default:'' }}";
+  window.savedPostCountry   = "{{ form.instance.country.id|default:'' }}";
+  window.savedPostState     = "{{ form.instance.state.id|default:'' }}";
+  window.savedPostTown      = "{{ form.instance.town.id|default:'' }}";
+</script>

@@ -8,6 +8,10 @@ from posts.models import PendingLocationRequest
 from custom_search.models import Continent, Country, State, Town
 
 
+def profile_pic_upload_path(instance, filename):
+    # Each user gets their own folder inside profile_pics/
+    return f"profile_pics/user_{instance.user.id}/{filename}"
+
 class Person(models.Model):
     APPROVAL_CHOICES = [
         ('awaiting_user', 'Awaiting User'),
@@ -18,7 +22,7 @@ class Person(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE,   #IF WE use the word "CASCADE" in place of "PROTECT" then, the whole will be deleted if we try to delete the profile  
         primary_key=True,
         related_name='profile',
         verbose_name=_("User"),
@@ -26,7 +30,10 @@ class Person(models.Model):
     business_name = models.CharField(max_length=255, blank=True, verbose_name=_("Business Name"))
     real_name = models.CharField(max_length=255, blank=True, verbose_name=_("Real Name"))
     person_profile_picture = models.ImageField(
-        upload_to='profile_pics/', blank=True, null=True, verbose_name=_("Profile Picture")
+        upload_to=profile_pic_upload_path,
+        blank=True,
+        null=True,
+        verbose_name=_("Profile Picture")
     )
     about = models.TextField(blank=True, verbose_name=_("About"))
     website = models.URLField(blank=True, verbose_name=_("Website"))
@@ -93,6 +100,23 @@ class Person(models.Model):
                     parent_state=self.state
                 )
                 
+    @property
+    def follower_count(self):
+        return self.user.follower_count
+
+    @property
+    def following_count(self):
+        return self.user.following_count
+
+    @property
+    def is_followed_by_current_user(self):
+        from accounts.models import Follow  # avoid circular imports
+        from django.contrib.auth import get_user_model
+        user = getattr(self, "_current_request_user", None)
+        if user and user.is_authenticated:
+            return Follow.objects.filter(follower=user, following=self.user).exists()
+        return False
+    
     def __str__(self):
         return f"{self.user.username} ({self.business_name})" if self.business_name else self.user.username
 
@@ -141,3 +165,4 @@ class Availability(models.Model):
 
     def __str__(self):
         return f"{self.person} - {self.day_of_week}: {self.start_time} to {self.end_time}"
+

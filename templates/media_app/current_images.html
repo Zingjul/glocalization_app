@@ -1,0 +1,19 @@
+<!-- Media Files -->
+{% if post.media_files.all %}
+  <div class="flex flex-wrap gap-4 mb-4">
+    {% for media in post.media_files.all %}
+      {% if media.file_type == "image" %}
+        <img src="{{ media.file.url }}" alt="Post Image" class="w-36 h-36 object-cover rounded shadow">
+      {% elif media.file_type == "video" %}
+        <video controls class="w-36 h-36 rounded shadow">
+          <source src="{{ media.file.url }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
+    No media uploaded for this post.
+  </div>
+{% endif %}

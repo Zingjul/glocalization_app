@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>{{ target_user.username }}'s {{ list_type }}</h2>
+  <ul>
+    {% for profile in profiles %}
+      <li>
+        <a href="{% url 'person_detail' profile.profile.pk %}">
+          {{ profile.username }}
+        </a>
+      </li>
+    {% empty %}
+      <p>No {{ list_type }} yet.</p>
+    {% endfor %}
+  </ul>
+{% endblock %}

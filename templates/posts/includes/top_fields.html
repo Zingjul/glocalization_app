@@ -1,7 +1,10 @@
-<div>
-    {{ form.availability_scope.label_tag }}
-    {{ form.availability_scope }}
-</div>
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {{ form.errors }}
+        </div>
+    {% endif %}
+  
+<div>{{ form.availability_scope.label_tag }} {{ form.availability_scope }}</div>
 <div>{{ form.product_name.label_tag }} {{ form.product_name }}</div>
 <div>{{ form.description.label_tag }} {{ form.description }}</div>
 <div>{{ form.author_phone_number.label_tag }} {{ form.author_phone_number }}</div>

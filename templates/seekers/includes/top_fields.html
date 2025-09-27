@@ -1,3 +1,8 @@
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {{ form.errors }}
+        </div>
+    {% endif %}
 <div>{{ form.availability_scope.label_tag }} {{ form.availability_scope }}</div>
 <div>{{ form.title.label_tag }} {{ form.title }}</div>
 <div>{{ form.description.label_tag }} {{ form.description }}</div>

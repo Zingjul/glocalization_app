@@ -1,0 +1,5 @@
+<li class="notification follow-notification {% if not notification.read %}unread{% endif %}">
+  <strong>{{ notification.actor.username }}</strong>
+  started following you 👥
+  <span class="timestamp">{{ notification.created_at|timesince }} ago</span>
+</li>

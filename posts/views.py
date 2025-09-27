@@ -7,9 +7,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.views.decorators.http import require_GET
 from django.utils.decorators import method_decorator
 from django.db.models import Q
-from .models import Post, Category, SocialMediaHandle, PostImage
+from .models import Post, Category, SocialMediaHandle
+from media_app.models import MediaFile
 from .forms import ProductPostForm, ServicePostForm, LaborPostForm, SocialMediaHandleForm
-from .forms import SocialMediaHandleForm
 import logging
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
@@ -160,6 +160,11 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'posts/post_form_product.html'
     success_url = reverse_lazy('post_home')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['social_form'] = SocialMediaHandleForm(
@@ -183,18 +188,21 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
         # ✅ Ensure the author is assigned
         form.instance.author = user
         form.instance.status = "pending"
-
+        
         # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Product")
 
         # 💾 Save the post
         response = super().form_valid(form)
 
-        # 📸 Save uploaded images (up to 6)
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                PostImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
+            
 
         # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
@@ -212,6 +220,11 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
     form_class = ServicePostForm
     template_name = 'posts/post_form_service.html'
     success_url = reverse_lazy('post_home')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -236,19 +249,21 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
         # ✅ Set base attributes
         form.instance.author = user
         form.instance.status = "pending"
-
-        # 🏷️ Category attachment
+                # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Service")
 
         # 💾 Save the post
         response = super().form_valid(form)
  
-        # 📸 Save uploaded images
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                PostImage.objects.create(post=self.object, image=image)
-       
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
+            
+
         # 💬 Save social media handles
         social_handle = social_form.save(commit=False)
         social_handle.post = self.object
@@ -266,6 +281,11 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'posts/post_form_labor.html'
     success_url = reverse_lazy('post_home')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['social_form'] = SocialMediaHandleForm(
@@ -289,18 +309,20 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
         # ✅ Assign author and status
         form.instance.author = user
         form.instance.status = "pending"
-
-        # 🏷️ Category attachment
+                # 🏷️ Category attachment
         form.instance.category = get_object_or_404(Category, name__iexact="Labor")
 
         # 💾 Save the post
         response = super().form_valid(form)
 
-        # 📸 Save uploaded images (up to 6)
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                PostImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
+            
 
         # 💬 Save social media handle
         social_handle = social_form.save(commit=False)
@@ -323,14 +345,17 @@ class PostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # Save the updated post first
         self.object = form.save()
 
-        # 🗑️ Clear out old images
-        self.object.images.all().delete()
+        # 🗑️ Clear out old media (images & videos)
+        self.object.media_files.all().delete()
 
-        # ✅ Then add any newly uploaded images
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                PostImage.objects.create(post=self.object, image=image)
+        # 📸 Save uploaded media (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
+            
 
         return super().form_valid(form)
 
@@ -356,14 +381,16 @@ class PostEditProductView(PostEditBaseView):
         if social_form.is_valid():
             social_form.save()
 
-        # 🔁 Replace images only if new ones were uploaded
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.images.all().delete()
-            for image in new_images:
-                if image:
-                    PostImage.objects.create(post=self.object, image=image)
-
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
         return super().form_valid(form)
 
 class PostEditServiceView(PostEditBaseView):
@@ -387,15 +414,17 @@ class PostEditServiceView(PostEditBaseView):
         if social_form.is_valid():
             social_form.save()
 
-        # 🔁 Replace images only if new ones were uploaded
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.images.all().delete()
-            for image in new_images:
-                if image:
-                    PostImage.objects.create(post=self.object, image=image)
-
-        return super().form_valid(form)
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
+        return super().form_valid(form)              
 
 class PostEditLaborView(PostEditBaseView):
     model = Post
@@ -418,14 +447,16 @@ class PostEditLaborView(PostEditBaseView):
         if social_form.is_valid():
             social_form.save()
 
-        # 🔁 Replace images only if new ones were uploaded
-        new_images = [self.request.FILES.get(f'image{i}') for i in range(1, 7)]
-        if any(new_images):
-            self.object.images.all().delete()
-            for image in new_images:
-                if image:
-                    PostImage.objects.create(post=self.object, image=image)
-
+        # 🔁 Replace media only if new ones were uploaded
+        new_files = self.request.FILES.getlist("media_files[]")
+        if new_files:
+            self.object.media_files.all().delete()
+            for file in new_files:
+                MediaFile.objects.create(
+                    content_object=self.object,
+                    file=file,
+                    file_type="video" if file.content_type.startswith("video") else "image"
+                )
         return super().form_valid(form)
 
 class PendingPostsByUserView(LoginRequiredMixin, ListView):
@@ -500,3 +531,67 @@ def location_autocomplete(request):
 
     results = model.objects.filter(name__icontains=query).values_list("name", flat=True)[:10]
     return JsonResponse({"results": list(results)})
+
+# ----------------------------
+# Location API Endpoints
+# ----------------------------
+@require_GET
+def continents_api(request):
+    from custom_search.models import Continent
+    continents = Continent.objects.all().order_by("name")
+
+    # Include Unspecified (id=0) first if it exists
+    unspecified = Continent.objects.filter(id=0)
+    continents = (unspecified | continents).distinct()
+
+    data = [{"id": c.id, "name": c.name} for c in continents]
+    return JsonResponse(data, safe=False)
+
+
+@require_GET
+def countries_api(request):
+    from custom_search.models import Country
+    continent_id = request.GET.get("continent_id")
+
+    countries = Country.objects.none()
+    if continent_id:
+        countries = Country.objects.filter(continent_id=continent_id)
+
+    unspecified = Country.objects.filter(id=0)
+    countries = (unspecified | countries).distinct().order_by("name")
+
+    data = [{"id": c.id, "name": c.name} for c in countries]
+    return JsonResponse(data, safe=False)
+
+
+@require_GET
+def states_api(request):
+    from custom_search.models import State
+    country_id = request.GET.get("country_id")
+
+    states = State.objects.none()
+    if country_id:
+        states = State.objects.filter(country_id=country_id)
+
+    unspecified = State.objects.filter(id=0)
+    states = (unspecified | states).distinct().order_by("name")
+
+    data = [{"id": s.id, "name": s.name} for s in states]
+    return JsonResponse(data, safe=False)
+
+
+@require_GET
+def towns_api(request):
+    from custom_search.models import Town
+    state_id = request.GET.get("state_id")
+
+    towns = Town.objects.none()
+    if state_id:
+        towns = Town.objects.filter(state_id=state_id)
+
+    unspecified = Town.objects.filter(id=0)
+    towns = (unspecified | towns).distinct().order_by("name")
+
+    data = [{"id": t.id, "name": t.name} for t in towns]
+    return JsonResponse(data, safe=False)
+

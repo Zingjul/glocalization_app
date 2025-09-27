@@ -59,6 +59,7 @@
             {% if user.is_authenticated %}
             <div class="col-md-9 col-6 text-end">
               <a class="btn btn-link text-white me-2" href="/">Home</a>
+              <a class="btn btn-link text-white me-2" href="{% url 'notifications:notifications-page' %}">Notification</a>
               <a class="btn btn-link text-white me-2" href="{% url 'logout' %}">Logout</a>
               <!-- <a class="btn btn-link text-white me-2"  id="logoutBtn"  href="{% url 'logout' %}">Logout</a> -->
               <a class="btn btn-outline-danger" href="{% url 'delete_account' %}">Delete Account</a>

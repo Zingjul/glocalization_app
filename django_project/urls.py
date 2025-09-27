@@ -30,9 +30,11 @@ urlpatterns = [
     path('comments/', include("comment.urls")),
     path('search/', include("search.urls")),
     path('custom_search/', include('custom_search.urls')),
+    path('media/', include('media_app.urls', namespace="media_app")),
     path('postfinder/', include("postfinder.urls")),
     path('seekers/', include('seekers.urls', namespace="seekers")),
     path('seekersfinder/', include('seekersfinder.urls', namespace="seekersfinder")),
+    path('notifications/', include('notifications.urls', namespace="notifications")),
 ]
 
 if settings.DEBUG:

@@ -3,14 +3,17 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView, PasswordResetCompleteView,
     PasswordChangeView
 )
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model, logout
 from django.views.generic.edit import FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.db.models import F
+from .models import Follow, CustomUser
 from .forms import (
     CustomUserCreationForm,
     CustomLoginForm,
@@ -18,6 +21,7 @@ from .forms import (
     CustomPasswordChangeForm,
     ConfirmPasswordForm,
 )
+
 
 CustomUser = get_user_model()
 
@@ -108,13 +112,47 @@ class CustomPasswordChangeView(PasswordChangeView):
 class UserList(ListView):
     model = CustomUser
     template_name = 'accounts/user_list.html'
-    context_object_name = 'users'
+    context_object_name = 'profiles'
+
+    def get_queryset(self):
+        # Exclude current user if you don’t want them in the list
+        return CustomUser.objects.exclude(id=self.request.user.id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Preload follows
+        following_ids = set(
+            Follow.objects.filter(follower=self.request.user).values_list("following_id", flat=True)
+        )
+
+        profiles = context["profiles"]
+        for profile in profiles:
+            profile.follower_count = Follow.objects.filter(following=profile).count()
+            profile.is_followed = profile.id in following_ids
+
+        context["profiles"] = profiles
+        return context
 
 
 class UserDetail(DetailView):
     model = CustomUser
-    template_name = 'accounts/user_detail.html'
+    template_name = 'person/person_detail.html'
     context_object_name = 'user_obj'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_obj = self.object
+
+        # Make it consistent with PersonDetailView
+        is_followed = Follow.objects.filter(
+            follower=self.request.user,
+            following=user_obj
+        ).exists()
+
+        context["profile"] = getattr(user_obj, "profile", None)  # so template works
+        context["is_followed"] = is_followed
+        return context
 
 
 # Delete User Account with Password Confirmation
@@ -133,3 +171,95 @@ class UserDeleteView(LoginRequiredMixin, FormView):
         logout(self.request)
         user.delete()
         return super().form_valid(form)
+
+# @login_required
+# def toggle_follow(request, user_id):
+#     """Follow/unfollow another user and reload the page."""
+#     target_user = get_object_or_404(CustomUser, id=user_id)
+
+#     if target_user == request.user:
+#         # Prevent following self
+#         return redirect(request.META.get("HTTP_REFERER", "person_list"))
+
+#     follow, created = Follow.objects.get_or_create(
+#         follower=request.user,
+#         following=target_user,
+#     )
+
+#     if not created:
+#         # Already following → unfollow
+#         follow.delete()
+#         target_user.follower_count = F("follower_count") - 1
+#         request.user.following_count = F("following_count") - 1
+#     else:
+#         # New follow
+#         target_user.follower_count = F("follower_count") + 1
+#         request.user.following_count = F("following_count") + 1
+
+#     target_user.save(update_fields=["follower_count"])
+#     request.user.save(update_fields=["following_count"])
+
+#     return redirect(request.META.get("HTTP_REFERER", "person_list"))
+
+@login_required
+def toggle_follow(request, user_id):
+    target_user = get_object_or_404(CustomUser, id=user_id)
+
+    if target_user == request.user:
+        messages.error(request, "You cannot follow yourself.")
+        return redirect(request.META.get("HTTP_REFERER", "person_list"))
+
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=target_user,
+    )
+
+    if not created:
+        follow.delete()  # unfollow
+
+    return redirect(request.META.get("HTTP_REFERER", "person_list"))
+
+
+from django.views.generic import ListView
+from django.contrib.auth import get_user_model
+from .models import Follow
+
+CustomUser = get_user_model()
+
+# this views is defined to specially display a list of the "followers" or "followings" of an account
+class FollowersListView(ListView):
+    """List all followers of a given user."""
+    model = CustomUser
+    template_name = "person/followers_list.html"
+    context_object_name = "profiles"
+
+    def get_queryset(self):
+        user_id = self.kwargs["user_id"]
+        return CustomUser.objects.filter(
+            id__in=Follow.objects.filter(following_id=user_id).values_list("follower_id", flat=True)
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["list_type"] = "followers"
+        context["target_user"] = CustomUser.objects.get(id=self.kwargs["user_id"])
+        return context
+
+
+class FollowingListView(ListView):
+    """List all accounts that a given user is following."""
+    model = CustomUser
+    template_name = "person/following_list.html"
+    context_object_name = "profiles"
+
+    def get_queryset(self):
+        user_id = self.kwargs["user_id"]
+        return CustomUser.objects.filter(
+            id__in=Follow.objects.filter(follower_id=user_id).values_list("following_id", flat=True)
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["list_type"] = "following"
+        context["target_user"] = CustomUser.objects.get(id=self.kwargs["user_id"])
+        return context

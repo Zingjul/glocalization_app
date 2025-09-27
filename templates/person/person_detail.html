@@ -2,16 +2,35 @@
 
 {% block content %}
 <h2>Profile of {{ profile.user.username }}</h2>
-
+            <form action="{% url 'toggle_follow' profile.user.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button 
+                    type="submit"
+                    class="btn btn-sm {% if is_followed %}btn-danger{% else %}btn-success{% endif %}">
+                    {% if is_followed %}Unfollow{% else %}Follow{% endif %}
+                </button>
+            </form>
 {% if profile.person_profile_picture %}
     <img src="{{ profile.person_profile_picture.url }}" alt="Profile Picture" width="150">
 {% endif %}
-
+<!-- ✅ Show follower/following counts for this profile -->
+<div>
+    <a href="{% url 'followers_list' profile.user.id %}">
+        <span id="followers-{{ profile.pk }}">  
+            {{ profile.user.follower_count }}
+        </span> followers | 
+    </a>
+    <a href="{% url 'following_list' profile.user.id %}">
+        <span id="following-{{ profile.pk }}">
+            {{ profile.user.following_count }}
+        </span> following
+    </a>
+</div>
 <p><strong>Business Name:</strong> {{ profile.business_name }}</p>
 <p><strong>About:</strong> {{ profile.about }}</p>
 <p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
-<p><strong>Call:</strong> {{ user.phone_number }}</p>
-<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Call:</strong> {{ profile.user.phone_number }}</p>
+<p><strong>Email:</strong> {{ profile.user.email }}</p>
 
 <div><strong>Location:</strong> 
     <p>Continent: {% if profile.continent %} {{ profile.continent.name }} {% endif %}</p>
@@ -25,7 +44,7 @@
 
 {% if user == profile.user %}
     {% if profile.approval_status != "pending" %}
-        <a href="{% url 'person_edit' profile.pk %}" class="btn btn-warning">Edit Profile</a>
+        <a href="{% url 'person_setup' %}" class="btn btn-warning">Edit Profile</a>
     {% else %}
         <button class="btn btn-secondary" disabled>Your profile is under review</button>
     {% endif %}

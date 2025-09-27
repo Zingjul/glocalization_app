@@ -2,6 +2,14 @@
 >we are currently using a development email version for sending emails directly to the console for now, we'll need to make use of real email plug for real time production
 
 
+?????????????????
+Login form expects full Gmail address as input.
+
+But you store only the prefix in username.
+
+So if someone registers johnsmith@gmail.com → username="johnsmith" → email="johnsmith@gmail.com".
+
+On login: they type johnsmith@gmail.com. Your clean_username() strips to johnsmith. ✅ Works fine — just worth documenting.
 
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>

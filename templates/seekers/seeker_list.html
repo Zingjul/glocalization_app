@@ -43,11 +43,20 @@
              data-scope="{{ post.availability_scope }}"
              data-town="{{ post.post_town.name|default:post.post_town_input|lower }}">
 
-          {% if post.seeker_images.all %}
-            <img src="{{ post.seeker_images.all.0.image.url }}" alt="Post image" class="w-full h-48 object-cover">
+          {% if post.media_files.all %}
+            {% with media=post.media_files.all.0 %}
+              {% if media.file_type == "image" %}
+                <img src="{{ media.file.url }}" alt="Post image" class="w-full h-48 object-cover">
+              {% elif media.file_type == "video" %}
+                <video controls class="w-full h-48 object-cover">
+                  <source src="{{ media.file.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+            {% endwith %}
           {% else %}
             <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-              No Image
+              No Media
             </div>
           {% endif %}
 

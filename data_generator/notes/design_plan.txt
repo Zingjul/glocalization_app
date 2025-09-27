@@ -266,3 +266,41 @@ These will help users instantly grasp what this new feature does:
 🛎️ Seeker gets notified privately: A notification, possibly with a link to view the responder’s profile
 
 🔐 No visible trace on the post itself — totally private between sender and receiver
+
+
+
+
+
+Free or cheapest tier:
+
+1 day lifespan (default)
+
+Just enough to test the platform.
+
+Creates FOMO (fear of missing out) → pushes users to upgrade if their ad needs more visibility.
+
+Entry-level paid tier:
+
+7 days lifespan
+
+Perfect for short campaigns and small sellers.
+
+Affordable price point → captures a wide base of paying users.
+
+Premium tier:
+
+14 or 30 days lifespan
+
+For serious businesses or sellers who want lasting visibility.
+
+Big margin generator.
+
+👉 Why 1 + 7 + 30 is a great combo?
+
+1 day = urgency/free hook.
+
+7 days = natural weekly cycle (people plan sales in weeks).
+
+30 days = business-friendly (monthly campaigns).
+
+📌 Many platforms avoid "weird" numbers like 3 or 5 days because users are used to daily/weekly/monthly cycles.

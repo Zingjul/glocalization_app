@@ -1,0 +1,23 @@
+<script>
+    // ✅ Phone + Email
+    window.userPhone = "{{ user.phone_number|default:'' }}";
+    window.userEmail = "{{ user.email|default:'' }}";
+
+    // ✅ Location (from Person model)
+    window.userContinent = "{{ user.profile.continent.id|default:'' }}";
+    window.userCountry   = "{{ user.profile.country.id|default:'' }}";
+    window.userState     = "{{ user.profile.state.id|default:'' }}";
+    window.userTown      = "{{ user.profile.town.id|default:'' }}";
+
+    // ✅ Fallback typed inputs
+    window.userContinentInput = "{{ user.profile.continent_input|default:'' }}";
+    window.userCountryInput   = "{{ user.profile.country_input|default:'' }}";
+    window.userStateInput     = "{{ user.profile.state_input|default:'' }}";
+    window.userTownInput      = "{{ user.profile.town_input|default:'' }}";
+
+    // 🔹 Saved post location IDs (these are the ones we want for prefill)
+    window.savedPostContinent = "{{ form.instance.continent.id|default:'' }}";
+    window.savedPostCountry   = "{{ form.instance.country.id|default:'' }}";
+    window.savedPostState     = "{{ form.instance.state.id|default:'' }}";
+    window.savedPostTown      = "{{ form.instance.town.id|default:'' }}";
+</script>

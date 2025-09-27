@@ -9,32 +9,16 @@
  
     <!-- 🔽 Manually render each field (excluding image1–image6) -->
     {% include "posts/includes/top_fields.html" %}
-    <div>{{ form.labor_type.label_tag }} {{ form.labor_type }}</div>
-    <div>{{ form.labor_skills.label_tag }} {{ form.labor_skills }}</div>
     <div>{{ form.labor_experience_years.label_tag }} {{ form.labor_experience_years }}</div>
-    <div>{{ form.labor_availability.label_tag }} {{ form.labor_availability }}</div>
     {% include "posts/includes/location_fields.html" %}
-    {% include "posts/includes/image_fields.html" %}
+    {% include "media_app/image_fields.html" %}
+    {% include "posts/includes/social_fields.html" %}
+  
+  <!-- 🧾 Existing media (images/videos) -->
+    {% include "media_app/current_images.html" %}
 
-  <!-- 🧾 Existing images (from previous post) -->
-  {% if post.images.all %}
-    <h3 class="mt-6 text-lg font-semibold">Current Images</h3>
-    <div class="flex flex-wrap gap-2 mb-6" id="existingImagesContainer">
-      {% for img in post.images.all %}
-        <img src="{{ img.image.url }}" alt="Existing Image" class="w-24 h-24 object-cover rounded shadow">
-      {% endfor %}
-    </div>
-  {% endif %}
-
-    <!-- 🔗 Social Media Handles -->
-    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
-    {{ social_form.as_p }}
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            {{ form.errors }}
-        </div>
-    {% endif %}
-    
+    {% include "posts/includes/extra_script_js.html" %}
+ 
   <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
     Update
   </button>
@@ -42,4 +26,5 @@
 
 <!-- import scripts -->
     {% include "posts/includes/js_imports.html" %}
+
   {% endblock content %}

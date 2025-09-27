@@ -4,15 +4,14 @@
 <ul id="profile-list" class="list-group">
     {% for profile in profiles %}
         <li class="list-group-item">
-            <strong>{{ profile.user.username }}</strong>
-            {% if profile.business_name %}
-                | <em>{{ profile.business_name }}</em>
-            {% endif %}
-            <a href="{% url 'person_detail' profile.pk %}" class="btn btn-sm btn-primary">View Profile</a>
+            <strong>{{ profile.business_name }}</strong>
+
+            <!-- View profile -->
+            <a href="{% url 'person_detail' profile.pk %}" class="btn btn-sm btn-primary">
+                View Profile
+            </a>  
         </li>
     {% endfor %}
 </ul>
-
-<!-- A hidden div to track loading -->
-<div id="loading" style="display: none;">Loading more profiles...</div>
+{% include "person/includes/js_imports.html" %}
 {% endblock content %}

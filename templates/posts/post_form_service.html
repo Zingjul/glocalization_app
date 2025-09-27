@@ -4,29 +4,20 @@
   <h2 class="text-xl font-semibold mb-4">Create Service Post</h2>
 
   <form method="post" enctype="multipart/form-data" id="postForm">
-    {% csrf_token %}
-    <div>
-      {{ form.availability_scope.label_tag }}
-      {{ form.availability_scope }}
-    </div>
-        
+    {% csrf_token %}  
     <!-- 🔽 Render each field manually (excluding image1–image6) -->
     {% include "posts/includes/top_fields.html" %}
     <div>{{ form.service_details.label_tag }} {{ form.service_details }}</div>
-    <div>{{ form.qualifications.label_tag }} {{ form.qualifications }}</div>
-    <div>{{ form.availability_schedule.label_tag }} {{ form.availability_schedule }}</div>
-    <div>{{ form.service_guarantees.label_tag }} {{ form.service_guarantees }}</div>
+    <!-- <div>{{ form.qualifications.label_tag }} {{ form.qualifications }}</div> -->
+    <!-- <div>{{ form.availability_schedule.label_tag }} {{ form.availability_schedule }}</div> -->
+    <!-- <div>{{ form.service_guarantees.label_tag }} {{ form.service_guarantees }}</div> -->
     {% include "posts/includes/location_fields.html" %}
-    {% include "posts/includes/image_fields.html" %}
+    {% include "media_app/image_fields.html" %}
+    {% include "posts/includes/social_fields.html" %}
     
-    <!-- 🔗 Social Media Handles -->
-    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
-    {{ social_form.as_p }}
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            {{ form.errors }}
-        </div>
-    {% endif %}
+    <!-- this script helps us register this fields so that the js file will use them for autopopulating email and phone number fields -->
+    {% include "posts/includes/extra_script_js.html" %}
+
     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
       Submit
     </button>

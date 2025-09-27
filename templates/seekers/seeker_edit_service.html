@@ -6,23 +6,18 @@
 
 <form method="post" enctype="multipart/form-data" id="postForm">
   {% csrf_token %}
-
-   {% include "seekers/includes/top_fields.html" %}
+    <!-- 🔽 Manually render each field (excluding image1–image6) -->
+   <!-- am using the "include" in order to fetch template data from a seperate file this is in order to avoid retyping similar code over and over again -->
+    {% include "seekers/includes/top_fields.html" %}
     {% include "seekers/includes/extras_fields.html" %}
     {% include "seekers/includes/location_fields.html" %}
-    {% include "seekers/includes/image_fields.html" %}
+    {% include "media_app/image_fields.html" %}
+    {% include "posts/includes/social_fields.html" %}
     
-  <!-- 🧾 Existing images (from previous post) -->
-  {% if post.images.all %}
-    <h3 class="mt-6 text-lg font-semibold">Current Images</h3>
-    <div class="flex flex-wrap gap-2 mb-6" id="existingImagesContainer">
-      {% for img in post.images.all %}
-        <img src="{{ img.image.url }}" alt="Existing Image" class="w-24 h-24 object-cover rounded shadow">
-      {% endfor %}
-    </div>
-  {% endif %}
+  <!-- 🧾 Existing media (images/videos) -->
+    {% include "media_app/current_images.html" %}
 
-  {% include "seekers/includes/social_fields.html" %}
+    {% include "posts/includes/extra_script_js.html" %} 
 
   <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
     Update

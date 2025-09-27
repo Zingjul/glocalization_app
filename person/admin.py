@@ -7,14 +7,21 @@ from .models import Person, Availability, PendingLocationRequest
 from custom_search.models import Continent, Country, State, Town
 from . import emails
 
+# ✅ notification hooks imported here instead of accounts/admin.py
+from notifications.hooks.person_notifications import (
+    notify_profile_approval,
+    notify_profile_rejection,
+    notify_business_name_toggle,
+)
+
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = (
-        "user", "business_name",
+        "user", "business_name", "use_business_name",
         "continent", "country", "state", "town",
         "continent_input", "country_input", "state_input", "town_input",
-        "approval_status",
+        "approval_status", "updated_at",
     )
     list_filter = ("continent", "country", "state", "town", "approval_status")
     search_fields = (
@@ -22,15 +29,21 @@ class PersonAdmin(admin.ModelAdmin):
         "continent_input", "country_input", "state_input", "town_input"
     )
 
-    actions = ["approve_location_inputs", "reject_profile_update"]
+    actions = [
+        "approve_location_inputs",
+        "reject_profile_update",
+        "approve_profiles",
+        "reject_profiles",
+        "toggle_business_name",
+    ]
 
+    # -------------------------
+    # Existing approval/rejection
+    # -------------------------
     @admin.action(description="Approve profile update (verify or create locations)")
     def approve_location_inputs(self, request, queryset):
         approved = 0
         for person in queryset:
-            # same logic you had earlier for continent → country → state → town
-            # (use existing or create new if missing)
-            # ... omitted here for brevity ...
             person.approval_status = "approved"
             person.save()
 
@@ -71,6 +84,41 @@ class PersonAdmin(admin.ModelAdmin):
             level=messages.INFO,
         )
 
+    # -------------------------
+    # Functions merged from accounts/admin.py
+    # -------------------------
+    @admin.action(description="Approve selected profiles (set is_verified=True)")
+    def approve_profiles(self, request, queryset):
+        for person in queryset:
+            if not getattr(person, "is_verified", False):
+                person.is_verified = True
+                person.approval_status = "approved"
+                person.save()
+                notify_profile_approval(person)
+        self.message_user(request, f"{queryset.count()} profile(s) approved 🎉")
+
+    @admin.action(description="Reject selected profiles (set is_verified=False)")
+    def reject_profiles(self, request, queryset):
+        for person in queryset:
+            if getattr(person, "is_verified", False):
+                person.is_verified = False
+                person.approval_status = "rejected"
+                person.save()
+                notify_profile_rejection(person)
+        self.message_user(request, f"{queryset.count()} profile(s) rejected 🚫")
+
+    @admin.action(description="Toggle Business/Real Name")
+    def toggle_business_name(self, request, queryset):
+        for person in queryset:
+            person.use_business_name = not person.use_business_name
+            person.save()
+            notify_business_name_toggle(person)
+        self.message_user(
+            request,
+            f"Toggled business/real name for {queryset.count()} profile(s)"
+        )
+
+
 @admin.register(PendingLocationRequest)
 class PendingLocationRequestAdmin(admin.ModelAdmin):
     list_display = (
@@ -94,7 +142,6 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
 
             normalized_name = typed_town.strip().title()
 
-            # case-insensitive lookup in same state
             town = Town.objects.filter(
                 state=parent_state, name__iexact=normalized_name
             ).first()
@@ -113,18 +160,15 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
                         state=parent_state
                     )
 
-            # ✅ link approved town back to Person
             person = pending.person
             person.town = town
             person.approval_status = "approved"
             person.save(update_fields=["town", "approval_status"])
 
-            # ✅ mark pending request as approved
             pending.is_reviewed = True
             pending.approved = True
             pending.save()
 
-            # ✅ notify user
             send_mail(
                 subject=emails.APPROVAL_SUBJECT,
                 message=emails.APPROVAL_MESSAGE.format(username=person.user.username),

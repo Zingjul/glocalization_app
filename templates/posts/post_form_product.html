@@ -5,11 +5,6 @@
 
   <form method="post" enctype="multipart/form-data" id="postForm">
     {% csrf_token %}
-    <div>
-      {{ form.availability_scope.label_tag }}
-      {{ form.availability_scope }}
-    </div>
-    
     <!-- Manually render each Post field (excluding image1–image6) -->
     {% include "posts/includes/top_fields.html" %}
     <div>{{ form.color.label_tag }} {{ form.color }}</div>
@@ -19,17 +14,11 @@
     <div>{{ form.technical_specifications.label_tag }} {{ form.technical_specifications }}</div>
     <div>{{ form.warranty.label_tag }} {{ form.warranty }}</div>
     {% include "posts/includes/location_fields.html" %}
-    {% include "posts/includes/image_fields.html" %}
+    {% include "media_app/image_fields.html" %}
+    {% include "posts/includes/social_fields.html" %}
     
-    <!-- 🔗 Social Media Handles -->
-    <h3 class="text-lg font-semibold mt-6 mb-2">Social Media Handles</h3>
-    {{ social_form.as_p }}
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            {{ form.errors }}
-        </div>
-    {% endif %}
-    
+    <!-- this script helps us register this fields so that the js file will use them for autopopulating email and phone number fields -->
+    {% include "posts/includes/extra_script_js.html" %}
     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
       Submit
     </button>

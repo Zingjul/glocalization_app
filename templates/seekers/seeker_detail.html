@@ -19,6 +19,26 @@
   </div>
 {% endif %}
 
+<!-- 📷 Media Files -->
+{% if seekerpost.media_files.all %}
+  <div class="flex flex-wrap gap-4 mb-4">
+    {% for media in seekerpost.media_files.all %}
+      {% if media.file_type == "image" %}
+        <img src="{{ media.file.url }}" alt="Seeker Media" class="w-36 h-36 object-cover rounded shadow">
+      {% elif media.file_type == "video" %}
+        <video controls class="w-64 h-40 rounded shadow">
+          <source src="{{ media.file.url }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
+    No media uploaded for this request.
+  </div>
+{% endif %}
+
 <h2 class="text-2xl font-bold text-green-700 mb-4">
   {% if seekerpost.category.name == 'Product' %}
     {{ seekerpost.product_name }}
