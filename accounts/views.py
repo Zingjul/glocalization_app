@@ -172,35 +172,6 @@ class UserDeleteView(LoginRequiredMixin, FormView):
         user.delete()
         return super().form_valid(form)
 
-# @login_required
-# def toggle_follow(request, user_id):
-#     """Follow/unfollow another user and reload the page."""
-#     target_user = get_object_or_404(CustomUser, id=user_id)
-
-#     if target_user == request.user:
-#         # Prevent following self
-#         return redirect(request.META.get("HTTP_REFERER", "person_list"))
-
-#     follow, created = Follow.objects.get_or_create(
-#         follower=request.user,
-#         following=target_user,
-#     )
-
-#     if not created:
-#         # Already following → unfollow
-#         follow.delete()
-#         target_user.follower_count = F("follower_count") - 1
-#         request.user.following_count = F("following_count") - 1
-#     else:
-#         # New follow
-#         target_user.follower_count = F("follower_count") + 1
-#         request.user.following_count = F("following_count") + 1
-
-#     target_user.save(update_fields=["follower_count"])
-#     request.user.save(update_fields=["following_count"])
-
-#     return redirect(request.META.get("HTTP_REFERER", "person_list"))
-
 @login_required
 def toggle_follow(request, user_id):
     target_user = get_object_or_404(CustomUser, id=user_id)

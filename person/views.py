@@ -16,6 +16,7 @@ from accounts.models import CustomUser
 from custom_search.models import Continent, Country, State, Town   # ✅ only from here
 
 logger = logging.getLogger(__name__)
+
 class PersonSetupView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Create or update the logged-in user's Person profile."""
 
@@ -116,14 +117,18 @@ class PersonListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Only return profiles with approval_status = "approved"
-        qs = Person.objects.filter(approval_status="approved")
-        logger.debug("Retrieved %s approved profiles", qs.count())
+        qs = Person.objects.filter(
+            approval_status="approved"
+        ).exclude(user=self.request.user)  # 🚫 exclude the logged-in user
+        logger.debug("Retrieved %s approved profiles (excluding current user)", qs.count())
         return qs
+
 
 class PersonDetailView(DetailView):
     """Display details of a Person profile."""
     model = Person
     template_name = "person/person_detail.html"
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
