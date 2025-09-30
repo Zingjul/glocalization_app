@@ -33,44 +33,89 @@ class PostListView(LoginRequiredMixin, ListView):
     context_object_name = "posts"
 
     def get_queryset(self):
+        """
+        Return approved posts visible to the current user according to the strict scope rules:
+          - global -> everyone
+          - continent -> match user's continent (only)
+          - country -> match user's continent + country (only)
+          - state -> match user's continent + country + state (only)
+          - town -> match user's continent + country + state + town
+
+        If request GET includes explicit location params (continent/country/state/town),
+        treat that as a search override: include global posts + posts that match the provided
+        location and the corresponding availability_scope.
+        """
         user = self.request.user
-        profile = getattr(user, 'person', None)
-        queryset = Post.objects.filter(status='approved')
+        # <-- adjust to 'person' if your profile related_name is user.person -->
+        profile = getattr(user, "profile", None)
 
-        # Check for custom search (optional override)
-        continent = self.request.GET.get('continent')
-        country = self.request.GET.get('country')
-        state = self.request.GET.get('state')
-        town = self.request.GET.get('town')
+        # start from approved posts only
+        qs = Post.objects.filter(status="approved")
 
-        if continent or country or state or town:
-            # Use search query if present
+        # If explicit search filters provided, treat as search override (include global)
+        continent_q = self.request.GET.get("continent")
+        country_q = self.request.GET.get("country")
+        state_q = self.request.GET.get("state")
+        town_q = self.request.GET.get("town")
+
+        if continent_q or country_q or state_q or town_q:
             filters = Q()
-            if town:
-                filters |= Q(post_town__name=town, availability_scope='town')
-            if state:
-                filters |= Q(post_state__name=state, availability_scope='state')
-            if country:
-                filters |= Q(post_country__name=country, availability_scope='country')
-            if continent:
-                filters |= Q(post_continent__name=continent, availability_scope='continent')
-            return queryset.filter(filters).order_by('-created_at')
+            # Always include global posts in search results
+            filters |= Q(availability_scope="global")
 
-        # Otherwise, filter by user's profile location
+            if town_q:
+                filters |= Q(availability_scope="town", post_town__name__iexact=town_q)
+            if state_q:
+                filters |= Q(availability_scope="state", post_state__name__iexact=state_q)
+            if country_q:
+                filters |= Q(availability_scope="country", post_country__name__iexact=country_q)
+            if continent_q:
+                filters |= Q(availability_scope="continent", post_continent__name__iexact=continent_q)
+
+            return qs.filter(filters).order_by("-created_at")
+
+        # Default feed: enforce strict visibility based on user's profile location
         if profile:
             filters = Q()
-            if profile.town:
-                filters |= Q(post_town=profile.town, availability_scope='town')
-            if profile.state:
-                filters |= Q(post_state=profile.state, availability_scope='state')
-            if profile.country:
-                filters |= Q(post_country=profile.country, availability_scope='country')
-            if profile.continent:
-                filters |= Q(post_continent=profile.continent, availability_scope='continent')
-            return queryset.filter(filters).order_by('-created_at')
 
-        # Fallback: show all approved posts if user has no location info
-        return queryset.order_by('-created_at')
+            # 1) global always visible
+            filters |= Q(availability_scope="global")
+
+            # 2) continent posts — visible if user's continent matches (regardless of other fields)
+            if getattr(profile, "continent", None):
+                filters |= Q(availability_scope="continent", post_continent=profile.continent)
+
+            # 3) country posts — visible if continent + country match
+            if getattr(profile, "country", None) and getattr(profile, "continent", None):
+                filters |= Q(
+                    availability_scope="country",
+                    post_continent=profile.continent,
+                    post_country=profile.country,
+                )
+
+            # 4) state posts — visible if continent + country + state match
+            if getattr(profile, "state", None) and getattr(profile, "country", None) and getattr(profile, "continent", None):
+                filters |= Q(
+                    availability_scope="state",
+                    post_continent=profile.continent,
+                    post_country=profile.country,
+                    post_state=profile.state,
+                )
+
+            # 5) town posts — visible only if all 4 levels match
+            if getattr(profile, "town", None) and getattr(profile, "state", None) and getattr(profile, "country", None) and getattr(profile, "continent", None):
+                filters |= Q(
+                    availability_scope="town",
+                    post_continent=profile.continent,
+                    post_country=profile.country,
+                    post_state=profile.state,
+                    post_town=profile.town,
+                )
+
+            return qs.filter(filters).order_by("-created_at")
+
+        # User has no profile/location info -> only show global posts
+        return qs.filter(availability_scope="global").order_by("-created_at")
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
@@ -310,7 +355,7 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
 
         # ✅ add the unified variable
         context['post_object'] = self.object
-        
+
         return context
 
     def form_valid(self, form):
