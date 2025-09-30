@@ -99,6 +99,9 @@ class PostDetailView(LoginRequiredMixin, DetailView):
             "comment_form": CommentForm(),
         })
 
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 class PostCreateView(LoginRequiredMixin, TemplateView):
     model = Post
@@ -132,6 +135,10 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         social_form = SocialMediaHandleForm(instance=getattr(post, "social_handles", None))
         context["social_form"] = social_form
         context["post"] = post
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -171,6 +178,10 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def form_valid(self, form):
@@ -232,6 +243,10 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def form_valid(self, form):
@@ -292,6 +307,10 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
     def form_valid(self, form):
@@ -371,6 +390,10 @@ class PostEditProductView(PostEditBaseView):
             context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
         else:
             context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+                
         return context
 
     def form_valid(self, form):
@@ -404,6 +427,10 @@ class PostEditServiceView(PostEditBaseView):
             context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
         else:
             context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+                
         return context
 
     def form_valid(self, form):
@@ -437,6 +464,10 @@ class PostEditLaborView(PostEditBaseView):
             context['social_form'] = SocialMediaHandleForm(self.request.POST, instance=self.object.social_handles)
         else:
             context['social_form'] = SocialMediaHandleForm(instance=self.object.social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+                
         return context
 
     def form_valid(self, form):

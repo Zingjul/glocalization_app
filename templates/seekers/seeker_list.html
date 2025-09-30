@@ -2,6 +2,14 @@
 {% load static %}
 
 {% block content %}
+<form method="get" action="{% url 'seekersfinder:seekerfinder' %}" class="mb-4">
+  <input type="text" name="q" placeholder="Search seeker posts..."
+         value="{{ request.GET.q|default:'' }}"
+         class="border rounded px-3 py-2 w-1/2">
+  <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
+    Search
+  </button>
+</form>
 
 <!-- 👤 Authenticated user links (optional) -->
 {% if user.is_authenticated %}
@@ -9,6 +17,7 @@
     <p><a href="{% url 'person_detail' user.pk %}">(You)</a></p>
     <p><a href="{% url 'person_list' %}">Other users</a></p>
     <p><a href="{% url 'seekers:seeker_create' %}">+Post a request</a></p>
+    <p><a href="{% url 'seekers:my_pending_seekers' %}">Pending post requests</a></p>
     <p><a href="{% url 'post_home' %}">Basic Section</a></p>
   </div>
 {% endif %}

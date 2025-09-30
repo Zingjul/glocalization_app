@@ -69,7 +69,7 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        profile = getattr(user, 'person', None)
+        profile = getattr(user, 'profile', None)
         queryset = SeekerPost.objects.filter(status='approved')
 
         continent = self.request.GET.get('continent')
@@ -134,6 +134,9 @@ class SeekerPostDetailView(LoginRequiredMixin, DetailView):
             "app_label": post._meta.app_label,      # "seekers"
             "model_name": post._meta.model_name,    # "seekerpost"
         })
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
 class SeekerPostCreateView(LoginRequiredMixin, TemplateView):
@@ -169,6 +172,10 @@ class SeekerPostUpdateView(LoginRequiredMixin, UpdateView):
         social_form = SeekerSocialMediaHandleForm(instance=getattr(post, "social_handles", None))
         context["social_form"] = social_form
         context["post"] = post
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -187,16 +194,10 @@ class SeekerPostUpdateView(LoginRequiredMixin, UpdateView):
                 self.get_context_data(form=form, social_form=social_form)
             )
 
-
 class SeekerPostDeleteView(LoginRequiredMixin, DeleteView):
     model = SeekerPost
     template_name = 'seekers/seeker_confirm_delete.html'
     success_url = reverse_lazy('seekers:seeker_list')
-
-# def seeker_home(request):
-#     visible_posts = get_seeker_posts_visible_to_user(request.user)
-#     return render(request, 'seekers/seeker_list.html', {'posts': visible_posts})
-
 
 class SeekerProductPostCreateView(LoginRequiredMixin, CreateView):
     model = SeekerPost
@@ -204,12 +205,21 @@ class SeekerProductPostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'seekers/seeker_create_product.html'
     success_url = reverse_lazy('seekers:seeker_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['social_form'] = SeekerSocialMediaHandleForm(
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def form_valid(self, form):
@@ -220,9 +230,9 @@ class SeekerProductPostCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
 
         profile = getattr(user, 'profile', None)
-        if profile and profile.business_name:
+        if profile and not form.instance.business_name:
             form.instance.business_name = profile.business_name
-
+        
         form.instance.author = user
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Product")
@@ -253,12 +263,21 @@ class SeekerServicePostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'seekers/seeker_create_service.html'
     success_url = reverse_lazy('seekers:seeker_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['social_form'] = SeekerSocialMediaHandleForm(
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+
         return context
 
     def form_valid(self, form):
@@ -269,9 +288,9 @@ class SeekerServicePostCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
 
         profile = getattr(user, 'profile', None)
-        if profile and profile.business_name:
+        if profile and not form.instance.business_name:
             form.instance.business_name = profile.business_name
-
+        
         form.instance.author = user
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Service")
@@ -302,12 +321,21 @@ class SeekerLaborPostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'seekers/seeker_create_labor.html'
     success_url = reverse_lazy('seekers:seeker_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user   # ✅ Pass user into form
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['social_form'] = SeekerSocialMediaHandleForm(
             self.request.POST or None,
             self.request.FILES or None
         )
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
     def form_valid(self, form):
@@ -318,9 +346,9 @@ class SeekerLaborPostCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
 
         profile = getattr(user, 'profile', None)
-        if profile and profile.business_name:
+        if profile and not form.instance.business_name:
             form.instance.business_name = profile.business_name
-
+        
         form.instance.author = user
         form.instance.status = "pending"
         form.instance.category = get_object_or_404(SeekerCategory, name__iexact="Labor")
@@ -354,12 +382,17 @@ class SeekerPostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
     def form_valid(self, form):
         self.object = form.save()
-        self.object.seeker_images.all().delete()
 
-        for i in range(1, 7):
-            image = self.request.FILES.get(f'image{i}')
-            if image:
-                SeekerImage.objects.create(post=self.object, image=image)
+        # Delete existing media files
+        self.object.media_files.all().delete()
+
+        # Save new uploaded files (images/videos)
+        for file in self.request.FILES.getlist("media_files[]"):
+            MediaFile.objects.create(
+                content_object=self.object,
+                file=file,
+                file_type="video" if file.content_type.startswith("video") else "image"
+            )
 
         return super().form_valid(form)
 
@@ -375,6 +408,10 @@ class SeekerPostEditProductView(SeekerPostEditBaseView):
             context['social_form'] = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         else:
             context['social_form'] = SeekerSocialMediaHandleForm(instance=self.object.seeker_social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
     def form_valid(self, form):
@@ -408,6 +445,10 @@ class SeekerPostEditServiceView(SeekerPostEditBaseView):
             context['social_form'] = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         else:
             context['social_form'] = SeekerSocialMediaHandleForm(instance=self.object.seeker_social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
     def form_valid(self, form):
@@ -441,6 +482,10 @@ class SeekerPostEditLaborView(SeekerPostEditBaseView):
             context['social_form'] = SeekerSocialMediaHandleForm(self.request.POST, instance=self.object.seeker_social_handles)
         else:
             context['social_form'] = SeekerSocialMediaHandleForm(instance=self.object.seeker_social_handles)
+
+        # ✅ add the unified variable
+        context['post_object'] = self.object
+        
         return context
 
     def form_valid(self, form):
@@ -469,32 +514,67 @@ class SeekerPendingPostsByUserView(LoginRequiredMixin, ListView):
     context_object_name = "pending_posts"
 
     def get_queryset(self):
-        return SeekerPost.objects.filter(author=self.request.user, status='pending').order_by('-created_at')
+        return SeekerPost.objects.filter(
+            author=self.request.user,   # ✅ use author, not profile
+            status="pending"
+        ).order_by("-id")
 
 
 def get_seeker_posts_visible_to_user(user):
-    location = user.profile
-    logger.info(f"User Town: {location.town} ({location.town.name})")
-
+    location = getattr(user, "profile", None)
+    if not location:
+        return SeekerPost.objects.none()
     return SeekerPost.objects.filter(
         Q(availability_scope='global') |
-        (Q(availability_scope='continent') & (Q(post_continent=location.continent) | Q(post_continent_input__iexact=location.continent.name))) |
-        (Q(availability_scope='country') & (Q(post_country=location.country) | Q(post_country_input__iexact=location.country.name))) |
-        (Q(availability_scope='state') & (Q(post_state=location.state) | Q(post_state_input__iexact=location.state.name))) |
-        (Q(availability_scope='town') & (Q(post_town=location.town) | Q(post_town_input__iexact=location.town.name)))
-    ).distinct()
 
+        (
+            Q(availability_scope='continent') &
+            (
+                Q(post_continent=location.continent) |
+                Q(post_continent_input__iexact=location.continent.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='country') &
+            (
+                Q(post_country=location.country) |
+                Q(post_country_input__iexact=location.country.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='state') &
+            (
+                Q(post_state=location.state) |
+                Q(post_state_input__iexact=location.state.name)
+            )
+        ) |
+
+        (
+            Q(availability_scope='town') &
+            (
+                Q(post_town=location.town) |
+                Q(post_town_input__iexact=location.town.name)
+            )
+        )
+    ).distinct()
+def home(request):
+    visible_posts = get_seeker_posts_visible_to_user(request.user)
+    return render(request, 'seekers/seeker_list.html', {'posts': visible_posts})
 
 @require_GET
 def seeker_location_autocomplete(request):
+    from custom_search.models import Continent, Country, State, Town
+
     location_type = request.GET.get("type", "").lower()
     query = request.GET.get("q", "")
 
     model_map = {
-        "continent": SeekerContinent,
-        "country": SeekerCountry,
-        "state": SeekerState,
-        "town": SeekerTown,
+        "continent": Continent,
+        "country": Country,
+        "state": State,
+        "town": Town,
     }
 
     model = model_map.get(location_type)
@@ -503,3 +583,65 @@ def seeker_location_autocomplete(request):
 
     results = model.objects.filter(name__icontains=query).values_list("name", flat=True)[:10]
     return JsonResponse({"results": list(results)})
+
+# ----------------------------
+# Location API Endpoints
+# ----------------------------
+@require_GET
+def continents_api(request):
+    from custom_search.models import Continent
+    continents = Continent.objects.all().order_by("name")
+
+    # Include Unspecified (id=0) first if it exists
+    unspecified = Continent.objects.filter(id=0)
+    continents = (unspecified | continents).distinct()
+
+    data = [{"id": c.id, "name": c.name} for c in continents]
+    return JsonResponse(data, safe=False)
+
+@require_GET
+def countries_api(request):
+    from custom_search.models import Country
+    continent_id = request.GET.get("continent_id")
+
+    countries = Country.objects.none()
+    if continent_id:
+        countries = Country.objects.filter(continent_id=continent_id)
+
+    unspecified = Country.objects.filter(id=0)
+    countries = (unspecified | countries).distinct().order_by("name")
+
+    data = [{"id": c.id, "name": c.name} for c in countries]
+    return JsonResponse(data, safe=False)
+
+
+@require_GET
+def states_api(request):
+    from custom_search.models import State
+    country_id = request.GET.get("country_id")
+
+    states = State.objects.none()
+    if country_id:
+        states = State.objects.filter(country_id=country_id)
+
+    unspecified = State.objects.filter(id=0)
+    states = (unspecified | states).distinct().order_by("name")
+
+    data = [{"id": s.id, "name": s.name} for s in states]
+    return JsonResponse(data, safe=False)
+
+
+@require_GET
+def towns_api(request):
+    from custom_search.models import Town
+    state_id = request.GET.get("state_id")
+
+    towns = Town.objects.none()
+    if state_id:
+        towns = Town.objects.filter(state_id=state_id)
+
+    unspecified = Town.objects.filter(id=0)
+    towns = (unspecified | towns).distinct().order_by("name")
+
+    data = [{"id": t.id, "name": t.name} for t in towns]
+    return JsonResponse(data, safe=False)

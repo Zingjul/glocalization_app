@@ -27,8 +27,9 @@ urlpatterns = [
          SeekerPendingPostsByUserView.as_view(), 
          name="my_pending_seekers"),
 
-    # 🎯 Seeker creation selector
+    # 🎯 Seeker creation selector SeekerPostBaseCreateView
     path("create/", SeekerPostCreateView.as_view(), name="seeker_create"),
+    # path("create/", SeekerPostBaseCreateView.as_view(), name="seeker_create"),
     path("create/product/", SeekerProductPostCreateView.as_view(), name="create_product_request"),
     path("create/service/", SeekerServicePostCreateView.as_view(), name="create_service_request"),
     path("create/labor/", SeekerLaborPostCreateView.as_view(), name="create_labor_request"),
