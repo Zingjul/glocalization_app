@@ -1,11 +1,37 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
   <h1>Search Results for "{{ query }}"</h1>
 
+  <!-- Unified search + filters form -->
+  <form method="get" action="{% url 'postfinder_search' %}" id="postfinderForm">
+    <!-- Keyword search -->
+    <div>
+      <input type="text" name="q" placeholder="Search posts..." value="{{ query }}">
+    </div>
+
+    <!-- Availability scope -->
+    <div style="margin-top: 1rem;">
+      {{ form.availability_scope.label_tag }} {{ form.availability_scope }}
+    </div>
+
+    <!-- Location fields -->
+    {% include "posts/includes/location_fields.html" %}
+
+    <!-- Submit button -->
+    <button type="submit" style="margin-top: 1rem;">Search & Filter</button>
+  </form>
+
+  <!-- Results -->
   {% if results %}
-    <ul>
+    <ul id="resultsList">
       {% for post in results %}
-        <li>
+        <li class="post-item"
+            data-continent="{{ post.post_continent.name }}"
+            data-country="{{ post.post_country.name }}"
+            data-state="{{ post.post_state.name }}"
+            data-town="{{ post.post_town.name }}">
           <a href="{% url 'post_detail' post.pk %}">
             {{ post.title }} ({{ post.business_name }})
           </a>
@@ -16,4 +42,9 @@
   {% else %}
     <p>No posts matched your search.</p>
   {% endif %}
+
+  <!-- External JS -->
+    {% include "posts/includes/js_imports.html" %}
+  <script src="{% static 'js/postfinder/postfinder_filter.js' %}"></script>
 {% endblock %}
+<!-- File: glocalization_app/postfinder/templatetags/postfinder_extras.py -->

@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericRelation
 from media_app.models import MediaFile   # ✅ proper import
 from datetime import timedelta
-
+from .managers import PostQuerySet
 User = get_user_model()
 
 def default_expiry():
@@ -42,7 +42,7 @@ class Post(models.Model):
         default='town',
         help_text="Defines the scope of availability for this post."
     )
-
+    objects = PostQuerySet.as_manager()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
 
