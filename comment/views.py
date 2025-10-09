@@ -56,6 +56,13 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         self.content_type = get_object_or_404(ContentType, app_label=self.app_label, model=self.model_name)
         self.model_class = self.content_type.model_class()
         self.content_object = get_object_or_404(self.model_class, id=self.object_id)
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            from django.contrib import messages
+            messages.error(request, "Your profile must be approved before you can comment.")
+            from django.shortcuts import redirect
+            return redirect(self.content_object.get_absolute_url())
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):

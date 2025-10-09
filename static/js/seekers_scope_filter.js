@@ -1,12 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
-  if (typeof currentUserTown === "undefined") return;
+  // Show all seeker posts if currentUserTown is missing, empty, or "undefined"
+  if (
+    typeof currentUserTown === "undefined" ||
+    !currentUserTown ||
+    currentUserTown === "undefined"
+  ) {
+    document.querySelectorAll("#seekerContainer [data-scope]").forEach(card => {
+      card.style.display = "block";
+    });
+    return;
+  }
 
   const cards = document.querySelectorAll("#seekerContainer [data-scope]");
   cards.forEach(card => {
     const scope = card.dataset.scope;
     const town = card.dataset.town?.trim().toLowerCase();
 
-    // Match current user's town against seeker post's declared scope
     const shouldShow =
       scope === "global" ||
       scope === "continent" ||

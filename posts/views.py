@@ -27,7 +27,7 @@ class CategoryListView(ListView):
     template_name = "posts/category_list.html"
     context_object_name = "categories"
 
-class PostListView(LoginRequiredMixin, ListView):
+class PostListView(ListView):
     model = Post
     template_name = "posts/post_list.html"
     context_object_name = "posts"
@@ -74,6 +74,10 @@ class PostListView(LoginRequiredMixin, ListView):
 
             return qs.filter(filters).order_by("-created_at")
 
+        # NEW LOGIC: If profile is not approved, show all approved posts
+        if profile and profile.approval_status != "approved":
+            return qs.order_by("-created_at")
+
         # Default feed: enforce strict visibility based on user's profile location
         if profile:
             filters = Q()
@@ -115,9 +119,9 @@ class PostListView(LoginRequiredMixin, ListView):
             return qs.filter(filters).order_by("-created_at")
 
         # User has no profile/location info -> only show global posts
-        return qs.filter(availability_scope="global").order_by("-created_at")
+        return qs.order_by("-created_at")
 
-class PostDetailView(LoginRequiredMixin, DetailView):
+class PostDetailView(DetailView):
     model = Post
     template_name = "posts/post_detail.html"
     context_object_name = "post"
@@ -271,6 +275,12 @@ class ProductPostCreateView(LoginRequiredMixin, CreateView):
         )
         return response
 
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create posts.")
+            return redirect("profile_detail")  # or another appropriate page
+        return super().dispatch(request, *args, **kwargs)
 class ServicePostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = ServicePostForm
@@ -334,7 +344,13 @@ class ServicePostCreateView(LoginRequiredMixin, CreateView):
             "Service post submitted successfully and is under review!"
         )
         return response
-        
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create posts.")
+            return redirect("profile_detail")  # or another appropriate page
+        return super().dispatch(request, *args, **kwargs)
+
 class LaborPostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = LaborPostForm
@@ -398,7 +414,12 @@ class LaborPostCreateView(LoginRequiredMixin, CreateView):
             "Labor post submitted successfully and is under review!"
         )
         return response
-       
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create posts.")
+            return redirect("profile_detail")  # or another appropriate page
+        return super().dispatch(request, *args, **kwargs)
 class PostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     success_url = reverse_lazy('post_home')

@@ -8,15 +8,48 @@
     <form method="post" autocomplete="off" class="space-y-6">
       {% csrf_token %}
 
-      {% for field in form %}
-        <div>
-          {{ field.label_tag }}
-          {{ field }}
-          {% if field.errors %}
-            <div class="mt-1 text-sm text-red-600">{{ field.errors }}</div>
-          {% endif %}
-        </div>
-      {% endfor %}
+      <div>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.username.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.email.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        {{ form.country_code.label_tag }}
+        {{ form.country_code }}
+        {% if form.country_code.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.country_code.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        {{ form.phone_number.label_tag }}
+        {{ form.phone_number }}
+        {% if form.phone_number.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.phone_number.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        {{ form.password1.label_tag }}
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.password1.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        {{ form.password2.label_tag }}
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="mt-1 text-sm text-red-600">{{ form.password2.errors }}</div>
+        {% endif %}
+      </div>
 
       <button type="submit" class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition">
         Sign Up

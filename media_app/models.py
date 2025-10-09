@@ -34,7 +34,7 @@ class MediaFile(models.Model):
     # Who uploaded the file (optional, for better organization)
     owner = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="uploaded_media"

@@ -124,12 +124,10 @@ class PersonListView(LoginRequiredMixin, ListView):
         return qs
 
 
-class PersonDetailView(DetailView):
+class PersonDetailView(LoginRequiredMixin, DetailView):
     """Display details of a Person profile."""
     model = Person
     template_name = "person/person_detail.html"
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         profile = self.object
@@ -145,11 +143,10 @@ class PersonDetailView(DetailView):
         return context
 
 class PersonDeleteView(LoginRequiredMixin, DeleteView):
-    """Delete a user account (CustomUser + Person)."""
-
+    """Delete a user account (CustomUser + Person).""" 
     model = CustomUser
     template_name = "person/person_confirm_delete.html"
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("post_home")
 
     def delete(self, request, *args, **kwargs):
         user = self.get_object()

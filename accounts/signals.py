@@ -19,29 +19,6 @@ def notify_on_signup(sender, instance, created, **kwargs):
             target_content_type="user"
         )
 
-# --- Notify on password change ---
-# @receiver(password_changed)
-# def notify_on_password_change(sender, request, user, **kwargs):
-#     Notification.objects.create(
-#         recipient=user,
-#         actor=None,
-#         verb="Your password was changed successfully.",
-#         target_object_id=user.id,
-#         target_content_type="user"
-#     )
-
-# --- Notify admins on account deletion ---
-@receiver(post_delete, sender=CustomUser)
-def notify_on_account_deletion(sender, instance, **kwargs):
-    for admin in CustomUser.objects.filter(is_superuser=True):
-        Notification.objects.create(
-            recipient=admin,
-            actor=instance,
-            verb=f"User account deleted: {instance.username}",
-            target_object_id=instance.id,
-            target_content_type="user"
-        )
-
 # alert follow and unfollow
 @receiver(post_save, sender=Follow)
 def notify_follow(sender, instance, created, **kwargs):
@@ -53,16 +30,6 @@ def notify_follow(sender, instance, created, **kwargs):
             target_object_id=instance.id,
             target_content_type="follow"
         )
-
-# @receiver(post_delete, sender=Follow)
-# def notify_unfollow(sender, instance, **kwargs):
-#     Notification.objects.create(
-#         recipient=instance.following,
-#         actor=instance.follower,
-#         verb=f"{instance.follower.username} has unfollowed you.",
-#         target_object_id=instance.id,
-#         target_content_type="follow"
-#     )
 
 @receiver(post_save, sender=Follow)
 def create_follow_notification(sender, instance, created, **kwargs):

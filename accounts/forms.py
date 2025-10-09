@@ -8,7 +8,7 @@ from django.contrib.auth.forms import (
 )
 from .models import CustomUser, Follow
 from django.core.exceptions import ValidationError
-
+import phonenumbers
 
 class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
@@ -31,33 +31,34 @@ class CustomLoginForm(AuthenticationForm):
             raise forms.ValidationError("Please use a Gmail address (e.g., yourname@gmail.com)")
         return username.split('@')[0]
 
-
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ("username", "email", "phone_number", "password1", "password2")
+        fields = ("username", "email", "country_code", "phone_number", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         label_map = {
-            'username': 'Email address',
-            'email': 'Confirm your email address',
+            'username': 'Email Address',
+            'email': 'Confirm your Email Address',
+            'country_code': 'Select Country',
             'phone_number': 'Phone Number',
             'password1': 'Password',
             'password2': 'Confirm Password',
         }
-        error_message_map = {
-            'required': 'Please fill out this field.',
-        }
 
-        for field_name, field in self.fields.items():
-            field.label = label_map.get(field_name, field_name.capitalize())
-            field.error_messages.update(error_message_map)
+        for name, field in self.fields.items():
+            field.label = label_map.get(name, name.capitalize())
             field.widget.attrs.update({
-                'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
+                'class': (
+                    'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 '
+                    'block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none '
+                    'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 '
+                    'ease-in-out bg-gray-100 text-gray-900'
+                ),
                 'autocomplete': 'off'
             })
-
+        self.fields['phone_number'].widget.attrs['placeholder'] = 'e.g. 09012345678'
     def clean_username(self):
         username = self.cleaned_data.get("username", "").strip().lower()
         if not username.endswith("@gmail.com"):
@@ -70,24 +71,43 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get("email")
         if CustomUser.objects.filter(email=email).exists():
-            raise forms.ValidationError("This email address is already in use. Please use a different email address.")
+            raise forms.ValidationError("This email address is already in use.")
         return email
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")
-        if CustomUser.objects.filter(phone_number=phone_number).exists():
-            raise forms.ValidationError("This phone number is already in use. Please use a different phone number.")
+        country_code = self.cleaned_data.get("country_code")
+        if phone_number and country_code:
+            try:
+                iso2 = str(country_code).upper().strip()
+                number_str = str(phone_number).strip()
+                # Handle both local and international formats
+                if number_str.startswith('+'):
+                    parsed_number = phonenumbers.parse(number_str, None)
+                else:
+                    parsed_number = phonenumbers.parse(number_str, iso2)
+                if not phonenumbers.is_valid_number(parsed_number):
+                    raise forms.ValidationError(
+                        "Please enter a valid phone number for your selected country (e.g. 09012345678 for Nigeria)."
+                    )
+                formatted_number = phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
+                if CustomUser.objects.filter(phone_number=formatted_number).exists():
+                    raise forms.ValidationError("This phone number is already in use.")
+                return phone_number  # Let the model save() handle formatting
+            except Exception:
+                raise forms.ValidationError(
+                    "Please enter a valid phone number for your selected country (e.g. 09012345678 for Nigeria)."
+                )
         return phone_number
-
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # Ensure virtual_id is set (in case it wasn't set by default)
+        # ✅ Ensure virtual_id is set
         if not user.virtual_id:
             from .models import generate_virtual_id
             user.virtual_id = generate_virtual_id()
 
-        # Auto-assign email by appending @gmail.com to the username
+        # ✅ Normalize email (add full Gmail)
         user.email = f"{user.username}@gmail.com"
 
         if commit:
@@ -98,13 +118,14 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        fields = ("username", "email", "phone_number", "first_name", "last_name")
+        fields = ("username", "email", "country_code", "phone_number", "first_name", "last_name")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         label_map = {
             'username': 'Email Prefix',
             'email': 'Email Address',
+            'country_code': 'Country',
             'phone_number': 'Phone Number',
             'first_name': 'First Name',
             'last_name': 'Last Name',
@@ -112,10 +133,14 @@ class CustomUserChangeForm(UserChangeForm):
         for name, field in self.fields.items():
             field.label = label_map.get(name, name.capitalize())
             field.widget.attrs.update({
-                'class': 'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-gray-100 text-gray-900',
+                'class': (
+                    'form-control input-wrapper block text-sm font-medium text-gray-700 mb-1 '
+                    'block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none '
+                    'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 '
+                    'ease-in-out bg-gray-100 text-gray-900'
+                ),
                 'autocomplete': 'off'
             })
-
 
 class CustomPasswordResetForm(PasswordResetForm):
     email = forms.EmailField(

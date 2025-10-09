@@ -7,7 +7,6 @@ from posts.models import PendingLocationRequest
 
 from custom_search.models import Continent, Country, State, Town
 
-
 def profile_pic_upload_path(instance, filename):
     # Each user gets their own folder inside profile_pics/
     return f"profile_pics/user_{instance.user.id}/{filename}"
@@ -21,11 +20,9 @@ class Person(models.Model):
     ]
 
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE,   #IF WE use the word "CASCADE" in place of "PROTECT" then, the whole will be deleted if we try to delete the profile  
-        primary_key=True,
-        related_name='profile',
-        verbose_name=_("User"),
+        primary_key=True, related_name='profile', verbose_name=_("User"),
     )
     business_name = models.CharField(max_length=255, blank=True, verbose_name=_("Business Name"))
     real_name = models.CharField(max_length=255, blank=True, verbose_name=_("Real Name"))
@@ -56,19 +53,19 @@ class Person(models.Model):
 
     # Linked dropdown-based location
     continent = models.ForeignKey(
-        Continent, on_delete=models.SET_NULL, default=0, blank=True, null=True,
+        Continent, on_delete=models.CASCADE, default=0, blank=True, null=True,
         related_name='specific_continent'
     )
     country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, default=0, blank=True, null=True,
+        Country, on_delete=models.CASCADE, default=0, blank=True, null=True,
         related_name='specific_country'
     )
     state = models.ForeignKey(
-        State, on_delete=models.SET_NULL, default=0, blank=True, null=True,
+        State, on_delete=models.CASCADE, default=0, blank=True, null=True,
         related_name='specific_state'
     )
     town = models.ForeignKey(
-        Town, on_delete=models.SET_NULL, default=0, blank=True, null=True,
+        Town, on_delete=models.CASCADE, default=0, blank=True, null=True,
         related_name='specific_town'
     )
     # User-typed fallback (to be reviewed by admin)
@@ -139,7 +136,7 @@ class PendingLocationRequest(models.Model):
     typed_town = models.CharField(max_length=100, blank=True, null=True)
     parent_state = models.ForeignKey(
         State,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="pending_person_requests"

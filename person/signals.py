@@ -10,13 +10,29 @@ from notifications.hooks.person_notifications import (
     notify_town_rejection,
     notify_business_name_toggle
 )
+from custom_search.models import Country, Continent
 
 # --- Profile creation for new users ---
 """Automatically create a Person profile when a new user signs up."""
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):
     if created and not hasattr(instance, "profile"):
-        Person.objects.create(user=instance, approval_status="pending")
+        # Get the selected country from the user model
+        selected_country_code = getattr(instance, "country_code", None)
+        country_obj = None
+        continent_obj = None
+        if selected_country_code:
+            country_obj = Country.objects.filter(country_code=selected_country_code).first()
+            if country_obj:
+                continent_obj = country_obj.continent  # Assuming Country has a FK to Continent
+
+        # Create the Person profile and auto-fill country and continent
+        Person.objects.create(
+            user=instance,
+            country=country_obj,
+            continent=continent_obj,
+            approval_status="awaiting_user"
+        )
 # --- Ensure profile updates when user is saved ---
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_profile(sender, instance, **kwargs):
@@ -42,10 +58,10 @@ def person_notifications(sender, instance, **kwargs):
     # Town pending
     if hasattr(instance, "_pending_town"):
         notify_pending_town(instance, instance._pending_town)
-
     # Town approved/rejected
     if hasattr(instance, "_town_approved"):
         notify_town_approval(instance, instance._town_approved)
+
     if hasattr(instance, "_town_rejected"):
         notify_town_rejected(instance, instance._town_rejected)
 

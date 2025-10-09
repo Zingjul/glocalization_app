@@ -21,11 +21,14 @@ from .forms import (
     CustomPasswordChangeForm,
     ConfirmPasswordForm,
 )
-
+from django.http import JsonResponse
+from custom_search.models import Country
 
 CustomUser = get_user_model()
 
+
 # Signup View (User Registration)
+
 class SignupView(FormView):
     template_name = 'registration/signup.html'
     form_class = CustomUserCreationForm
@@ -172,8 +175,13 @@ class UserDeleteView(LoginRequiredMixin, FormView):
         user.delete()
         return super().form_valid(form)
 
+        
 @login_required
 def toggle_follow(request, user_id):
+    profile = getattr(request.user, "profile", None)
+    if not profile or profile.approval_status != "approved":
+        messages.error(request, "Your profile must be approved before you can follow or unfollow users.")
+        return redirect(request.META.get("HTTP_REFERER", "person_list"))
     target_user = get_object_or_404(CustomUser, id=user_id)
 
     if target_user == request.user:

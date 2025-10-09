@@ -107,6 +107,10 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
 
             return qs.filter(filters).order_by("-created_at")
 
+        # NEW LOGIC: If profile is not approved, show all approved posts
+        if profile and profile.approval_status != "approved":
+            return qs.order_by("-created_at")
+
         # --- Default feed: filter by user's profile location ---
         if profile:
             filters = Q()
@@ -148,7 +152,7 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
             return qs.filter(filters).order_by("-created_at")
 
         # --- Fallback: user has no profile/location info -> only global posts ---
-        return qs.filter(availability_scope="global").order_by("-created_at")
+        return qs.order_by("-created_at")
 
 
 class SeekerPostDetailView(LoginRequiredMixin, DetailView):
@@ -303,6 +307,12 @@ class SeekerProductPostCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "Product seeker post submitted successfully and is under review!")
         return response
 
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create seeker posts.")
+            return redirect("profile_detail")  # Or another info page
+        return super().dispatch(request, *args, **kwargs)
 
 class SeekerServicePostCreateView(LoginRequiredMixin, CreateView):
     model = SeekerPost
@@ -361,6 +371,12 @@ class SeekerServicePostCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "Service seeker post submitted successfully and is under review!")
         return response
 
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create seeker posts.")
+            return redirect("profile_detail")  # Or another info page
+        return super().dispatch(request, *args, **kwargs)
 
 class SeekerLaborPostCreateView(LoginRequiredMixin, CreateView):
     model = SeekerPost
@@ -419,6 +435,12 @@ class SeekerLaborPostCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "Labor seeker post submitted successfully and is under review!")
         return response
 
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.approval_status != "approved":
+            messages.error(request, "Your profile must be approved before you can create seeker posts.")
+            return redirect("profile_detail")  # Or another info page
+        return super().dispatch(request, *args, **kwargs)
 
 class SeekerPostEditBaseView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = SeekerPost

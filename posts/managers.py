@@ -2,21 +2,29 @@
 from django.db import models
 from django.db.models import Q
 
+# This file defines custom query logic for filtering posts based on a user's profile and location.
+
 class PostQuerySet(models.QuerySet):
     def visible_to(self, user):
+        # Get the user's profile (if they have one)
         profile = getattr(user, "profile", None)
+        # Start with only posts that are approved
         qs = self.filter(status="approved")
 
-        # If no profile, only global
+        # If the user has no profile, show all approved posts (no location filtering)
         if not profile:
-            return qs.filter(availability_scope="global")
-
+            return qs
+            
+        # Build up filters for posts that match the user's location
         filters = Q()
+        # Always include global posts
         filters |= Q(availability_scope="global")
 
+        # If the user has a continent set, include posts for that continent
         if getattr(profile, "continent", None):
             filters |= Q(availability_scope="continent", post_continent=profile.continent)
 
+        # If the user has a country set, include posts for that country
         if getattr(profile, "country", None):
             filters |= Q(
                 availability_scope="country",
@@ -24,6 +32,7 @@ class PostQuerySet(models.QuerySet):
                 post_country=profile.country,
             )
 
+        # If the user has a state set, include posts for that state
         if getattr(profile, "state", None):
             filters |= Q(
                 availability_scope="state",
@@ -32,6 +41,7 @@ class PostQuerySet(models.QuerySet):
                 post_state=profile.state,
             )
 
+        # If the user has a town set, include posts for that town
         if getattr(profile, "town", None):
             filters |= Q(
                 availability_scope="town",
@@ -41,4 +51,5 @@ class PostQuerySet(models.QuerySet):
                 post_town=profile.town,
             )
 
+        # Return all posts that match any of these filters, without duplicates
         return qs.filter(filters).distinct()

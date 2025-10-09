@@ -63,19 +63,19 @@ class Post(models.Model):
 
     # 🔽 Post-specific location (dropdown selection)
     post_continent = models.ForeignKey(
-        Continent, on_delete=models.SET_NULL, blank=True, null=True,
+        Continent, on_delete=models.CASCADE, blank=True, null=True,
         related_name='post_specific_continent', default=0
     )
     post_country = models.ForeignKey(
-        Country, on_delete=models.SET_NULL, blank=True, null=True,
+        Country, on_delete=models.CASCADE, blank=True, null=True,
         related_name='post_specific_country', default=0
     )
     post_state = models.ForeignKey(
-        State, on_delete=models.SET_NULL, blank=True, null=True,
+        State, on_delete=models.CASCADE, blank=True, null=True,
         related_name='post_specific_state', default=0
     )
     post_town = models.ForeignKey(
-        Town, on_delete=models.SET_NULL, blank=True, null=True,
+        Town, on_delete=models.CASCADE, blank=True, null=True,
         related_name='post_specific_town', default=0
     )
 
@@ -170,7 +170,7 @@ class PendingLocationRequest(models.Model):
     typed_town = models.CharField(max_length=100, blank=True, null=True)
     parent_state = models.ForeignKey(
         "custom_search.State",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True, null=True,
         related_name="post_pending_requests"
     )

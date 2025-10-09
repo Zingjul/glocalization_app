@@ -27,7 +27,7 @@ class Notification(models.Model):
 
     actor = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="actor_notifications",
