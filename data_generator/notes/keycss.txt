@@ -15,4 +15,3 @@ ALMOST NEVER WANTED TO USE THIS, BUT ITS LITE, AND COOL: i used it on the user c
 
 using this for post form
     w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent
-

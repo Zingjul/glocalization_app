@@ -1,0 +1,49 @@
+{% extends 'staff/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h3>Welcome back, {{ request.user.first_name|default:request.user.username }}!</h3>
+        <p class="text-muted">You are logged in as {{ request.user.get_role_display|default:"Staff Member" }}.</p>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Pending Posts</h5>
+                <p class="card-text">Approve or reject user submissions.</p>
+                <a href="{% url 'staff:pending_posts' %}" class="btn btn-primary btn-sm">Review</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Flagged Comments</h5>
+                <p class="card-text">Moderate inappropriate content.</p>
+                <a href="{% url 'staff:flagged_comments' %}" class="btn btn-warning btn-sm">Check</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Manage Users</h5>
+                <p class="card-text">Suspend or ban users if necessary.</p>
+                <a href="{% url 'staff:manage_users' %}" class="btn btn-secondary btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Support Inbox</h5>
+                <p class="card-text">Handle user tickets and reports.</p>
+                <a href="{% url 'staff:support_inbox' %}" class="btn btn-info btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

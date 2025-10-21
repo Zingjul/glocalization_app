@@ -24,9 +24,6 @@ from notifications.hooks.seekers_notifications import notify_seeker_approved, no
 
 User = get_user_model()
 
-print("Notifications signals initialized.")
-
-
 # ----------------------------------------------------------------------
 # HELPERS
 # ----------------------------------------------------------------------

@@ -66,3 +66,59 @@ Decorate views with:
 
 
 Redirect users to the right dashboard based on their role after login.
+
+
+
+
+
+
+------------------------
+🧩 Implementation Roadmap
+
+We’ll build it in phases (each one will be fully functional):
+
+Phase 1 — Setup & Access Control
+
+Add staff/urls.py and staff/views.py.
+
+Create base template templates/staff/base.html.
+
+Implement:
+
+/staff/login/ (custom login form restricted to staff only)
+
+/staff/dashboard/ (main landing page)
+
+Show dashboard metrics:
+
+Pending Posts
+
+Pending SeekerPosts
+
+Unreviewed PendingLocationRequests
+
+Unreviewed PendingSeekerLocationRequests
+
+Spam comments
+
+Active users
+
+Phase 2 — Moderation Pages
+
+/staff/posts/pending/
+
+/staff/seekers/pending/
+
+/staff/comments/spam/
+
+/staff/locations/pending/
+
+Phase 3 — User Management
+
+/staff/users/ page for viewing/deactivating accounts.
+
+Phase 4 — (Optional) Board & Audit Log
+
+Integrate Board model for staff curation.
+
+Add simple activity log for tracking who approved what.

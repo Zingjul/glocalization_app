@@ -22,9 +22,10 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("accounts/", include("accounts.urls")),  # ✅ Your custom views
+    path("accounts/", include("accounts.urls")),
     path('user/', include("person.urls")),
-    path("api/", include("custom_search.urls")),  # ✅ This must be here!
+    path("api/", include("custom_search.urls")),
+    path('about/', include('about.urls', namespace="about")),
     
     path('', include("posts.urls")),
     path('comments/', include("comment.urls")),
@@ -36,6 +37,7 @@ urlpatterns = [
     path('seekersfinder/', include('seekersfinder.urls', namespace="seekersfinder")),
     path('notifications/', include('notifications.urls', namespace="notifications")),
     path('board/', include('board.urls', namespace="board")),
+    path('staff/', include('staff.urls', namespace="staff")),
 ]
 
 if settings.DEBUG:

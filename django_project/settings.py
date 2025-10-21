@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     
     # Local apps
+    'about',
     'accounts',
     'comment',
     'custom_search',
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'seekersfinder',
     "notifications.apps.NotificationsConfig",
     'board',
+    'staff',
 ]
 
 MIDDLEWARE = [

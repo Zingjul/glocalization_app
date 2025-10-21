@@ -1,7 +1,7 @@
 from django.db import models
 from django_countries.fields import CountryField
 from django.conf import settings
-from person.utils.phone_codes import get_phone_code
+from person.utils.phone_codes import get_phone_code_by_iso2
 
 class Continent(models.Model):
     id = models.IntegerField(primary_key=True)  # manually assigned
@@ -30,7 +30,7 @@ class Country(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.phone_code:
-            self.phone_code = get_phone_code(self.country_code)
+            self.phone_code = get_phone_code_by_iso2(self.country_code)
         super().save(*args, **kwargs)
 
 class State(models.Model):

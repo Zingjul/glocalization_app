@@ -17,28 +17,39 @@ from custom_search.models import Country, Continent
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):
     if created and not hasattr(instance, "profile"):
-        # Get the selected country from the user model
-        selected_country_code = getattr(instance, "country_code", None)
-        country_obj = None
-        continent_obj = None
-        if selected_country_code:
-            country_obj = Country.objects.filter(country_code=selected_country_code).first()
-            if country_obj:
-                continent_obj = country_obj.continent  # Assuming Country has a FK to Continent
+        try:
+            # Get the selected country from the user model
+            selected_country_code = getattr(instance, "country_code", None)
+            country_obj = None
+            continent_obj = None
 
-        # Create the Person profile and auto-fill country and continent
-        Person.objects.create(
-            user=instance,
-            country=country_obj,
-            continent=continent_obj,
-            approval_status="awaiting_user"
-        )
+            if selected_country_code:
+                country_obj = Country.objects.filter(country_code=selected_country_code).first()
+                if country_obj:
+                    continent_obj = country_obj.continent  # Assuming Country has a FK to Continent
+
+            # Attempt to create the Person profile
+            Person.objects.create(
+                user=instance,
+                country=country_obj,
+                continent=continent_obj,
+                approval_status="awaiting_user"
+            )
+
+        except Exception as e:
+            # Log and continue instead of crashing during superuser creation
+            print(f"[WARNING] Profile auto-creation failed for user {instance.username}: {e}")
+
 # --- Ensure profile updates when user is saved ---
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_profile(sender, instance, **kwargs):
-    """Ensure the Person profile updates when the User model is saved."""
-    if hasattr(instance, "profile"):
-        instance.profile.save()
+    """Safely save related profile when user is updated."""
+    try:
+        # Only save if the user actually has a profile
+        if hasattr(instance, "profile") and instance.profile:
+            instance.profile.save()
+    except Exception as e:
+        print(f"[WARNING] Profile save failed for user {instance.username}: {e}")
 
 # --- Notification triggers for Person updates ---
 @receiver(post_save, sender=Person)

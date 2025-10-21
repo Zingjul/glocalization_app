@@ -58,7 +58,7 @@ class PersonAdmin(admin.ModelAdmin):
 
         self.message_user(
             request,
-            f"✅ Approved {approved} profile(s) and verified their location.",
+            f"Approved {approved} profile(s) and verified their location.",
             level=messages.SUCCESS,
         )
 
@@ -80,7 +80,7 @@ class PersonAdmin(admin.ModelAdmin):
 
         self.message_user(
             request,
-            f"🚫 Rejected {rejected} profile update(s). Sent back to users for correction.",
+            f"Rejected {rejected} profile update(s). Sent back to users for correction.",
             level=messages.INFO,
         )
 
@@ -95,7 +95,7 @@ class PersonAdmin(admin.ModelAdmin):
                 person.approval_status = "approved"
                 person.save()
                 notify_profile_approval(person)
-        self.message_user(request, f"{queryset.count()} profile(s) approved 🎉")
+        self.message_user(request, f"{queryset.count()} profile(s) approved")
 
     @admin.action(description="Reject selected profiles (set is_verified=False)")
     def reject_profiles(self, request, queryset):
@@ -105,7 +105,7 @@ class PersonAdmin(admin.ModelAdmin):
                 person.approval_status = "rejected"
                 person.save()
                 notify_profile_rejection(person)
-        self.message_user(request, f"{queryset.count()} profile(s) rejected 🚫")
+        self.message_user(request, f"{queryset.count()} profile(s) rejected")
 
     @admin.action(description="Toggle Business/Real Name")
     def toggle_business_name(self, request, queryset):
@@ -181,12 +181,12 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
 
         if approved_count:
             self.message_user(
-                request, f"✅ Approved {approved_count} pending town(s) and linked to Person(s).",
+                request, f"Approved {approved_count} pending town(s) and linked to Person(s).",
                 level=messages.SUCCESS
             )
         if skipped_count:
             self.message_user(
-                request, f"⚠️ Skipped {skipped_count} request(s) (missing typed_town or parent_state).",
+                request, f"Skipped {skipped_count} request(s) (missing typed_town or parent_state).",
                 level=messages.WARNING
             )
 
@@ -213,6 +213,6 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
             rejected += 1
 
         self.message_user(
-            request, f"🚫 Rejected {rejected} pending town(s).",
+            request, f"Rejected {rejected} pending town(s).",
             level=messages.INFO
         )
