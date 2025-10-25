@@ -48,7 +48,7 @@ class State(models.Model):
 
 class Town(models.Model):
     id = models.IntegerField(primary_key=True)  # manually assigned
-    code = models.CharField(max_length=5, unique=True, db_index=True, default="TEMP")
+    code = models.CharField(max_length=5, db_index=True, default="TEMP")
     name = models.CharField(max_length=100)
     state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="towns", db_index=True)
     type = models.CharField(

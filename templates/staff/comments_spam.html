@@ -1,0 +1,44 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2 class="section-title">🚫 Spam Comments</h2>
+
+{% if spam_comments %}
+<table class="moderation-table">
+  <thead>
+    <tr>
+      <th>Author</th>
+      <th>Excerpt</th>
+      <th>On Object</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for comment in spam_comments %}
+    <tr>
+      <td>{{ comment.author.username }}</td>
+      <td>
+        <a href="{% url 'staff:comment_detail' comment.pk %}">
+          {{ comment.text|truncatechars:70 }}
+        </a>
+      </td>
+      <td>{{ comment.content_type.app_label }}.{{ comment.content_type.model }} #{{ comment.object_id }}</td>
+      <td>{{ comment.created_at|date:"Y-m-d H:i" }}</td>
+      <td>
+        <form action="{% url 'staff:restore_comment' comment.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="approve-btn">Not Spam</button>
+        </form>
+        <form action="{% url 'staff:delete_comment' comment.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="reject-btn">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No spam comments found 🎉</p>
+{% endif %}
+{% endblock %}

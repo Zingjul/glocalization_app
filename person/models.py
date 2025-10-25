@@ -113,7 +113,22 @@ class Person(models.Model):
         if user and user.is_authenticated:
             return Follow.objects.filter(follower=user, following=self.user).exists()
         return False
-    
+
+    @property
+    def subscription(self):
+        from entitle.models import UserSubscription
+        try:
+            return UserSubscription.objects.get(user=self.user)
+        except UserSubscription.DoesNotExist:
+            return None
+
+    @property
+    def auto_approval_hours(self):
+        sub = self.subscription
+        if sub and sub.is_active:
+            return sub.plan.auto_approval_hours
+        return 24  # default fallback for free/unsubscribed users
+
     def __str__(self):
         return f"{self.user.username} ({self.business_name})" if self.business_name else self.user.username
 

@@ -85,6 +85,14 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
 
         qs = SeekerPost.objects.filter(status="approved")
 
+        # --- 1️⃣ If profile exists but not approved → show ALL approved posts ---
+        if profile and getattr(profile, "approval_status", None) != "approved":
+            return qs.order_by("-created_at")
+
+        # NEW LOGIC: If profile is not approved, show all approved posts
+        if profile and profile.approval_status != "approved":
+            return qs.order_by("-created_at")
+
         # --- Search override: use GET params if present ---
         continent_q = self.request.GET.get("continent")
         country_q = self.request.GET.get("country")
@@ -149,11 +157,8 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
                     post_town=profile.town,
                 )
 
-            return qs.filter(filters).order_by("-created_at")
-
         # --- Fallback: user has no profile/location info -> only global posts ---
         return qs.order_by("-created_at")
-
 
 class SeekerPostDetailView(LoginRequiredMixin, DetailView):
     model = SeekerPost

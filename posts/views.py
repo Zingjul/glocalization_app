@@ -46,11 +46,18 @@ class PostListView(ListView):
         location and the corresponding availability_scope.
         """
         user = self.request.user
-        # <-- adjust to 'person' if your profile related_name is user.person -->
         profile = getattr(user, "profile", None)
 
         # start from approved posts only
         qs = Post.objects.filter(status="approved")
+
+        # --- 1️⃣ If profile exists but not approved → show ALL approved posts ---
+        if profile and getattr(profile, "approval_status", None) != "approved":
+            return qs.order_by("-created_at")
+
+        # NEW LOGIC: If profile is not approved, show all approved posts
+        if profile and profile.approval_status != "approved":
+            return qs.order_by("-created_at")
 
         # If explicit search filters provided, treat as search override (include global)
         continent_q = self.request.GET.get("continent")
@@ -115,9 +122,7 @@ class PostListView(ListView):
                     post_state=profile.state,
                     post_town=profile.town,
                 )
-
-            return qs.filter(filters).order_by("-created_at")
-
+            
         # User has no profile/location info -> only show global posts
         return qs.order_by("-created_at")
 

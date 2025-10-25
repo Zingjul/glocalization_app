@@ -1,0 +1,63 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2 class="section-title">👥 User Management</h2>
+
+<form method="get" action="{% url 'staff:manage_users' %}" class="search-form">
+  <input type="text" name="q" value="{{ query }}" placeholder="Search by username or email..." class="search-input">
+  <button type="submit" class="search-btn">Search</button>
+</form>
+
+{% if users %}
+<table class="moderation-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Joined</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr class="{% if not user.is_active %}inactive-row{% endif %}">
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.date_joined|date:"Y-m-d" }}</td>
+      <td>
+        {% if user.is_superuser %}
+          <span class="role-badge superuser">Superuser</span>
+        {% elif user.is_staff %}
+          <span class="role-badge staff">Staff</span>
+        {% else %}
+          <span class="role-badge user">User</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if user.is_active %}
+          <span class="status-active">Active</span>
+        {% else %}
+          <span class="status-inactive">Inactive</span>
+        {% endif %}
+      </td>
+      <td>
+        <form action="{% url 'staff:toggle_user_status' user.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          {% if user.is_active %}
+            <button class="reject-btn">Deactivate</button>
+          {% else %}
+            <button class="approve-btn">Activate</button>
+          {% endif %}
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No users found.</p>
+{% endif %}
+{% endblock %}

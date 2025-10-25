@@ -1,7 +1,6 @@
 # posts/managers.py
 from django.db import models
 from django.db.models import Q
-
 # This file defines custom query logic for filtering posts based on a user's profile and location.
 
 class PostQuerySet(models.QuerySet):
@@ -11,10 +10,11 @@ class PostQuerySet(models.QuerySet):
         # Start with only posts that are approved
         qs = self.filter(status="approved")
 
-        # If the user has no profile, show all approved posts (no location filtering)
+        # CASE 1: If the user has no profile, show all approved posts (no location filtering)
         if not profile:
             return qs
             
+        # CASE 3:
         # Build up filters for posts that match the user's location
         filters = Q()
         # Always include global posts
@@ -51,5 +51,9 @@ class PostQuerySet(models.QuerySet):
                 post_town=profile.town,
             )
 
+        # CASE 2: user has a profile but it's not yet approved → show all approved posts
+        if profile.approval_status != "approved":
+            return qs
+    
         # Return all posts that match any of these filters, without duplicates
         return qs.filter(filters).distinct()

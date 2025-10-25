@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import StaffBoardPost, AuditLog
 
-# Register your models here.
+admin.site.register(StaffBoardPost)
+admin.site.register(AuditLog)

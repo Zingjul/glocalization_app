@@ -166,18 +166,36 @@ class SeekerPostAdmin(admin.ModelAdmin):
 
     @admin.action(description="Force expire selected seeker posts now")
     def expire_selected_seekers(self, request, queryset):
-        updated = 0
-        now = timezone.now()
-        for seeker_post in queryset:
-            seeker_post.expires_at = now
-            seeker_post.save(update_fields=["expires_at"])
-            updated += 1
+        from django.utils import timezone
+        from django.contrib import messages
 
-        if updated:
+        now = timezone.now()
+        deleted = 0
+
+        for seeker_post in queryset:
+            if seeker_post.expires_at and seeker_post.expires_at <= now:
+                # Already expired — delete directly
+                seeker_post.delete()
+                deleted += 1
+            else:
+                # Mark as expired and delete
+                seeker_post.expires_at = now
+                seeker_post.status = "expired"
+                seeker_post.save(update_fields=["expires_at", "status"])
+                seeker_post.delete()
+                deleted += 1
+
+        if deleted:
             self.message_user(
                 request,
-                f"⚠️ Expired {updated} seeker post(s) manually.",
+                f"🗑️ {deleted} seeker post(s) have been deleted as expired.",
                 level=messages.WARNING,
+            )
+        else:
+            self.message_user(
+                request,
+                "✅ No seeker posts were deleted — none were expired.",
+                level=messages.INFO,
             )
 
 # --- Pending Seeker Location Admin ---

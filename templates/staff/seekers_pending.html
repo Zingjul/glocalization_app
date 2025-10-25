@@ -1,0 +1,44 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2 class="section-title">🎯 Pending Seeker Posts</h2>
+
+{% if pending_seeker_posts %}
+<table class="moderation-table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Scope</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for seeker_post in pending_seeker_posts %}
+        <tr>
+            <td>
+                <a href="{% url 'staff:seeker_post_detail' seeker_post.pk %}">{{ seeker_post.title }}</a>
+            </td>
+            <td>{{ seeker_post.author.username }}</td>
+            <td>{{ seeker_post.get_availability_scope_display }}</td>
+            <td>{{ seeker_post.category.name }}</td>
+            <td>{{ seeker_post.date|date:"Y-m-d H:i" }}</td>
+            <td>
+                <form action="{% url 'staff:approve_seeker_post' seeker_post.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="approve-btn">Approve</button>
+                </form>
+                <form action="{% url 'staff:reject_seeker_post' seeker_post.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="reject-btn">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No pending seeker posts right now 🎉</p>
+{% endif %}
+{% endblock %}

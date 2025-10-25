@@ -1,0 +1,41 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2>{{ seeker_post.title }}</h2>
+<p><strong>Author:</strong> {{ seeker_post.author.username }}</p>
+<p><strong>Category:</strong> {{ seeker_post.category.name }}</p>
+<p><strong>Availability Scope:</strong> {{ seeker_post.get_availability_scope_display }}</p>
+<p><strong>Date:</strong> {{ seeker_post.date|date:"Y-m-d H:i" }}</p>
+<hr>
+<p>{{ seeker_post.description|linebreaks }}</p>
+
+{% if seeker_post.images.all %}
+<h4>Attached Images:</h4>
+<ul>
+  {% for img in seeker_post.images.all %}
+  <li><img src="{{ img.file.url }}" width="120" style="margin:5px;border-radius:6px;"></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if seeker_post.videos.all %}
+<h4>Attached Videos:</h4>
+<ul>
+  {% for vid in seeker_post.videos.all %}
+  <li><video src="{{ vid.file.url }}" width="240" controls></video></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<div class="action-buttons">
+    <form action="{% url 'staff:approve_seeker_post' seeker_post.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="approve-btn">Approve</button>
+    </form>
+    <form action="{% url 'staff:reject_seeker_post' seeker_post.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="reject-btn">Reject</button>
+    </form>
+</div>
+
+<a href="{% url 'staff:pending_seeker_posts' %}" class="back-link">← Back to list</a>
+{% endblock %}

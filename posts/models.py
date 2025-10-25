@@ -10,6 +10,9 @@ from django.contrib.contenttypes.fields import GenericRelation
 from media_app.models import MediaFile   # ✅ proper import
 from datetime import timedelta
 from .managers import PostQuerySet
+
+
+
 User = get_user_model()
 
 def default_expiry():
@@ -60,6 +63,11 @@ class Post(models.Model):
 
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    # New auto-approval / audit fields
+    approved_at = models.DateTimeField(blank=True, null=True)
+    # small helper flag (you can also compute from reports)
+    is_flagged = models.BooleanField(default=False)
 
     # 🔽 Post-specific location (dropdown selection)
     post_continent = models.ForeignKey(
@@ -120,6 +128,52 @@ class Post(models.Model):
 
     expires_at = models.DateTimeField(default=default_expiry)
 
+    expires_at = models.DateTimeField(default=default_expiry)
+
+    # ----------------------
+    # override save to set auto_approve_at on creation
+    # ----------------------
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Keep only your location request logic
+        if self.post_town_input:
+            normalized_town = self.post_town_input.strip().title()
+            pending, created = PendingLocationRequest.objects.get_or_create(
+                post=self,
+                defaults={"typed_town": normalized_town, "parent_state": self.post_state},
+            )
+            if not created:
+                pending.typed_town = normalized_town
+                pending.parent_state = self.post_state
+                pending.is_reviewed = False
+                pending.approved = False
+                pending.save()
+        else:
+            PendingLocationRequest.objects.filter(post=self).delete()
+# ----------------------
+# PostReport model: user reporting/flagging
+# ----------------------
+class PostReport(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="reports")
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reason = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("post", "reporter")
+
+    def __str__(self):
+        return f"Report: post {self.post_id} by {self.reporter_id}"
+
+    # small helper to flag post when threshold met
+    @staticmethod
+    def flag_if_needed(post, threshold=3):
+        count = post.reports.count()
+        if count >= threshold and not post.is_flagged:
+            post.is_flagged = True
+            post.save(update_fields=["is_flagged"])
+
     @property
     def images(self):
         return self.media_files.filter(file_type="image")
@@ -135,7 +189,7 @@ class Post(models.Model):
         return reverse("post_detail", kwargs={"pk": self.pk})
 
     class Meta:
-        ordering = ["-date"]
+        ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -1,0 +1,42 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2 class="section-title">📝 Pending Posts</h2>
+
+{% if pending_posts %}
+<table class="moderation-table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in pending_posts %}
+        <tr>
+            <td>
+                <a href="{% url 'staff:post_detail' post.pk %}">{{ post.product_name }}</a>
+            </td>
+            <td>{{ post.author.username }}</td>
+            <td>{{ post.date|date:"Y-m-d H:i" }}</td>
+            <td>{{ post.status|capfirst }}</td>
+            <td>
+                <form action="{% url 'staff:approve_post' post.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                </form>
+                <form action="{% url 'staff:reject_post' post.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No pending posts at the moment 🎉</p>
+{% endif %}
+{% endblock %}

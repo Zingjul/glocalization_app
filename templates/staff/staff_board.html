@@ -1,0 +1,25 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2 class="section-title">📋 Staff Board</h2>
+
+<form method="post" class="post-form">
+  {% csrf_token %}
+  <input type="text" name="title" placeholder="Title..." required class="input-field">
+  <textarea name="content" rows="4" placeholder="Write a message or note..." required class="input-field"></textarea>
+  <button type="submit" class="approve-btn">Post</button>
+</form>
+
+<hr>
+
+{% if posts %}
+  {% for post in posts %}
+  <div class="board-post">
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.content|linebreaks }}</p>
+    <small>🕓 {{ post.created_at|date:"Y-m-d H:i" }} — 👤 {{ post.author.username }}</small>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>No posts yet. Be the first to post!</p>
+{% endif %}
+{% endblock %}

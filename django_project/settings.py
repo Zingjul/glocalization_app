@@ -121,3 +121,5 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents logout when browser is close
 SESSION_SAVE_EVERY_REQUEST = True  # Ensures session persistence
 # Use BigAutoField for primary keys by default
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+

@@ -1,0 +1,22 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2>{{ post.title }}</h2>
+<p><strong>Author:</strong> {{ post.author.username }}</p>
+<p><strong>Date:</strong> {{ post.date|date:"Y-m-d H:i" }}</p>
+<p><strong>Status:</strong> {{ post.status }}</p>
+<hr>
+<p>{{ post.description|linebreaks }}</p>
+
+<div class="action-buttons">
+    <form action="{% url 'staff:approve_post' post.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="approve-btn">Approve</button>
+    </form>
+    <form action="{% url 'staff:reject_post' post.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="reject-btn">Reject</button>
+    </form>
+</div>
+
+<a href="{% url 'staff:pending_posts' %}" class="back-link">← Back to list</a>
+{% endblock %}

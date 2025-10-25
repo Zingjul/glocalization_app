@@ -149,18 +149,36 @@ class PostAdmin(admin.ModelAdmin):
     @admin.action(description="Force expire selected posts")
     def force_expire_posts(self, request, queryset):
         from django.utils import timezone
+        from django.contrib import messages
 
-        expired = 0
+        now = timezone.now()
+        deleted = 0
         for post in queryset:
-            if post.expires_at > timezone.now():
-                post.expires_at = timezone.now()
-                post.save(update_fields=["expires_at"])
-                expired += 1
+            if post.expires_at and post.expires_at <= now:
+                # Already expired — delete
+                post.delete()
+                deleted += 1
+            else:
+                # Not expired yet — mark as expired then delete
+                post.expires_at = now
+                post.status = "expired"
+                post.save(update_fields=["expires_at", "status"])
+                post.delete()
+                deleted += 1
 
-        if expired:
+        if deleted:
             self.message_user(
-                request, f"⚠️ {expired} post(s) forced to expire.", level=messages.WARNING
+                request,
+                f"🗑️ {deleted} post(s) have been deleted as expired.",
+                level=messages.WARNING
             )
+        else:
+            self.message_user(
+                request,
+                "✅ No posts were deleted — none were expired.",
+                level=messages.INFO
+            )
+
 
 # --- Pending Location Request Admin ---
 @admin.register(PendingLocationRequest)
