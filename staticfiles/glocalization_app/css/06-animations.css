@@ -1,0 +1,308 @@
+/* ================================================
+   Animations & Transitions
+   Smooth, Apple-inspired animations
+   ================================================ */
+
+/* ========== Keyframe Animations ========== */
+
+/* Fade */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide */
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Scale */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Pulse */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Spin */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Heart Pop (for like button) */
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Shimmer (for loading skeletons) */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Wave */
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Float */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* ========== Animation Classes ========== */
+
+/* Fade */
+.animate-fadeIn {
+  animation: fadeIn var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.animate-fadeOut {
+  animation: fadeOut var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Slide */
+.animate-slideInUp {
+  animation: slideInUp var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.animate-slideInDown {
+  animation: slideInDown var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.animate-slideInRight {
+  animation: slideInRight var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Scale */
+.animate-scaleIn {
+  animation: scaleIn var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.animate-scaleOut {
+  animation: scaleOut var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Other animations */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ========== Scroll Reveal ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1)), 
+              transform var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1)),
+              transform var(--transition-smooth, 0.8s cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.reveal-stagger.visible > *:nth-child(1) { transition-delay: 0.1s; }
+.reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.2s; }
+.reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.3s; }
+.reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.4s; }
+.reveal-stagger.visible > *:nth-child(5) { transition-delay: 0.5s; }
+.reveal-stagger.visible > *:nth-child(6) { transition-delay: 0.6s; }
+.reveal-stagger.visible > *:nth-child(7) { transition-delay: 0.7s; }
+.reveal-stagger.visible > *:nth-child(8) { transition-delay: 0.8s; }
+
+.reveal-stagger.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== Loading States ========== */
+.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--border-medium, rgba(0, 0, 0, 0.12));
+  border-top-color: var(--accent-primary, #007aff);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary, #f5f5f7) 25%,
+    #e8e8ea 50%,
+    var(--bg-secondary, #f5f5f7) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+

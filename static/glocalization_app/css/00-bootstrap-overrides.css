@@ -1,0 +1,406 @@
+/* ============================================
+   BOOTSTRAP OVERRIDES
+   Apple-inspired + X-refined design on top of Bootstrap
+   ============================================ */
+
+/* ============================================
+   BOOTSTRAP BUTTON OVERRIDES
+   Replace Bootstrap buttons with our design
+   ============================================ */
+
+/* Primary button (Apple style) */
+.btn-primary {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 12px 24px !important;
+  font-size: var(--font-size-feed) !important;
+  font-weight: var(--fw-medium) !important;
+  transition: background var(--transition-base), transform var(--transition-fast) !important;
+  border: none !important;
+}
+
+.btn-primary:hover {
+  background: var(--accent-primary-hover) !important;
+  border-color: var(--accent-primary-hover) !important;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.btn-primary:focus {
+  background: var(--accent-primary-hover) !important;
+  border-color: var(--accent-primary-hover) !important;
+  box-shadow: 0 0 0 4px var(--accent-primary-light) !important;
+}
+
+/* Secondary button */
+.btn-secondary,
+.btn-outline-secondary {
+  background: transparent !important;
+  border: 1px solid var(--border-medium) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 12px 24px !important;
+  font-size: var(--font-size-feed) !important;
+  font-weight: var(--fw-medium) !important;
+  transition: background var(--transition-base) !important;
+}
+
+.btn-secondary:hover,
+.btn-outline-secondary:hover {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Success button */
+.btn-success {
+  background: var(--accent-success) !important;
+  border-color: var(--accent-success) !important;
+  color: white !important;
+  border-radius: var(--radius-pill) !important;
+}
+
+.btn-success:hover {
+  background: #2db04f !important;
+  border-color: #2db04f !important;
+}
+
+/* Danger button */
+.btn-danger,
+.btn-outline-danger {
+  background: var(--accent-danger) !important;
+  border-color: var(--accent-danger) !important;
+  color: white !important;
+  border-radius: var(--radius-pill) !important;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/* Link button */
+.btn-link {
+  color: var(--accent-primary) !important;
+  text-decoration: none !important;
+  font-weight: var(--fw-medium) !important;
+}
+
+.btn-link:hover {
+  color: var(--accent-primary-hover) !important;
+  text-decoration: underline !important;
+}
+
+/* Small buttons */
+.btn-sm {
+  padding: 8px 16px !important;
+  font-size: var(--font-size-meta) !important;
+}
+
+/* ============================================
+   BOOTSTRAP FORM OVERRIDES
+   ============================================ */
+
+.form-control,
+.form-select {
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 14px 16px !important;
+  font-size: var(--font-size-body) !important;
+  color: var(--text-primary) !important;
+  background: var(--bg-primary) !important;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base) !important;
+}
+
+.form-control::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 4px var(--accent-primary-light) !important;
+  outline: none !important;
+}
+
+.form-label {
+  font-size: var(--font-size-feed) !important;
+  font-weight: var(--fw-medium) !important;
+  color: var(--text-primary) !important;
+  margin-bottom: var(--space-xs) !important;
+}
+
+/* ============================================
+   BOOTSTRAP CARD OVERRIDES
+   ============================================ */
+
+.card {
+  border: 1px solid var(--border-light) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--bg-elevated) !important;
+  box-shadow: none !important;
+  transition: transform var(--transition-slow), box-shadow var(--transition-slow) !important;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.card-body {
+  padding: var(--space-md) !important;
+}
+
+.card-title {
+  font-size: var(--font-size-body) !important;
+  font-weight: var(--fw-semibold) !important;
+  color: var(--text-primary) !important;
+  margin-bottom: var(--space-xs) !important;
+}
+
+.card-text {
+  font-size: var(--font-size-feed) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP ALERT OVERRIDES
+   ============================================ */
+
+.alert {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border-light) !important;
+  padding: var(--space-md) !important;
+  font-size: var(--font-size-feed) !important;
+}
+
+.alert-success {
+  background: var(--accent-success-light) !important;
+  border-left: 3px solid var(--accent-success) !important;
+  color: var(--text-primary) !important;
+}
+
+.alert-danger {
+  background: var(--accent-danger-light) !important;
+  border-left: 3px solid var(--accent-danger) !important;
+  color: var(--text-primary) !important;
+}
+
+.alert-warning {
+  background: var(--accent-warning-light) !important;
+  border-left: 3px solid var(--accent-warning) !important;
+  color: var(--text-primary) !important;
+}
+
+.alert-info {
+  background: var(--accent-primary-light) !important;
+  border-left: 3px solid var(--accent-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP MODAL OVERRIDES
+   ============================================ */
+
+.modal-content {
+  border-radius: var(--radius-lg) !important;
+  border: none !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-light) !important;
+  padding: var(--space-lg) !important;
+}
+
+.modal-title {
+  font-size: var(--font-size-h2) !important;
+  font-weight: var(--fw-semibold) !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-body {
+  padding: var(--space-lg) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-light) !important;
+  padding: var(--space-lg) !important;
+}
+
+.btn-close {
+  background-size: 14px !important;
+}
+
+/* ============================================
+   BOOTSTRAP BADGE OVERRIDES
+   ============================================ */
+
+.badge {
+  border-radius: var(--radius-pill) !important;
+  padding: 4px 10px !important;
+  font-size: var(--font-size-caption) !important;
+  font-weight: var(--fw-medium) !important;
+  text-transform: uppercase !important;
+  letter-spacing: var(--ls-wide) !important;
+}
+
+.badge.bg-primary {
+  background: var(--accent-primary) !important;
+}
+
+.badge.bg-success {
+  background: var(--accent-success) !important;
+}
+
+.badge.bg-danger {
+  background: var(--accent-danger) !important;
+}
+
+.badge.bg-warning {
+  background: var(--accent-warning) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP NAVBAR OVERRIDES (If you need it)
+   ============================================ */
+
+.navbar {
+  background: var(--glass-bg-light) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  padding: var(--space-md) var(--space-lg) !important;
+}
+
+.navbar-brand {
+  font-size: var(--font-size-h3) !important;
+  font-weight: var(--fw-semibold) !important;
+  color: var(--accent-primary) !important;
+}
+
+.nav-link {
+  color: var(--text-primary) !important;
+  font-size: var(--font-size-feed) !important;
+  font-weight: var(--fw-medium) !important;
+  transition: color var(--transition-base) !important;
+}
+
+.nav-link:hover {
+  color: var(--accent-primary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP TABLE OVERRIDES
+   ============================================ */
+
+.table {
+  color: var(--text-primary) !important;
+}
+
+.table thead th {
+  font-size: var(--font-size-meta) !important;
+  font-weight: var(--fw-semibold) !important;
+  text-transform: uppercase !important;
+  letter-spacing: var(--ls-wide) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 2px solid var(--border-medium) !important;
+  padding: var(--space-md) !important;
+}
+
+.table tbody td {
+  font-size: var(--font-size-feed) !important;
+  padding: var(--space-md) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+.table-hover tbody tr:hover {
+  background: var(--bg-secondary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP PAGINATION OVERRIDES
+   ============================================ */
+
+.pagination {
+  gap: var(--space-xs) !important;
+}
+
+.page-link {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  font-size: var(--font-size-feed) !important;
+  transition: background var(--transition-base) !important;
+}
+
+.page-link:hover {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+
+.page-item.active .page-link {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+.page-item.disabled .page-link {
+  background: transparent !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-tertiary) !important;
+}
+
+/* ============================================
+   BOOTSTRAP DROPDOWN OVERRIDES
+   ============================================ */
+
+.dropdown-menu {
+  border: 1px solid var(--border-light) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: var(--space-sm) !important;
+}
+
+.dropdown-item {
+  border-radius: var(--radius-sm) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  font-size: var(--font-size-feed) !important;
+  color: var(--text-primary) !important;
+  transition: background var(--transition-base) !important;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dropdown-item.active {
+  background: var(--accent-primary) !important;
+  color: white !important;
+}
+
+/* ============================================
+   REMOVE BOOTSTRAP FOCUS OUTLINES (We have our own)
+   ============================================ */
+
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  outline: none !important;
+}
+
+/* ============================================
+   BOOTSTRAP GRID TWEAKS (Optional)
+   ============================================ */
+
+/* Add gap to Bootstrap columns */
+.row.g-custom {
+  --bs-gutter-x: var(--space-lg);
+  --bs-gutter-y: var(--space-lg);
+}

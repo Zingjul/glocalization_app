@@ -38,6 +38,7 @@ urlpatterns = [
     path('notifications/', include('notifications.urls', namespace="notifications")),
     path('board/', include('board.urls', namespace="board")),
     path('staff/', include('staff.urls', namespace="staff")),
+    path('subscription/', include('subscription.urls', namespace="subscription")),
 ]
 
 if settings.DEBUG:

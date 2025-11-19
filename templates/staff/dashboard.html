@@ -6,6 +6,10 @@
 <p class="subtitle">Quick overview of moderation and activity statistics.</p>
 
 <div class="stats-grid">
+    <a href="{% url 'staff:pending_profiles' %}" class="card link-card">
+        <h3 class="badge bg-danger">{{ pending_profiles }}</h3>
+        <p>KYC</p>
+    </a>
     <a href="{% url 'staff:pending_posts' %}" class="card link-card">
         <h3>{{ pending_posts }}</h3>
         <p>Pending Posts</p>
@@ -21,10 +25,10 @@
         <p>Pending Location Requests</p>
     </a>
 
-    <a href="{% url 'staff:pending_locations' %}" class="card link-card">
+    <!-- <a href="{% url 'staff:pending_locations' %}" class="card link-card">
         <h3>{{ pending_seeker_locations }}</h3>
         <p>Pending Seeker Locations</p>
-    </a>
+    </a> -->
 
     <a href="{% url 'staff:spam_comments' %}" class="card link-card">
         <h3>{{ spam_comments }}</h3>
@@ -34,6 +38,11 @@
     <a href="{% url 'staff:manage_users' %}" class="card link-card">
         <h3>{{ active_users }}</h3>
         <p>Active Users</p>
+    </a>
+
+    <a href="{% url 'staff:pending_subscriptions' %}" class="card link-card">
+        <h3>{{ pending_subscriptions }}</h3>
+        <p>Subcription</p>
     </a>
 </div>
 {% endblock %}

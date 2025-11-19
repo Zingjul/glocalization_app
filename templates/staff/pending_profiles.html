@@ -1,0 +1,38 @@
+{% extends "staff/base.html" %}
+{% block content %}
+<h2>Pending Profiles</h2>
+
+{% if pending_profiles %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Business Name</th>
+      <th>Country</th>
+      <th>State</th>
+      <th>Town</th>
+      <th>Approval Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for person in pending_profiles %}
+    <tr>
+      <td>{{ person.user.username }}</td>
+      <td>{{ person.business_name|default:"—" }}</td>
+      <td>{{ person.country|default:"—" }}</td>
+      <td>{{ person.state|default:"—" }}</td>
+      <td>{{ person.town|default:"—" }}</td>
+      <td><span class="badge bg-warning">{{ person.approval_status }}</span></td>
+      <td>
+        <a href="{% url 'staff:approve_profile' person.pk %}" class="btn btn-success btn-sm">Approve</a>
+        <a href="{% url 'staff:reject_profile' person.pk %}" class="btn btn-danger btn-sm">Reject</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No pending profiles at this time.</p>
+{% endif %}
+{% endblock %}

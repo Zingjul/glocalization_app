@@ -1,0 +1,77 @@
+/* ================================================
+   Design System Variables
+   Purpose: Central place for all design tokens
+   Maintenance: Change these values to rebrand entire site
+   ================================================ */
+
+:root {
+  /* ========== Colors ========== */
+  /* Primary Palette - Change these to rebrand */
+  --accent-primary: #007aff;        /* iOS blue - main CTA color */
+  --accent-primary-hover: #0051d5;  /* Darker blue for hover */
+  --accent-success: #34c759;        /* Green - success states */
+  --accent-danger: #ff3b30;         /* Red - errors/delete */
+  --accent-warning: #ff9500;        /* Orange - warnings */
+  
+  /* Grays - Apple's palette (don't change for consistency) */
+  --bg-primary: #ffffff;            /* Main background */
+  --bg-secondary: #f5f5f7;          /* Subtle gray background */
+  --bg-elevated: #ffffff;
+  --bg-tertiary: #fafafa;           /* Even lighter gray */
+  
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary: #aeaeb2;
+  --text-inverse: #ffffff;
+  
+  --border-light: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.18);
+  
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 60px;
+  --space-3xl: 80px;
+  
+  /* Typography */
+  --font-size-h1: 32px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-body: 17px;
+  --font-size-feed: 15px;
+  --font-size-meta: 13px;
+  --font-size-caption: 11px;
+  
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  
+  --ls-wide: 0.03em;
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 980px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+  
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Glass effect */
+  --glass-bg-light: rgba(255, 255, 255, 0.8);
+  --glass-blur: blur(20px)
+}

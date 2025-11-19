@@ -1,0 +1,283 @@
+/* Layout System - Professional Platform Design */
+
+/* Main App Container */
+body {
+  background: var(--bg-secondary);
+  overflow-x: hidden;
+}
+
+/* Platform Layout - Three Column Structure */
+.platform-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: calc(100vh - 60px);
+  background: var(--bg-primary);
+}
+
+/* Left Sidebar */
+.platform-sidebar-left {
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-light);
+  overflow-y: auto;
+  z-index: 10;
+}
+
+/* Center Feed Container */
+.platform-main {
+  background: var(--bg-secondary);
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-feed {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  min-height: 100vh;
+}
+
+/* Right Sidebar */
+.platform-sidebar-right {
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-light);
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+/* Feed Header (Page Title) */
+.feed-header {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-lg);
+  position: sticky;
+  top: 60px;
+  z-index: 5;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.feed-title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.feed-subtitle {
+  font-size: var(--font-size-meta);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* Feed Content Area */
+.feed-content {
+  padding: 0;
+}
+
+/* Single Column Card Layout (like X/Facebook) */
+.feed-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.feed-item {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition-base);
+}
+
+.feed-item:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Tablet Layout (< 1280px) */
+@media (max-width: 1279px) {
+  .platform-container {
+    grid-template-columns: 260px 1fr;
+  }
+  
+  .platform-sidebar-right {
+    display: none;
+  }
+}
+
+/* Mobile Layout (< 768px) */
+@media (max-width: 767px) {
+  .platform-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .platform-sidebar-left {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    width: 280px;
+    height: calc(100vh - 60px);
+    transition: left var(--transition-slow);
+    box-shadow: var(--shadow-xl);
+    z-index: 100;
+  }
+  
+  .platform-sidebar-left.active {
+    left: 0;
+  }
+  
+  .platform-sidebar-right {
+    display: none;
+  }
+  
+  .platform-feed {
+    max-width: 100%;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .feed-header {
+    top: 60px;
+  }
+  
+  /* Mobile overlay when sidebar is open */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+}
+
+/* Container Utilities (Updated) */
+.container {
+  background-color: red;
+  width: 100%;
+  padding: 0 var(--space-md);
+}
+
+.container--feed {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Grid System (for other pages if needed) */
+.grid {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+/* Remove multi-column grids for cards - we want single column */
+.cards-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* No gap, cards connect via borders */
+}
+
+/* Spacing Utilities (keep existing) */
+.m-0 { margin: 0; }
+.m-auto { margin: auto; }
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+
+.p-0 { padding: 0; }
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+/* Hide/Show Utilities */
+.hidden {
+  display: none !important;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+/* Responsive Hide/Show */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hidden-desktop {
+    display: none !important;
+  }
+}
+
+/* Flex utilities (keep for components) */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }

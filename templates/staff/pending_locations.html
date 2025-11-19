@@ -2,14 +2,14 @@
 {% block content %}
 <h2 class="section-title">📍 Pending Location Requests</h2>
 
-<h3>Product Posts</h3>
-{% if post_requests %}
+{% if post_requests or seeker_requests or person_requests %}
 <table class="moderation-table">
   <thead>
     <tr>
       <th>Town Name</th>
       <th>Parent State</th>
-      <th>Post</th>
+      <th>Type</th>
+      <th>Linked Item</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -18,6 +18,7 @@
     <tr>
       <td>{{ req.typed_town }}</td>
       <td>{{ req.parent_state.name }}</td>
+      <td><span class="badge bg-primary">Product Post</span></td>
       <td><a href="{{ req.post.get_absolute_url }}" target="_blank">Post #{{ req.post.id }}</a></td>
       <td>
         <form action="{% url 'staff:approve_location' req.pk %}" method="post" style="display:inline;">
@@ -31,31 +32,32 @@
       </td>
     </tr>
     {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>No pending product-post locations 🎉</p>
-{% endif %}
 
-<hr>
-
-<h3>Seeker Posts</h3>
-{% if seeker_requests %}
-<table class="moderation-table">
-  <thead>
-    <tr>
-      <th>Town Name</th>
-      <th>Parent State</th>
-      <th>Seeker Post</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
     {% for req in seeker_requests %}
     <tr>
       <td>{{ req.typed_town }}</td>
       <td>{{ req.parent_state.name }}</td>
-      <td><a href="{{ req.post.get_absolute_url }}" target="_blank">Seeker Post #{{ req.post.id }}</a></td>
+      <td><span class="badge bg-warning text-dark">Seeker Post</span></td>
+      <td><a href="{{ req.post.get_absolute_url }}" target="_blank">Seeker #{{ req.post.id }}</a></td>
+      <td>
+        <form action="{% url 'staff:approve_location' req.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button class="approve-btn">Approve</button>
+        </form>
+        <form action="{% url 'staff:reject_location' req.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button class="reject-btn">Reject</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+
+    {% for req in person_requests %}
+    <tr>
+      <td>{{ req.typed_town }}</td>
+      <td>{{ req.parent_state.name }}</td>
+      <td><span class="badge bg-success">Person</span></td>
+      <td>{{ req.person.full_name }}</td>
       <td>
         <form action="{% url 'staff:approve_location' req.pk %}" method="post" style="display:inline;">
           {% csrf_token %}
@@ -71,6 +73,6 @@
   </tbody>
 </table>
 {% else %}
-<p>No pending seeker-post locations 🎉</p>
+<p>No pending location requests 🎉</p>
 {% endif %}
 {% endblock %}

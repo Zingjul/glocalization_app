@@ -41,6 +41,16 @@ urlpatterns = [
 
     # audit log
     path("audit-log/", views.audit_log, name="audit_log"),
+    
+    # subscriptions 
+    path("pending-subscriptions/", views.pending_subscriptions_view, name="pending_subscriptions"),
+    path("approve-subscription/<int:pk>/", views.approve_subscription, name="approve_subscription"),
+    path("reject-subscription/<int:pk>/", views.reject_subscription, name="reject_subscription"),
+
+    # Person Profile approval
+    path("pending-profiles/", views.pending_profiles_view, name="pending_profiles"),
+    path("approve-profile/<int:pk>/", views.approve_profile, name="approve_profile"),
+    path("reject-profile/<int:pk>/", views.reject_profile, name="reject_profile"),
 
 ]
 

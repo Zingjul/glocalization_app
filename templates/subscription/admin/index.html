@@ -1,0 +1,20 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block content %}
+{% with pending_count=subscription_pending_count %}
+  {% if pending_count and pending_count > 0 %}
+    <div style="
+        background-color: #f44336;
+        color: white;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-weight: 600;">
+      🔔 {{ pending_count }} user{{ pending_count|pluralize }} reported payment awaiting confirmation
+    </div>
+  {% endif %}
+{% endwith %}
+
+{{ block.super }}
+{% endblock %}

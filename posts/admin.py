@@ -179,7 +179,6 @@ class PostAdmin(admin.ModelAdmin):
                 level=messages.INFO
             )
 
-
 # --- Pending Location Request Admin ---
 @admin.register(PendingLocationRequest)
 class PendingLocationRequestAdmin(admin.ModelAdmin):

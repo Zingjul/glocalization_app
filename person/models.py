@@ -140,7 +140,6 @@ class Person(models.Model):
         verbose_name_plural = _("Profiles")
         ordering = ["-date_joined"]
 
-
 class PendingLocationRequest(models.Model):
     """Stores user-typed locations for admin review before approval."""
     person = models.OneToOneField(
@@ -177,4 +176,3 @@ class Availability(models.Model):
 
     def __str__(self):
         return f"{self.person} - {self.day_of_week}: {self.start_time} to {self.end_time}"
-

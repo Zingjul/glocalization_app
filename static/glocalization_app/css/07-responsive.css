@@ -1,0 +1,710 @@
+/* ================================================
+   Responsive Design System
+   Professional breakpoints and mobile optimization
+   ================================================ */
+
+/* ========== Breakpoint Variables ========== */
+/* 
+   xs: 0-575px     (Small phones)
+   sm: 576-767px   (Phones)
+   md: 768-991px   (Tablets)
+   lg: 992-1199px  (Small desktops)
+   xl: 1200-1399px (Desktops)
+   xxl: 1400px+    (Large desktops)
+*/
+
+/* ========== XXL - Large Desktops (1400px+) ========== */
+@media (min-width: 1400px) {
+  .platform-wrapper {
+    grid-template-columns: 320px minmax(600px, 720px) 380px;
+    max-width: 1600px;
+  }
+  
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* ========== XL - Desktops (1200px - 1399px) ========== */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .platform-wrapper {
+    grid-template-columns: 280px minmax(500px, 680px) 340px;
+    max-width: 1400px;
+  }
+  
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* ========== LG - Small Desktops (992px - 1199px) ========== */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .platform-wrapper {
+    grid-template-columns: 260px 1fr;
+    max-width: 100%;
+    padding: 0 20px;
+  }
+  
+  /* Hide right sidebar on smaller desktops */
+  .platform-widgets {
+    display: none;
+  }
+  
+  /* Adjust feed width */
+  .platform-feed {
+    max-width: 100%;
+  }
+  
+  /* Smaller sidebar */
+  .platform-sidebar {
+    padding: 15px 10px;
+  }
+  
+  .sidebar-nav-item {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .sidebar-nav-item span {
+    display: inline-block;
+  }
+  
+  /* Adjust card grid */
+  .cards-grid--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========== MD - Tablets (768px - 991px) ========== */
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Two column layout with collapsible sidebar */
+  .platform-wrapper {
+    grid-template-columns: 80px 1fr;
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  /* Mini sidebar - icons only */
+  .platform-sidebar {
+    padding: 20px 5px;
+  }
+  
+  .sidebar-header {
+    display: none;
+  }
+  
+  .sidebar-nav-item {
+    flex-direction: column;
+    padding: 10px;
+    font-size: 11px;
+    text-align: center;
+  }
+  
+  .sidebar-nav-item i {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  
+  .sidebar-nav-item span {
+    display: block;
+    font-size: 10px;
+  }
+  
+  .btn-create-post {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 0;
+    margin: 20px auto;
+    font-size: 0;
+  }
+  
+  .btn-create-post::before {
+    content: '+';
+    font-size: 24px;
+  }
+  
+  /* Hide widgets */
+  .platform-widgets {
+    display: none;
+  }
+  
+  /* Full width feed */
+  .platform-feed {
+    max-width: 100%;
+    border-right: none;
+  }
+  
+  /* Cards in 2 columns */
+  .cards-grid--3,
+  .cards-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  /* Adjust header for tablets */
+  .site-header {
+    padding: 10px 15px;
+  }
+  
+  .header-nav .nav-link span {
+    display: none;
+  }
+  
+  .header-nav .nav-link {
+    padding: 8px 12px;
+  }
+}
+
+/* ========== SM - Large Phones (576px - 767px) ========== */
+@media (min-width: 576px) and (max-width: 767px) {
+  /* Single column with hamburger menu */
+  body.platform-page {
+    padding-bottom: 60px; /* Space for bottom nav */
+  }
+  
+  .platform-wrapper {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  
+  /* Hide desktop sidebar */
+  .platform-sidebar {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: left 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .platform-sidebar.mobile-active {
+    left: 0;
+  }
+  
+  /* Sidebar overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+  
+  /* Full width feed */
+  .platform-feed {
+    border: none;
+    max-width: 100%;
+  }
+  
+  .feed-header {
+    padding: 15px;
+    position: relative;
+  }
+  
+  .feed-header h1 {
+    font-size: 20px;
+  }
+  
+  /* Add menu button to feed header */
+  .feed-header::before {
+    content: '☰';
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .feed-header h1 {
+    margin-left: 40px;
+  }
+  
+  /* Cards in single column */
+  .cards-grid--3,
+  .cards-grid--2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  /* Show bottom navigation */
+  .bottom-nav {
+    display: flex !important;
+    justify-content: space-around;
+    padding: 8px 0;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+  }
+  
+  /* Adjust cards for mobile */
+  .card {
+    border-radius: 12px;
+  }
+  
+  .card-media {
+    height: 200px;
+  }
+  
+  .card-content {
+    padding: 15px;
+  }
+  
+  .card-title {
+    font-size: 18px;
+  }
+  
+  /* Mobile menu toggle visible */
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  
+  /* Hide desktop navigation */
+  .header-nav,
+  .header-actions {
+    display: none !important;
+  }
+  
+  /* Mobile header adjustments */
+  .site-header {
+    padding: 10px 15px;
+  }
+  
+  .site-logo {
+    font-size: 18px;
+  }
+}
+
+/* ========== XS - Small Phones (0 - 575px) ========== */
+@media (max-width: 575px) {
+  /* Similar to SM but more compact */
+  body {
+    font-size: 15px;
+  }
+  
+  body.platform-page {
+    padding-bottom: 56px;
+  }
+  
+  .platform-wrapper {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  
+  /* Hide desktop sidebar completely */
+  .platform-sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    width: 85%;
+    max-width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+    transition: left 0.3s ease;
+    z-index: 1001;
+  }
+  
+  .platform-sidebar.mobile-active {
+    left: 0;
+  }
+  
+  /* Feed adjustments */
+  .platform-feed {
+    border: none;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .feed-header {
+    padding: 12px 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .feed-header h1 {
+    font-size: 18px;
+  }
+  
+  .feed-header p {
+    font-size: 12px;
+  }
+  
+  /* Search bar mobile */
+  .feed-search {
+    padding: 10px 15px;
+  }
+  
+  .feed-search .form-control {
+    font-size: 14px;
+    padding: 10px 15px 10px 40px;
+  }
+  
+  /* Feed cards mobile optimization */
+  .feed-card {
+    padding: 12px 15px;
+  }
+  
+  .feed-card-header {
+    gap: 10px;
+  }
+  
+  .feed-card-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .feed-card-name {
+    font-size: 14px;
+  }
+  
+  .feed-card-username,
+  .feed-card-time {
+    font-size: 12px;
+  }
+  
+  .feed-card-body {
+    margin-left: 50px;
+  }
+  
+  .feed-card-title {
+    font-size: 16px;
+  }
+  
+  .feed-card-text {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .feed-card-media {
+    margin-left: -15px;
+    margin-right: -15px;
+    border-radius: 0;
+    max-height: 300px;
+  }
+  
+  .feed-card-actions {
+    margin-left: 0;
+    gap: 4px;
+  }
+  
+  .feed-action {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  /* Cards grid mobile */
+  .cards-grid--3,
+  .cards-grid--2,
+  .cards-grid--4 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .card {
+    border-radius: 8px;
+  }
+  
+  .card-media {
+    height: 180px;
+  }
+  
+  .card-content {
+    padding: 12px;
+  }
+  
+  .card-title {
+    font-size: 16px;
+  }
+  
+  .card-description {
+    font-size: 13px;
+  }
+  
+  .card-actions {
+    padding: 0 12px 12px;
+  }
+  
+  /* Bottom navigation mobile */
+  .bottom-nav {
+    display: flex !important;
+    height: 56px;
+    padding: 4px 0;
+  }
+  
+  .bottom-nav-item {
+    font-size: 9px;
+    padding: 4px;
+  }
+  
+  .bottom-nav-item i {
+    font-size: 18px;
+  }
+  
+  .bottom-nav-item span {
+    margin-top: 2px;
+  }
+  
+  .bottom-nav-cta {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Quick actions mobile */
+  .quick-actions {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .quick-actions-container {
+    gap: 6px;
+  }
+  
+  .quick-link {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  
+  /* Forms mobile */
+  .form-search-input {
+    font-size: 14px;
+    padding: 10px 15px 10px 40px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .btn--small {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  /* Alerts mobile */
+  .alert {
+    font-size: 13px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  /* Mobile header */
+  .site-header {
+    height: 50px;
+    padding: 8px 12px;
+  }
+  
+  .site-logo {
+    font-size: 16px;
+  }
+  
+  .header-container {
+    padding: 0 10px;
+  }
+  
+  /* Hide desktop elements */
+  .hide-mobile,
+  .header-nav,
+  .header-actions,
+  .platform-widgets {
+    display: none !important;
+  }
+  
+  /* Show mobile elements */
+  .show-mobile,
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  
+  /* Mobile menu */
+  .mobile-menu {
+    top: 50px;
+  }
+  
+  .mobile-menu-item {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  /* Typography adjustments */
+  h1, .h1 {
+    font-size: 24px;
+  }
+  
+  h2, .h2 {
+    font-size: 20px;
+  }
+  
+  h3, .h3 {
+    font-size: 18px;
+  }
+  
+  /* Utility adjustments */
+  .container {
+    padding: 0 10px;
+  }
+  
+  .section {
+    padding: 40px 0;
+  }
+  
+  .py-xl {
+    padding-top: 30px !important;
+    padding-bottom: 30px !important;
+  }
+  
+  .mb-xl {
+    margin-bottom: 30px !important;
+  }
+}
+
+/* ========== Orientation Specific ========== */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Reduce vertical spacing for landscape phones */
+  .site-header {
+    height: 45px;
+  }
+  
+  .feed-header {
+    padding: 10px 15px;
+  }
+  
+  .bottom-nav {
+    height: 48px;
+  }
+  
+  .card-media {
+    height: 150px;
+  }
+}
+
+/* ========== Touch Device Optimizations ========== */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets */
+  .btn,
+  .nav-link,
+  .quick-link {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .feed-action {
+    padding: 10px 14px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .hover-lift:hover {
+    transform: none;
+  }
+}
+
+/* ========== Print Styles ========== */
+@media print {
+  .platform-sidebar,
+  .platform-widgets,
+  .site-header,
+  .bottom-nav,
+  .mobile-menu-toggle,
+  .btn-create-post,
+  .feed-header,
+  .feed-search {
+    display: none !important;
+  }
+  
+  .platform-wrapper {
+    display: block;
+  }
+  
+  .platform-feed {
+    max-width: 100%;
+    border: none;
+  }
+  
+  .feed-card {
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+}
+
+/* ========== Container Queries (Future-proof) ========== */
+@container (max-width: 400px) {
+  .feed-card-title {
+    font-size: 14px;
+  }
+  
+  .feed-card-text {
+    font-size: 12px;
+  }
+}
+
+/* ========== High DPI Screens ========== */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+  /* Sharper borders and shadows */
+  .card {
+    border-width: 0.5px;
+  }
+  
+  .site-header {
+    border-bottom-width: 0.5px;
+  }
+}
+
+/* ========== Responsive Table ========== */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ========== Responsive Images ========== */
+@media (max-width: 575px) {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .card-media img {
+    object-fit: cover;
+  }
+}
+
+/* ========== Safe Areas (for phones with notches) ========== */
+@supports (padding: max(0px)) {
+  .site-header {
+    padding-left: max(var(--space-lg), env(safe-area-inset-left));
+    padding-right: max(var(--space-lg), env(safe-area-inset-right));
+  }
+  
+  .bottom-nav {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}

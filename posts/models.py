@@ -151,6 +151,10 @@ class Post(models.Model):
                 pending.save()
         else:
             PendingLocationRequest.objects.filter(post=self).delete()
+    
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.pk})
+
 # ----------------------
 # PostReport model: user reporting/flagging
 # ----------------------

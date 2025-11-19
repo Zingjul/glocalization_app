@@ -7,15 +7,19 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 
-from posts.models import Post
+from posts.models import Post, PendingLocationRequest as PostPendingLocationRequest
+from person.models import Person, PendingLocationRequest as PersonPendingLocationRequest
 from seekers.models import SeekerPost, PendingSeekerLocationRequest
 from comment.models import Comment
 from accounts.models import CustomUser
-from posts.models import PendingLocationRequest
 from custom_search.models import Town
 from .models import StaffBoardPost, AuditLog
 from django.contrib.auth import get_user_model
 from staff.utils import log_action
+from subscription.models import UserSubscription, SubscriptionPlan
+from django.utils import timezone
+from notifications.hooks.person_notifications import notify_profile_approval, notify_profile_rejection
+
 User = get_user_model()
 
 def staff_check(user):
@@ -66,18 +70,24 @@ def dashboard_view(request):
     """Staff dashboard showing key moderation stats."""
     pending_posts = Post.objects.filter(status="pending").count()
     pending_seekers = SeekerPost.objects.filter(status="pending").count()
-    pending_locations = PendingLocationRequest.objects.filter(is_reviewed=False).count()
+    pending_profiles = Person.objects.filter(approval_status="pending").count()
+    pending_locations = PostPendingLocationRequest.objects.filter(is_reviewed=False).count()
     pending_seeker_locations = PendingSeekerLocationRequest.objects.filter(is_reviewed=False).count()
+    pending_person_locations = PersonPendingLocationRequest.objects.filter(is_reviewed=False).count()                 #person app
+    sum_of_pending_locations = pending_locations + pending_seeker_locations + pending_person_locations
     spam_comments = Comment.objects.filter(is_spam=True).count()
     active_users = CustomUser.objects.filter(is_active=True).count()
+    pending_subscriptions = UserSubscription.objects.filter(payment_reported=True, is_active=False).count()
 
     context = {
         "pending_posts": pending_posts,
         "pending_seekers": pending_seekers,
-        "pending_locations": pending_locations,
+        "pending_locations": sum_of_pending_locations,
         "pending_seeker_locations": pending_seeker_locations,
         "spam_comments": spam_comments,
         "active_users": active_users,
+        "pending_subscriptions": pending_subscriptions,
+        "pending_profiles": pending_profiles,
     }
 
     return render(request, "staff/dashboard.html", context)
@@ -195,12 +205,14 @@ def restore_comment(request, pk):
 @user_passes_test(staff_required)
 def pending_locations_view(request):
     """Display all unreviewed pending location requests (Posts + Seekers)."""
-    post_requests = PendingLocationRequest.objects.filter(is_reviewed=False).select_related("post", "parent_state")
+    post_requests = PostPendingLocationRequest.objects.filter(is_reviewed=False).select_related("post", "parent_state")
     seeker_requests = PendingSeekerLocationRequest.objects.filter(is_reviewed=False).select_related("post", "parent_state")
+    person_requests = PersonPendingLocationRequest.objects.filter(is_reviewed=False).select_related("person", "parent_state")
 
     context = {
         "post_requests": post_requests,
         "seeker_requests": seeker_requests,
+        "person_requests": person_requests,
     }
     return render(request, "staff/pending_locations.html", context)
 
@@ -212,7 +224,7 @@ def approve_location(request, pk):
     Automatically creates a Town if not found, links it, and approves the related post.
     """
     pending = (
-        PendingLocationRequest.objects.select_related("post", "parent_state").filter(pk=pk).first()
+        PostPendingLocationRequest.objects.select_related("post", "parent_state").filter(pk=pk).first()
         or PendingSeekerLocationRequest.objects.select_related("post", "parent_state").filter(pk=pk).first()
     )
 
@@ -263,7 +275,7 @@ def approve_location(request, pk):
             log_action(request, "Approved Location", pending, f"Approved town '{typed_town}' under {parent_state.name}")
 
             # 5️⃣ Success message depending on type
-            model_name = "Post" if isinstance(pending, PendingLocationRequest) else "Seeker"
+            model_name = "Post" if isinstance(pending, PostPendingLocationRequest) else "Seeker"
             messages.success(request, f"✅ '{typed_town}' approved and linked to {model_name} #{related_post.id}")
 
     except Exception as e:
@@ -279,7 +291,7 @@ def reject_location(request, pk):
     Sets the post status back to pending and marks the request reviewed.
     """
     pending = (
-        PendingLocationRequest.objects.filter(pk=pk).first()
+        PostPendingLocationRequest.objects.filter(pk=pk).first()
         or PendingSeekerLocationRequest.objects.filter(pk=pk).first()
     )
 
@@ -315,7 +327,7 @@ def manage_users(request):
     users = User.objects.all().order_by("-date_joined")
 
     if query:
-        users = users.filter(username__icontains=query) | users.filter(email__icontains=query)
+        users = users.filter(username__icontains=query) | users.filter(email__icontains=query) | users.filter(phone_number__icontains=query)
 
     context = {
         "users": users,
@@ -385,3 +397,76 @@ def audit_log(request):
     """View the staff activity log."""
     logs = AuditLog.objects.select_related("staff").all()[:100]
     return render(request, "staff/audit_log.html", {"logs": logs})
+
+
+# 🟢 Pending Subscriptions
+@user_passes_test(staff_required)
+def pending_subscriptions_view(request):
+    pending_subs = UserSubscription.objects.filter(payment_reported=True, is_active=False).select_related('user', 'plan')
+    return render(request, "staff/pending_subscriptions.html", {"pending_subs": pending_subs})
+
+# 🟢 Approve Subscription
+@user_passes_test(staff_required)
+def approve_subscription(request, pk):
+    user_sub = get_object_or_404(UserSubscription, pk=pk)
+    user_sub.is_active = True
+    user_sub.start_date = timezone.now()
+    user_sub.payment_reported = False
+    user_sub.save()
+
+    # ✅ Optional: deactivate other old subscriptions for same user
+    UserSubscription.objects.filter(user=user_sub.user).exclude(pk=pk).update(is_active=False)
+
+    log_action(request, "Approved Subscription", user_sub, f"Approved subscription for {user_sub.user.username}")
+    messages.success(request, f"✅ Subscription for '{user_sub.user.username}' activated.")
+    return redirect("staff:pending_subscriptions")
+
+# 🟢 Reject Subscription
+@user_passes_test(staff_required)
+def reject_subscription(request, pk):
+    user_sub = get_object_or_404(UserSubscription, pk=pk)
+    user_sub.payment_reported = False
+    user_sub.save()
+
+    log_action(request, "Rejected Subscription", user_sub, f"Rejected subscription for {user_sub.user.username}")
+    messages.warning(request, f"❌ Subscription submission for '{user_sub.user.username}' rejected.")
+    return redirect("staff:pending_subscriptions")
+
+# 🟢 Pending Profiles
+@user_passes_test(staff_required)
+def pending_profiles_view(request):
+    pending_profiles = Person.objects.filter(approval_status="pending").select_related("user", "country", "state", "town")
+    return render(request, "staff/pending_profiles.html", {"pending_profiles": pending_profiles})
+
+
+# 🟢 Approve Profile
+@user_passes_test(staff_required)
+def approve_profile(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+    person.approval_status = "approved"
+    person.save(update_fields=["approval_status"])
+
+    # Optionally log action
+    log_action(request, "Approved Profile", person, f"Approved profile for {person.user.username}")
+
+    notify_profile_approval(person)  # or notify_profile_rejection(person)
+
+    messages.success(request, f"✅ Profile for '{person.user.username}' approved.")
+    return redirect("staff:pending_profiles")
+
+
+# 🟢 Reject Profile
+@user_passes_test(staff_required)
+def reject_profile(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+    person.approval_status = "rejected"
+    person.save(update_fields=["approval_status"])
+
+    log_action(request, "Rejected Profile", person, f"Rejected profile for {person.user.username}")
+
+
+    notify_profile_approval(person)  # or notify_profile_rejection(person)
+
+
+    messages.warning(request, f"❌ Profile for '{person.user.username}' rejected.")
+    return redirect("staff:pending_profiles")
