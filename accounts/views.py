@@ -45,7 +45,7 @@ class SignupView(FormView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('dashboard')
+            return redirect('login')
         return super().get(request, *args, **kwargs)
 
 

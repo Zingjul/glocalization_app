@@ -1,15 +1,9 @@
+# notifications/apps.py
 from django.apps import AppConfig
 
-
 class NotificationsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
     name = "notifications"
 
     def ready(self):
-        """
-        Ensure signals are imported when Django starts so they register.
-        """
-        try:
-            import notifications.signals  # noqa: F401
-        except Exception:
-            # In case of circular imports while running tests or migrations, ignore.
-            pass
+        import notifications.signals  # 👈 this is what loads your signals automatically

@@ -6,12 +6,8 @@
   <form method="post" enctype="multipart/form-data" id="postForm">
     {% csrf_token %}
     <!-- 🔽 Manually render each field (excluding image1–image6) -->
-    {% include "posts/includes/top_fields.html" %}
-    <div>{{ form.labor_experience_years.label_tag }} {{ form.labor_experience_years }}</div>
-    {% include "posts/includes/location_fields.html" %}
-    {% include "media_app/image_fields.html" %}
-    {% include "posts/includes/social_fields.html" %}
-  
+    {% include "posts/includes/all_fields_included.html" %}
+    
     <!-- this script helps us register this fields so that the js file will use them for autopopulating email and phone number fields -->
     {% include "posts/includes/extra_script_js.html" %}
     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">

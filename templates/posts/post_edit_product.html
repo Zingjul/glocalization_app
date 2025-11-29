@@ -7,17 +7,8 @@
 <form method="post" enctype="multipart/form-data" id="postForm">
   {% csrf_token %}
 
-    {% include "posts/includes/top_fields.html" %}
-    <div>{{ form.color.label_tag }} {{ form.color }}</div>
-    <div>{{ form.brand.label_tag }} {{ form.brand }}</div>
-    <div>{{ form.condition.label_tag }} {{ form.condition }}</div>
-    <div>{{ form.model_version.label_tag }} {{ form.model_version }}</div>
-    <div>{{ form.technical_specifications.label_tag }} {{ form.technical_specifications }}</div>
-    <div>{{ form.warranty.label_tag }} {{ form.warranty }}</div>
-    {% include "posts/includes/location_fields.html" %}
-    {% include "media_app/image_fields.html" %}
-    {% include "posts/includes/social_fields.html" %}
-    
+    {% include "posts/includes/all_fields_included.html" %}
+
   <!-- 🧾 Existing media (images/videos) -->
     {% include "media_app/current_images.html" %}
 

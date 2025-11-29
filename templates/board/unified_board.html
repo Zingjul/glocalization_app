@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>Public Notice Board</h2>
+
+  {% if items %}
+    <ul style="list-style:none; padding:0;">
+      {% for item in items %}
+        {% with board=item.board obj=item.obj type=item.type %}
+        <li style="margin-bottom:2rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+          {% if obj %}
+            {# Header + link to detail pages - adjust URLs if your routes differ #}
+            {% if type == "post" %}
+              <h3><a href="{% url 'post_detail' obj.id %}">{{ obj.product_name }}</a></h3>
+            {% elif type == "seekerpost" %}
+              <h3><a href="{% url 'seekers:seeker_detail' obj.id %}">{{ obj.title }}</a></h3>
+            {% else %}
+              <h3>{{ board.title }}</h3>
+            {% endif %}
+
+            {# Meta line #}
+            <p style="margin:0;">
+              <small>
+                by {{ obj.author.get_full_name|default:obj.author.username }} •
+                {{ board.created_at|date:"M d, Y H:i" }}
+              </small>
+            </p>
+
+            {# Body - Post fields #}
+            {% if type == "post" %}
+              <p>{{ obj.description }}</p>
+              <p>
+                <strong>Scope:</strong> {{ obj.availability_scope }} |
+                <strong>Category:</strong> {{ obj.category.name }} |
+                {% if obj.price %}<strong>Price:</strong> {{ obj.price }}{% endif %}
+              </p>
+              <p>
+                <small>Contact: {{ obj.author_phone_number }}{% if obj.author_email %} • {{ obj.author_email }}{% endif %}</small>
+              </p>
+
+            {% elif type == "seekerpost" %}
+              <p>{{ obj.description }}</p>
+              <p>
+                <strong>Scope:</strong> {{ obj.availability_scope }} |
+                <strong>Business:</strong> {{ obj.business_name }}
+              </p>
+              <p>
+                <small>
+                  Preferred fulfillment time: {{ obj.preferred_fulfillment_time|default:"N/A" }} •
+                  Budget: {{ obj.budget|default:"N/A" }} •
+                  Contact: {{ obj.author_phone_number }}{% if obj.author_email %} • {{ obj.author_email }}{% endif %}
+                </small>
+              </p>
+            {% else %}
+              <p>{{ board.summary }}</p>
+            {% endif %}
+
+          {% else %}
+            {# Board entry exists but linked object was removed/deleted #}
+            <h3>{{ board.title }}</h3>
+            <p>{{ board.summary }}</p>
+            <p><small>Removed or unavailable.</small></p>
+          {% endif %}
+
+        </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No approved posts on the board yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

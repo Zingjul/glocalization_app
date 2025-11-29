@@ -1,16 +1,24 @@
-# notifications/hooks/seeker_notifications.py
-from notifications.models import Notification
-from accounts.models import Follow  # ✅ Centralized Follow model
+from notifications.models import Notification, Board
+from accounts.models import Follow
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+def get_seekers_board():
+    """
+    Get or create the Seekers notification board.
+    """
+    board, _ = Board.objects.get_or_create(
+        name="SeekersBoard",
+        defaults={"description": "Board for all new approved seeker requests."}
+    )
+    return board
 
 def notify_seeker_approved(seeker_post):
     """
     Notify relevant parties when a seeker post is approved.
     """
-    # --- Notify the author ---
+    # Notify the author
     Notification.objects.create(
         recipient=seeker_post.author,
         verb=f"Your seeker request '{seeker_post.title}' has been approved ✅",
@@ -18,17 +26,18 @@ def notify_seeker_approved(seeker_post):
         target_content_type="seekerpost"
     )
 
-    # --- Global notifications (optional for everyone except the author) ---
-    for user in User.objects.exclude(pk=seeker_post.author.pk):
-        Notification.objects.create(
-            recipient=user,
-            verb=f"New seeker request in {seeker_post.category.name}: '{seeker_post.title}' by {seeker_post.author.username}",
-            target_object_id=seeker_post.pk,
-            target_content_type="seekerpost"
-        )
+    # Notify the Seekers Board
+    seekers_board = get_seekers_board()
+    Notification.objects.create(
+        recipient=seekers_board,
+        actor=seeker_post.author,
+        verb=f"New seeker request in {seeker_post.category.name}: '{seeker_post.title}' by {seeker_post.author.username}",
+        target_object_id=seeker_post.pk,
+        target_content_type="seekerpost"
+    )
 
-    # --- Notify followers of the author ---
-    followers = seeker_post.author.followers.all()  # from Follow model
+    # Notify followers of the author
+    followers = seeker_post.author.followers.all()
     for follow in followers:
         Notification.objects.create(
             recipient=follow.follower,
@@ -37,7 +46,6 @@ def notify_seeker_approved(seeker_post):
             target_object_id=seeker_post.pk,
             target_content_type="seekerpost"
         )
-
 
 def notify_seeker_rejected(seeker_post):
     """
@@ -50,7 +58,6 @@ def notify_seeker_rejected(seeker_post):
         target_content_type="seekerpost"
     )
 
-
 def notify_seeker_town_approved(seeker_post, town_name):
     """
     Notify the author if their seeker town was approved.
@@ -61,7 +68,6 @@ def notify_seeker_town_approved(seeker_post, town_name):
         target_object_id=seeker_post.pk,
         target_content_type="seekerpost"
     )
-
 
 def notify_seeker_town_rejected(seeker_post, town_name):
     """

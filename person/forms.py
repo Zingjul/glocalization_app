@@ -4,11 +4,11 @@ from .models import Person
 from custom_search.models import Continent, Country, State, Town
 from django.utils.translation import gettext_lazy as _
 from accounts.models import Follow
-from .mixins import ImageFieldsMixin, LocationFieldsSetupMixin
+from .mixins import LocationFieldsSetupMixin
 from posts.utils.location_assignment import assign_location_fields
 
 
-class PersonForm(forms.ModelForm, ImageFieldsMixin, LocationFieldsSetupMixin):
+class PersonForm(forms.ModelForm, LocationFieldsSetupMixin):
     class Meta:
         model = Person
         fields = [

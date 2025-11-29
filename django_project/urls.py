@@ -35,6 +35,7 @@ urlpatterns = [
     path('seekers/', include('seekers.urls', namespace="seekers")),
     path('seekersfinder/', include('seekersfinder.urls', namespace="seekersfinder")),
     path('notifications/', include('notifications.urls', namespace="notifications")),
+    path('board/', include('board.urls', namespace="board")),
 ]
 
 if settings.DEBUG:

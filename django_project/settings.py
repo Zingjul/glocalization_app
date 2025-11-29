@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'postfinder',
     'seekers',
     'seekersfinder',
-    'notifications',
+    "notifications.apps.NotificationsConfig",
+    'board',
 ]
 
 MIDDLEWARE = [

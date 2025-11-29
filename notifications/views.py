@@ -10,7 +10,8 @@ from .serializers import NotificationSerializer, NotificationPreferenceSerialize
 
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.views.generic import TemplateView
+from .models import Board
 
 # NOTE: the Follow model lives in accounts app and is referenced via related_name:
 # - user.following -> Follow objects where user is follower (has .following -> the followed user)

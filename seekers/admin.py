@@ -1,4 +1,3 @@
-# seekers/admin.py
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.db.models import Q
@@ -14,6 +13,8 @@ from custom_search.models import Town
 from person.models import Person
 from media_app.models import MediaFile
 
+# ✅ Import notification hook
+from notifications.hooks.seekers_notifications import notify_seeker_approved
 
 # --- Inline for attached media (Generic relation) ---
 class MediaFileInline(GenericTabularInline):
@@ -37,13 +38,11 @@ class MediaFileInline(GenericTabularInline):
         )
     file_preview.short_description = "Preview"
 
-
 # --- Inline for Social Media Handles ---
 class SeekerSocialMediaHandleInline(admin.StackedInline):
     model = SeekerSocialMediaHandle
     can_delete = False
     extra = 0
-
 
 # --- Main Seeker Post Admin ---
 @admin.register(SeekerPost)
@@ -157,7 +156,12 @@ class SeekerPostAdmin(admin.ModelAdmin):
 
     @admin.action(description="Mark selected seeker posts as Approved")
     def approve_selected_seekers(self, request, queryset):
-        updated = queryset.update(status="approved")
+        updated = 0
+        for seeker_post in queryset.exclude(status="approved"):
+            seeker_post.status = "approved"
+            seeker_post.save(update_fields=["status"])
+            notify_seeker_approved(seeker_post)
+            updated += 1
         self.message_user(request, f"✅ {updated} seeker post(s) marked as approved.")
 
     @admin.action(description="Force expire selected seeker posts now")
@@ -175,7 +179,6 @@ class SeekerPostAdmin(admin.ModelAdmin):
                 f"⚠️ Expired {updated} seeker post(s) manually.",
                 level=messages.WARNING,
             )
-
 
 # --- Pending Seeker Location Admin ---
 @admin.register(PendingSeekerLocationRequest)
@@ -244,6 +247,8 @@ class PendingSeekerLocationRequestAdmin(admin.ModelAdmin):
                     pending.approved = True
                     pending.save()
 
+                    # Optionally notify here if you want
+
                     approved_count += 1
             except Exception as e:
                 self.message_user(
@@ -286,7 +291,6 @@ class PendingSeekerLocationRequestAdmin(admin.ModelAdmin):
                 level=messages.INFO,
             )
 
-
 # --- Inline for Posts under a Category ---
 class SeekerPostInline(admin.TabularInline):
     model = SeekerPost
@@ -295,14 +299,12 @@ class SeekerPostInline(admin.TabularInline):
     readonly_fields = ("title", "author", "status", "created_at")
     show_change_link = True
 
-
 # --- Category Admin ---
 @admin.register(SeekerCategory)
 class SeekerCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
     search_fields = ("name",)
     inlines = [SeekerPostInline]
-
 
 # --- Response Admin ---
 @admin.register(SeekerResponse)

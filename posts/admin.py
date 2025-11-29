@@ -1,4 +1,3 @@
-# posts/admin.py
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.db import transaction
@@ -8,7 +7,6 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from .models import Post, Category, PendingLocationRequest, SocialMediaHandle
 from custom_search.models import Town
 from media_app.models import MediaFile
-
 
 # --- Inline for attached media (Generic relation) ---
 class MediaFileInline(GenericTabularInline):
@@ -32,13 +30,11 @@ class MediaFileInline(GenericTabularInline):
         )
     file_preview.short_description = "Preview"
 
-
 # --- Inline for Social Media Handles ---
 class SocialMediaHandleInline(admin.StackedInline):
     model = SocialMediaHandle
     can_delete = False
     extra = 0
-
 
 # --- Main Post Admin ---
 @admin.register(Post)
@@ -140,7 +136,14 @@ class PostAdmin(admin.ModelAdmin):
 
     @admin.action(description="Mark selected posts as Approved")
     def approve_selected_posts(self, request, queryset):
-        updated = queryset.update(status="approved")
+        from notifications.hooks.post_notifications import notify_post_approved
+
+        updated = 0
+        for post in queryset.exclude(status="approved"):
+            post.status = "approved"
+            post.save(update_fields=["status"])
+            notify_post_approved(post)
+            updated += 1
         self.message_user(request, f"✅ {updated} post(s) marked as approved.")
 
     @admin.action(description="Force expire selected posts")
@@ -158,7 +161,6 @@ class PostAdmin(admin.ModelAdmin):
             self.message_user(
                 request, f"⚠️ {expired} post(s) forced to expire.", level=messages.WARNING
             )
-
 
 # --- Pending Location Request Admin ---
 @admin.register(PendingLocationRequest)
@@ -219,6 +221,8 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
                     pending.approved = True
                     pending.save()
 
+                    # Optionally notify here if you want
+
                     approved_count += 1
             except Exception as e:
                 self.message_user(
@@ -261,7 +265,6 @@ class PendingLocationRequestAdmin(admin.ModelAdmin):
                 level=messages.INFO,
             )
 
-
 # --- Inline for Posts under a Category ---
 class PostInline(admin.TabularInline):
     model = Post
@@ -269,7 +272,6 @@ class PostInline(admin.TabularInline):
     fields = ("product_name", "author", "status", "created_at")
     readonly_fields = ("product_name", "author", "status", "created_at")
     show_change_link = True
-
 
 # --- Category Admin ---
 @admin.register(Category)

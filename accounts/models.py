@@ -84,7 +84,6 @@ class Follow(models.Model):
         return f"{self.follower} → {self.following}"
 
 
-# 📈 Auto update counts
 @receiver(post_save, sender=Follow)
 def update_counts_on_follow(sender, instance, created, **kwargs):
     if created:
@@ -93,10 +92,15 @@ def update_counts_on_follow(sender, instance, created, **kwargs):
         instance.following.save(update_fields=["follower_count"])
         instance.follower.save(update_fields=["following_count"])
 
-
 @receiver(post_delete, sender=Follow)
 def update_counts_on_unfollow(sender, instance, **kwargs):
-    instance.following.follower_count = models.F("follower_count") - 1
-    instance.follower.following_count = models.F("following_count") - 1
-    instance.following.save(update_fields=["follower_count"])
-    instance.follower.save(update_fields=["following_count"])
+    # Refresh from DB to get actual value
+    following = instance.following
+    follower = instance.follower
+    following.refresh_from_db(fields=["follower_count"])
+    follower.refresh_from_db(fields=["following_count"])
+
+    following.follower_count = max(0, following.follower_count - 1)
+    follower.following_count = max(0, follower.following_count - 1)
+    following.save(update_fields=["follower_count"])
+    follower.save(update_fields=["following_count"])

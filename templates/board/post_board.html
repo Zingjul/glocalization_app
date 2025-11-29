@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Board Notifications</h2>
+  <ul>
+    {% for notification in notifications %}
+      <li>
+        <strong>{{ notification.verb }}</strong>
+        {% if notification.actor %} by {{ notification.actor.username }}{% endif %}
+        <br>
+        <small>{{ notification.created_at|date:"Y-m-d H:i" }}</small>
+        {% if notification.extra.post_title %}
+          <br>Post: {{ notification.extra.post_title }}
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>No notifications yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

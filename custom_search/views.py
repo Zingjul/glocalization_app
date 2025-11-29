@@ -105,4 +105,3 @@ def towns_by_state(request):
     state_id = request.GET.get("state") or request.GET.get("state_id")
     towns = Town.objects.filter(state_id=state_id).values("id", "name") if state_id else []
     return JsonResponse(list(towns), safe=False)
-
