@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Notification, NotificationPreference, Board
+from .models import Notification, NotificationPreference
+from board.models import Board
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

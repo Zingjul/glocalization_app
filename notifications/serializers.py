@@ -1,33 +1,40 @@
-# -------------------------
 # file: notifications/serializers.py
-# -------------------------
 from rest_framework import serializers
-from .models import Notification, NotificationPreference
+from .models import Notification
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    """Serializer for exposing notifications to frontend clients."""
+    actor = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
         fields = [
             "id",
-            "recipient",
             "actor",
             "verb",
-            "target_content_type",
-            "target_object_id",
-            "extra",
             "read",
             "created_at",
+            "extra",
+            "link",
         ]
-        read_only_fields = ["recipient", "created_at"]
 
+    def get_actor(self, obj):
+        if obj.actor:
+            return obj.actor.username
+        return "System"
 
-class NotificationPreferenceSerializer(serializers.ModelSerializer):
-    """Serializer for reading/updating notification preferences."""
+    def get_link(self, obj):
+        # Prefer the explicit link in 'extra' if provided by the hook
+        if obj.extra and "link" in obj.extra:
+            return obj.extra["link"]
 
-    class Meta:
-        model = NotificationPreference
-        fields = "__all__"
-        read_only_fields = ["user"]
+        # Otherwise, try building it from target info
+        if obj.target_content_type == "post" and obj.target_object_id:
+            from django.urls import reverse
+            try:
+                return reverse("post_detail", args=[obj.target_object_id])
+            except Exception:
+                pass
+
+        return None

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from notifications.models import Board
+from board.models import Board
 
 class Command(BaseCommand):
     help = "Create the central Board instances for notifications (PostBoard and SeekersBoard)."

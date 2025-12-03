@@ -1,11 +1,18 @@
-
-<!-- the notification_page is that one that previews the collected json data from the notification list json function we defined in the views.py file earlier -->
 {% extends "base.html" %}
-{% block content %}
-<h2>Notifications</h2>
-
-<ul id="notifications-list" class="list-group"></ul>
-
 {% load static %}
+{% block content %}
+
+<div class="notifications-container">
+  <h2 class="mb-3">Notification</h2>
+
+  <ul id="notifications-list" class="list-group">
+    <!-- Notifications will be injected here by JS -->
+  </ul>
+
+  <p id="no-notifications" class="text-muted" style="display: none;">
+    No notifications yet!
+  </p>
+</div>
+
 <script src="{% static 'js/notifications/notification_list.js' %}"></script>
-{% endblock content %}
+{% endblock %}

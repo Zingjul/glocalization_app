@@ -15,7 +15,7 @@
             {% elif type == "seekerpost" %}
               <h3><a href="{% url 'seekers:seeker_detail' obj.id %}">{{ obj.title }}</a></h3>
             {% else %}
-              <h3>{{ board.title }}</h3>
+              <h3>{{ board.name }}</h3>
             {% endif %}
 
             {# Meta line #}
@@ -52,13 +52,13 @@
                 </small>
               </p>
             {% else %}
-              <p>{{ board.summary }}</p>
+              <p>{{ board.description }}</p>
             {% endif %}
 
           {% else %}
             {# Board entry exists but linked object was removed/deleted #}
-            <h3>{{ board.title }}</h3>
-            <p>{{ board.summary }}</p>
+            <h3>{{ board.name }}</h3>
+            <p>{{ board.description }}</p>
             <p><small>Removed or unavailable.</small></p>
           {% endif %}
 

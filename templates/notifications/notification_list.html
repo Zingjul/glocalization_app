@@ -7,17 +7,13 @@
     <ul class="notification-list">
       {% for n in notifications %}
         <li class="{% if not n.read %}unread{% endif %}">
-          <strong>{{ n.actor.username|default:"System" }}</strong>
-          {{ n.verb }}
-          {% if n.target_content_type %}
-            (on {{ n.target_content_type }} #{{ n.target_object_id }})
-          {% endif %}
+          {{ n.display_text }}
           <span class="timestamp">{{ n.created_at|timesince }} ago</span>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>No notifications yet 🎉</p>
+    <p>No notifications yet</p>
   {% endif %}
 </div>
 {% endblock %}

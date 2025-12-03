@@ -1,79 +1,33 @@
 # seekers/signals.py
 
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from notifications.hooks.seeker_notifications import (
-    notify_seeker_approved,
-    notify_seeker_rejected,
-    notify_seeker_town_approved,
-    notify_seeker_town_rejected,
-)
-from notifications.utils import push_to_board, remove_from_board
-
+from board.models import Board
 from .models import SeekerPost
 
 
 @receiver(post_save, sender=SeekerPost)
-def seeker_post_save_notifications(sender, instance: SeekerPost, created, **kwargs):
+def sync_seekerpost_board(sender, instance, created, **kwargs):
     """
-    Handles sending notifications after a SeekerPost instance is saved.
-
-    This signal checks for transient flags set on the instance to determine
-    whether to send notifications for approval, rejection, town approval,
-    or town rejection events.
+    Automatically add/remove SeekerPost from SeekersBoard when approval status changes.
+    Keeps the board in sync with the `is_approved` field.
     """
-    # --- Post Approval / Rejection Notifications ---
-    if hasattr(instance, "_notify_approval"):
-        if instance._notify_approval:
-            notify_seeker_approved(instance)
-        else:
-            notify_seeker_rejected(instance)
-
-    # --- Town Approval Notification ---
-    if hasattr(instance, "_town_approved"):
-        notify_seeker_town_approved(instance, instance._town_approved)
-
-    # --- Town Rejection Notification ---
-    if hasattr(instance, "_town_rejected"):
-        notify_seeker_town_rejected(instance, instance._town_rejected)
-
-
-@receiver(pre_save, sender=SeekerPost)
-def update_board_on_approval_change(sender, instance: SeekerPost, **kwargs):
-    """
-    Pushes a SeekerPost to the board when it's approved or removes
-    it when its approval is revoked.
-
-    This signal compares the `is_approved` status before and after the save
-    to determine the correct action.
-    """
-    # If the instance is new (no primary key yet), it can't have a previous state.
-    if instance.pk is None:
-        return
-
     try:
-        # Get the state of the object from the database before the save.
-        previous_instance = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
-        # Should not happen for an update, but handles a rare edge case.
-        return
+        board, _ = Board.objects.get_or_create(
+            name="SeekersBoard",
+            defaults={"description": "Board for all approved seeker requests."}
+        )
 
-    was_approved = previous_instance.is_approved
-    is_now_approved = instance.is_approved
+        if getattr(instance, "is_approved", False):
+            # ✅ Add approved seeker posts to the board
+            if instance not in board.seeker_posts.all():
+                board.add_item(instance)
+                print(f"[INFO] Added approved SeekerPost {instance.pk} to SeekersBoard.")
+        else:
+            # 🧹 Remove unapproved seeker posts
+            if instance in board.seeker_posts.all():
+                board.seeker_posts.remove(instance)
+                print(f"[INFO] Removed unapproved SeekerPost {instance.pk} from SeekersBoard.")
 
-    # Push to board if the post's status changes from not approved to approved.
-    if not was_approved and is_now_approved:
-        push_to_board("SeekersBoard", instance)
-    # Remove from board if the post's status changes from approved to not approved.
-    elif was_approved and not is_now_approved:
-        remove_from_board("SeekersBoard", instance)
-
-
-@receiver(post_delete, sender=SeekerPost)
-def remove_from_board_on_delete(sender, instance: SeekerPost, **kwargs):
-    """
-    Ensures a SeekerPost is removed from the board when the
-    instance is deleted from the database.
-    """
-    remove_from_board("SeekersBoard", instance)
+    except Exception as e:
+        print(f"[WARN] Failed to sync SeekerPost {instance.pk}: {e}")

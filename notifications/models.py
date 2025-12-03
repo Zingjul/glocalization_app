@@ -55,7 +55,32 @@ class Notification(models.Model):
         verbose_name_plural = "Notifications"
 
     def __str__(self):
-        return f"Notification({self.id}) → {self.recipient} :: {self.verb}"
+        """Readable fallback for admin and logs."""
+        actor_name = self.actor.username if self.actor else "System"
+        return f"{actor_name} - {self.verb.replace('_', ' ').capitalize()}"
+
+    def display_text(self):
+        """Return a human-friendly sentence for each notification."""
+        actor_name = self.actor.username if self.actor else "System"
+        verb = self.verb
+        extra = self.extra or {}
+        post_title = extra.get("post_title") or extra.get("title")
+
+        # --- Custom formatting rules ---
+        if verb in ["post_published", "seeker_post_published"]:
+            return f"Your post '{post_title or 'Untitled'}' has been approved!"
+        elif verb in ["post_published_subscription", "seeker_post_published_subscription"]:
+            return f"{actor_name} just published a new post '{post_title or 'Untitled'}'."
+        elif verb == "commented":
+            return f"{actor_name} commented on your post '{post_title or 'Untitled'}'."
+        elif verb == "started_following":
+            return f"{actor_name} started following you."
+        elif verb == "profile_approved":
+            return f"Your profile update has been approved!"
+        elif verb == "account_created":
+            return f"Welcome! Your account has been created successfully."
+        else:
+            return f"{actor_name} {verb.replace('_', ' ')}."
 
     def mark_as_read(self):
         """Mark this notification as read."""
@@ -83,6 +108,36 @@ class Notification(models.Model):
             target_object_id=target.id,
             extra=extra or {}
         )
+
+    def get_target_url(self):
+        """Return a direct URL to the notification target if possible."""
+        if not self.target_content_type or not self.target_object_id:
+            return None
+
+        model = self.target_content_type.split(".")[-1]
+        obj_id = self.target_object_id
+
+        # Adjust these names to match your actual URL names
+        if model == "post":
+            return reverse("post_detail", args=[obj_id])
+        elif model == "seekerpost":
+            return reverse("seekerpost_detail", args=[obj_id])
+        elif model == "board":
+            return reverse("board_detail", args=[obj_id])
+
+        return None
+    # def get_target_url(self):
+    #     """
+    #     Return a URL to the target object if supported.
+    #     Extend this as your app grows (posts, seekerposts, etc.)        ✔✔👀👀
+    #     """
+    #     if self.target_content_type == "post":
+    #         return reverse("post_detail", args=[self.target_object_id])
+    #     elif self.target_content_type == "seekerpost":
+    #         return reverse("seeker_detail", args=[self.target_object_id])
+    #     # Add more content types as needed
+    #     return None
+
 
 class NotificationPreference(models.Model):
     """
@@ -121,47 +176,3 @@ class NotificationPreference(models.Model):
 
     def __str__(self):
         return f"NotifPrefs({self.user})"
-
-class Board(models.Model):
-    """
-    Represents a central notification board for new approved posts.
-    Only one instance is typically used.
-    Any interested user can view notifications sent to this board.
-    """
-    name = models.CharField(max_length=100, unique=True, default="PostBoard")
-    description = models.TextField(blank=True, default="Board for all new approved posts.")
-
-    def __str__(self):
-        return self.name
-
-class BoardItem(models.Model):
-    """
-    One row on a board. Mirrors your Notification's lightweight target reference style.
-    """
-    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="items")
-
-    # Target reference (string-based to match your Notification style)
-    target_app_label = models.CharField(max_length=100)
-    target_model = models.CharField(max_length=100)
-    target_object_id = models.PositiveBigIntegerField()
-
-    # Denormalized for fast rendering
-    title = models.CharField(max_length=255, blank=True)
-    url = models.CharField(max_length=512, blank=True)
-    extra = models.JSONField(default=dict, blank=True)
-
-    approved_at = models.DateTimeField(null=True, blank=True)
-    pinned = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['board', 'target_app_label', 'target_model', 'target_object_id'],
-                name='unique_board_item_per_object'
-            )
-        ]
-        ordering = ['-pinned', '-approved_at', '-created_at', '-id']
-
-    def __str__(self):
-        return f"{self.board.name}: {self.title or f'{self.target_model}#{self.target_object_id}'}"

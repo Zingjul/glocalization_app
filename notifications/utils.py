@@ -1,48 +1,31 @@
 from django.apps import apps
 from django.db import transaction
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
+from board.models import Board
 
-def _app_and_model(obj):
-    return obj._meta.app_label, obj.class.name.lower()
+def remove_from_board(obj):
+    """
+    Safely remove a Post or SeekerPost instance from any board it was previously added to.
+    Handles both 'posts' and 'seeker_posts'.
+    """
+    try:
+        for board in Board.objects.all():
+            removed = False
 
-def _get_board(name: str):
-    Board = apps.get_model('notifications', 'Board')
-    return Board.objects.get(name=name)
+            # Remove from normal posts board
+            if board.posts.filter(pk=obj.pk).exists():
+                board.posts.remove(obj)
+                removed = True
 
-def push_to_board(board_name: str, instance, title=None, url=None, extra=None, approved_at=None):
-    BoardItem = apps.get_model('notifications', 'BoardItem')
-    board = _get_board(board_name)
-    app_label, model = _app_and_model(instance)
+            # Remove from seekers board
+            if board.seeker_posts.filter(pk=obj.pk).exists():
+                board.seeker_posts.remove(obj)
+                removed = True
 
-    get_url = getattr(instance, 'get_absolute_url', None)
-    resolved_url = url or (get_url() if callable(get_url) else '')
+            if removed:
+                board.save()
+                print(f"[INFO] Removed {obj.__class__.__name__} {obj.pk} from board '{board.name}'")
 
-    payload = {
-        'title': title or getattr(instance, 'title', None) or str(instance),
-        'url': resolved_url,
-        'extra': extra or {},
-        'approved_at': approved_at or timezone.now(),
-    }
-
-    def _do():
-        BoardItem.objects.update_or_create(
-            board=board,
-            target_app_label=app_label,
-            target_model=model,
-            target_object_id=instance.pk,
-            defaults=payload
-        )
-    transaction.on_commit(_do)
-
-def remove_from_board(board_name: str, instance):
-    BoardItem = apps.get_model('notifications', 'BoardItem')
-    board = _get_board(board_name)
-    app_label, model = _app_and_model(instance)
-    def _do():
-        BoardItem.objects.filter(
-            board=board,
-            target_app_label=app_label,
-            target_model=model,
-            target_object_id=instance.pk
-        ).delete()
-    transaction.on_commit(_do)
+    except Exception as e:
+        print(f"[WARN] Failed to remove {obj.__class__.__name__} {getattr(obj, 'pk', '?')} from board: {e}")
