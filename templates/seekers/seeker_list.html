@@ -1,117 +1,44 @@
 {% extends "base.html" %}
 {% load static %}
 {% load humanize %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
 
 {% block title %}Seekers - TradesApp{% endblock %}
 
 {% block extra_head %}
-<!-- Add platform-specific CSS - same as post_list -->
+<!-- Same platform layout CSS as post_list prototype -->
 <link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
 {% endblock %}
 
 {% block site-header-content %}
-    <a href="/" class="nav-link" title="feed">
-        {% include 'icons/home.html' %}
-    </a>
-{% endblock site-header-content %}
-{% block content %}
-<body class="platform-page">
-
-<div class="platform-wrapper" id="platformWrapper">
-    <!-- LEFT SIDEBAR (same as post_list) -->
-    <aside class="platform-sidebar" id="platformSidebar">
-        <div class="function-key-toggle-notification" id="hideSideBar" title="Toggle Notifications Sidebar Hide">
-            <span>
-                x
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <!-- Ads tab -->
+        <a href="/" class="nav-link" title="Feed" data-page="feed">
+            <span class="nav-link__icon">
+                {% include 'icons/home.html' %}
             </span>
-        </div>
-        <!-- User Info (if authenticated) -->
-        {% if user.is_authenticated %}
-        <div class="sidebar-header">
-            <a href="{% url 'person_detail' user.pk %}">
-            <div class="sidebar-user-info">
-                <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=667eea&color=fff" 
-                     alt="{{ user.username }}" 
-                     class="sidebar-avatar">
-                <div class="sidebar-user-details">
-                    {% if user.profile %}
-                        <h5>You</h5>
-                        <p>{{ user.email }}</p>
-                    {% else %}
-                    
-                    {% endif %}
-                </div>
-            </div>
-            </a>
-        </div>
-        {% endif %}
+            <span class="nav-link__label">Ads</span>
+            <span class="nav-link__indicator"></span>
+        </a>
         
-        <!-- Navigation -->
-        <nav class="sidebar-nav">            
-            {% if user.is_authenticated %}
-            <!-- Highlight Seekers as active since we're on this page -->         
-            <a href="{% url 'notifications:notifications-page' %}" class="sidebar-nav-item" data-tooltip="Notifications">
-                <i class="fas fa-bell"></i>
-                <span>Notifications</span>
-            </a>
-            
-            <a href="{% url 'person_list' %}" class="sidebar-nav-item" data-tooltip="Community">
-                <i class="fas fa-users"></i>
-                <span>Community</span>
-            </a>
-            
-            <!-- New item for Seekers - mark as active -->
-            <a href="{% url 'seekers:seeker_list' %}" class="sidebar-nav-item active" data-tooltip="Seekers">
-                <i class="fas fa-search"></i>
-                <span>Seeker Requests</span>
-            </a>
-            
-            <a href="{% url 'seekers:my_pending_seekers' %}" class="sidebar-nav-item" data-tooltip="My Seekers">
-                <i class="fas fa-clock"></i>
-                <span>My Seekers</span>
-            </a>
-            
-            <a href="{% url 'post_home' %}" class="sidebar-nav-item" data-tooltip="Marketplace">
-                <i class="fas fa-store"></i>
-                <span>Marketplace</span>
-            </a>
-            
-            <a href="{% url 'subscription:plans' %}" class="sidebar-nav-item" data-tooltip="Premium">
-                <i class="fas fa-crown"></i>
-                <span>Premium</span>
-            </a>
-            {% else %}
-            <a href="{% url 'login' %}" class="sidebar-nav-item">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Login</span>
-            </a>
-            
-            <a href="{% url 'signup' %}" class="sidebar-nav-item">
-                <i class="fas fa-user-plus"></i>
-                <span>Sign Up</span>
-            </a>
-            {% endif %}
-        </nav>
-    </aside>
-    
-    <!-- CENTER FEED -->
+        <!-- Want tab (active for seekers) -->
+        <a href="{% url 'seekers:seeker_list' %}" class="nav-link nav-link--active" title="Seekers" data-page="seekers">
+            <span class="nav-link__icon">
+                {% include 'icons/icon-seeker.html' %}
+            </span>
+            <span class="nav-link__label">Want</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
+
+{% block content %}   
+    <!-- CENTER FEED (seeker cards in post_list style) -->
     <main class="platform-feed">
-        <!-- Search Bar Section (updated to match post_list) -->
-        <div class="feed-search header">
-            <form method="get" action="{% url 'seekersfinder:seekerfinder' %}" class="search-form">
-                <input type="text" 
-                    name="q" 
-                    class="form-control"
-                    placeholder="Search seeker requests..."
-                    value="{{ request.GET.q|default:'' }}">
-                
-                <button type="submit" class="search-button">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-            </form>
-        </div>
-        
-        <!-- Filter Path (if searching) -->
         {% if search_path %}
         <div class="px-3 py-2 bg-light border-bottom">
             <small class="text-muted">
@@ -120,19 +47,14 @@
         </div>
         {% endif %}
         
-        <!-- Feed Content -->
-        <div class="feed-content" id="seekerContainer">
+        <div class="feed-content container-fluid" id="seekerContainer">
             {% for post in posts %}
-            <!-- Seeker Card (Twitter/X Style - matching post_list format) -->
             <article class="feed-card" 
                      data-scope="{{ post.availability_scope }}"
-                     data-town="{{ post.seeker_town.name }}"
-                     onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                     data-town="{{ post.post_town.name|default:post.post_town_input|lower }}" onclick="window.location=`{% url 'post_detail' post.pk %}`">
                 
-                <div class="feed-card-header">
-                    <img src="https://ui-avatars.com/api/?name={{ post.author.username }}&background=667eea&color=fff" 
-                         alt="{{ post.author.username }}" 
-                         class="feed-card-avatar">
+                <div class="feed-card-header" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                    {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
                     
                     <div class="feed-card-meta">
                         <div class="feed-card-author">
@@ -143,56 +65,55 @@
                                     {{ post.author.username }}
                                 {% endif %}
                             </span>
-                            <span class="feed-card-time">{{ post.date|naturaltime }}</span>
+                            <span class="feed-card-time"> • {{ post.date|short_time }}</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="feed-card-body">
-                    <!-- Seeker Title (what they're looking for) -->
-                    <div class="feed-card-title">
-                        {{ post.seeker_product_name }}
+                    {% if post.title %}
+                    <div class="feed-card-title" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                        {{ post.title }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="feed-card-text" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                        {{ post.description|urlize|linebreaksbr }}
                     </div>
                     
-                    <!-- Description -->
-                    <div class="feed-card-text">{{ post.description }}</div>
-                    
-                    <!-- Budget if available -->
                     {% if post.budget %}
-                    <div class="mb-2">
+                    <div class="mb-2" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
                         <span class="text-primary fs-5 fw-bold">
                             Budget: ${{ post.budget|floatformat:2|intcomma }}
                         </span>
                     </div>
                     {% endif %}
                     
-                    <!-- Location -->
-                    <div class="text-muted">
+                    <div class="text-muted" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
                         <i class="fas fa-map-marker-alt"></i>
-                        {% if post.seeker_town %}
-                            {{ post.seeker_town.name }}
-                        {% elif post.seeker_town_input %}
-                            {{ post.seeker_town_input }}
+                        {% if post.post_town %}
+                            {{ post.post_town.name }}
+                        {% elif post.post_town_input %}
+                            {{ post.post_town_input }}
                         {% endif %}
-                        {% if post.seeker_state %}
-                            , {{ post.seeker_state.name }}
-                        {% elif post.seeker_state_input %}
-                            , {{ post.seeker_state_input }}
+                        {% if post.post_state %}
+                            , {{ post.post_state.name }}
+                        {% elif post.post_state_input %}
+                            , {{ post.post_state_input }}
                         {% endif %}
                     </div>
                     
-                    <!-- Urgency indicator if needed soon -->
-                    {% if post.needed_by %}
-                    <div class="mt-2">
+                    {% if post.preferred_fulfillment_time %}
+                    <div class="mt-2" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
                         <span class="text-warning">
-                            <i class="fas fa-clock"></i> Needed by: {{ post.needed_by|date:"M d, Y" }}
+                            <i class="fas fa-clock"></i>
+                            Preferred: {{ post.preferred_fulfillment_time }}
                         </span>
                     </div>
                     {% endif %}
                 </div>
             </article>
             {% empty %}
-            <!-- Empty state matching post_list style -->
             <div class="empty-state">
                 <i class="fas fa-search"></i>
                 <h3>No seeker requests yet</h3>
@@ -204,100 +125,53 @@
                 {% endif %}
             </div>
             {% endfor %}
-            
-            <!-- Floating CTA Button (for creating seeker request) -->
-            <div class="floating-cta-button">
-                <a href="{% url 'seekers:seeker_create' %}" class="floating-cta-button-child" aria-label="Post seeker request">
-                    <i class="fa-solid fa-search"></i>
-                </a>
-            </div>
-            
-            <!-- Jump to top (load new seekers) -->
-            <div class="jump-to-top-container">
+
+            <div class="jump-to-top-container">                
                 <center>
                     <a href="{% url 'seekers:seeker_list' %}">
                         <span class="jump-to-top" onclick="location.reload();">
                             <i class="fa-solid fa-arrow-up"></i>
                             <p>Load new</p>
+                            <a href="{% url 'seekers:seeker_create' %}">
+                                <div class="floating-cta-button">
+                                    <a href="{% url 'seekers:seeker_create' %}" class="floating-cta-button-child" aria-label="Post seeker request">
+                                        <i class="fa-solid fa-search"></i>
+                                    </a>
+                                </div>                                
+                            </a>
                         </span>
                     </a>
                 </center>
             </div>
         </div>
     </main>
-    
-    <!-- RIGHT WIDGETS -->
-    <aside class="platform-widgets">
-        <!-- Trending Seeker Categories -->
-        <a href="{% url 'board:unified_board' %}">
-            <div class="widget-card">
-                <h4 class="widget-title">Popular Requests <i class="fas fa-fire"></i></h4>
-                <div class="widget-item">
-                    <span>Electronics</span>
-                    <span class="text-muted">12 seekers</span>
-                </div> 
-                <div class="widget-item">
-                    <span>Services</span>
-                    <span class="text-muted">8 seekers</span>
-                </div>
-                <div class="widget-item">
-                    <span>Housing</span>
-                    <span class="text-muted">5 seekers</span>
-                </div>
-                <div class="widget-item">
-                    <span>Vehicles</span>
-                    <span class="text-muted">3 seekers</span>
-                </div>
-            </div>
-        </a>
-        
-        <!-- Seeker Stats (if authenticated) -->
-        {% if user.is_authenticated %}
-        <div class="widget-card">
-            <h4 class="widget-title">Your Seeker Activity</h4>
-            <div class="widget-item">
-                <span>Active Requests</span>
-                <span class="fw-bold">{{ user_active_seekers|default:"0" }}</span>
-            </div>
-            <div class="widget-item">
-                <span>Responses Received</span>
-                <span class="fw-bold">{{ user_responses|default:"0" }}</span>
-            </div>
-            <div class="widget-item">
-                <span>Requests Fulfilled</span>
-                <span class="fw-bold">{{ user_fulfilled|default:"0" }}</span>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Quick Tips -->
-        <div class="widget-card">
-            <h4 class="widget-title">Seeker Tips 💡</h4>
-            <ul class="small text-muted" style="padding-left: 15px;">
-                <li>Be specific about what you need</li>
-                <li>Include your budget range</li>
-                <li>Mention when you need it by</li>
-                <li>Respond promptly to offers</li>
-            </ul>
-        </div>
-        
-        <!-- Footer -->
-        <div class="text-muted small mt-4">
-            <a href="#" class="text-muted me-2">About</a>
-            <a href="#" class="text-muted me-2">Terms</a>
-            <a href="#" class="text-muted me-2">Privacy</a>
-            <a href="#" class="text-muted">Help</a>
-            <div class="mt-2">© 2025 TradesApp</div>
-        </div>
-    </aside>
-</div>
 
-<!-- User's town for JS filtering (same as post_list) -->
 <script>
     const currentUserTown = "{{ user.profile.town.name|lower }}";
 </script>
 
-<!-- Seeker-specific JS files -->
 <script src="{% static 'js/seekers_render_onload.js' %}"></script>
 <script src="{% static 'js/seekers_scope_filter.js' %}"></script>
 {% endblock %}
+
+{% block bottom_navigation %}
+<nav class="bottom-nav" aria-label="Mobile navigation">
+    <a href="/" class="bottom-nav-item" aria-label="Home">
+        {% include 'icons/icon-home-bottom-nav.html'%}
+        <span class="bottom-nav-link__label">Ads</span>
+    </a>
+    <a href="{% url 'postfinder_search' %}" class="bottom-nav-item" aria-label="Search">
+        {% include 'icons/magnifier_bottom_svg.html' %}
+        <span class="bottom-nav-link__label">Search</span>
+    </a>
+    <a href="{% url 'seekers:seeker_list' %}" class="bottom-nav-item nav-link--active" aria-label="Want">
+        {% include 'icons/icon-seeker-bottom-nav.html'%}
+        <span class="bottom-nav-link__label">Want</span>
+        <span class="bottom-nav-link__indicator"></span>
+
+    </a>
+    <a href="{% url 'post_create' %}" class="bottom-nav-item bottom-nav-cta" aria-label="Post ad">
+        {% include 'icons/icon-create.html' %}
+    </a>
+</nav>
+{% endblock bottom_navigation %}

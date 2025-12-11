@@ -5,7 +5,7 @@
   {% if comments %}
     <ul class="space-y-4">
       {% for comment in comments %}
-        {% include "comment/partials/comment_thread.html" with comment=comment target_object=target_object comment_form=comment_form %}
+        {% include "comment/partials/comment_thread.html" with comment=comment target_object=target_object comment_form=comment_form app_label=app_label model_name=model_name %}
       {% endfor %}
     </ul>
   {% else %}

@@ -1,18 +1,68 @@
-{% if post_object.media_files.all %}
-  <div class="flex flex-wrap gap-4 mb-4">
-    {% for media in post_object.media_files.all %}
-      {% if media.file_type == "image" %}
-        <img src="{{ media.file.url }}" alt="Media Image" class="w-36 h-36 object-cover rounded shadow">
-      {% elif media.file_type == "video" %}
-        <video controls class="w-64 h-40 rounded shadow">
-          <source src="{{ media.file.url }}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      {% endif %}
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
-    No media uploaded.
-  </div>
-{% endif %}
+<div class="current-images__container">
+  {% if post_object.media_files.count > 0 %}
+    <div class="media-carousel" data-post-id="{{ post_object.pk }}">
+      <div class="media-carousel__container">
+
+        <!-- Track containing all media items -->
+        <div class="media-carousel__track">
+          {% for media in post_object.media_files.all %}
+            <!-- Individual item. Only the first item has 'active' initially -->
+            <div class="media-carousel__item {% if forloop.first %}active{% endif %}"
+                 data-index="{{ forloop.counter0 }}">
+
+              {% if media.file_type == "image" %}
+                <img src="{{ media.file.url }}"
+                     alt="Post media {{ forloop.counter }}"
+                     loading="lazy"
+                     class="media-carousel__image"
+                     onerror="this.style.display='none'; this.closest('.media-carousel__item').innerHTML='<p class=\'text-red-500 p-4\'>Image failed to load.</p>'">
+              
+              {% elif media.file_type == "video" %}
+                <video class="media-carousel__video" controls preload="metadata"
+                       onclick="event.stopPropagation();">
+                  <source src="{{ media.file.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Controls, indicators, counter (only if more than one item) -->
+        {% if post_object.media_files.count > 1 %}
+          <!-- Navigation Buttons -->
+          <button class="media-carousel__nav media-carousel__nav--prev"
+                  onclick="navigateMedia(this, 'prev')"
+                  aria-label="Previous Media">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="media-carousel__nav media-carousel__nav--next"
+                  onclick="navigateMedia(this, 'next')"
+                  aria-label="Next Media">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+
+          <!-- Indicators -->
+          <div class="media-carousel__indicators">
+            {% for media in post_object.media_files.all %}
+              <div class="media-carousel__indicator {% if forloop.first %}active{% endif %}"
+                   onclick="goToMedia('{{ post_object.pk }}', {{ forloop.counter0 }})"
+                   aria-label="Go to media item {{ forloop.counter }}">
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Counter -->
+          <div class="media-carousel__counter">
+            {{ post_object.media_files.count }}
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  {% else %}
+    <div class="media-carousel__item active flex items-center justify-center h-full">
+      <p class="text-gray-500 p-4">No media uploaded.</p>
+    </div>
+  {% endif %}
+</div>

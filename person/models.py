@@ -4,9 +4,9 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from posts.models import PendingLocationRequest
-
+from media_app.models import MediaFile
 from custom_search.models import Continent, Country, State, Town
-
+from django.contrib.contenttypes.fields import GenericRelation
 def profile_pic_upload_path(instance, filename):
     # Each user gets their own folder inside profile_pics/
     return f"profile_pics/user_{instance.user.id}/{filename}"
@@ -18,6 +18,8 @@ class Person(models.Model):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
+
+    media_files = GenericRelation(MediaFile, related_query_name='person')
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
@@ -140,6 +142,17 @@ class Person(models.Model):
         verbose_name_plural = _("Profiles")
         ordering = ["-date_joined"]
 
+    @property
+    def profile_picture(self):
+        """Get the first image media file as profile picture"""
+        profile_pic = self.media_files.filter(file_type='image').first()
+        return profile_pic
+    
+    @property
+    def profile_picture_url(self):
+        """Get profile picture URL or None"""
+        pic = self.profile_picture
+        return pic.file.url if pic else None
 class PendingLocationRequest(models.Model):
     """Stores user-typed locations for admin review before approval."""
     person = models.OneToOneField(
@@ -176,3 +189,4 @@ class Availability(models.Model):
 
     def __str__(self):
         return f"{self.person} - {self.day_of_week}: {self.start_time} to {self.end_time}"
+

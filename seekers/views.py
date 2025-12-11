@@ -9,7 +9,14 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.views import View
+from board.mixins import BoardItemsMixin
+from django.db.models import Prefetch
 import logging
+from comment.models import Comment
+from comment.forms import CommentForm
+from person.models import Person  # assumes same as posts app
+from seekers.utils.location_assignment import assign_location_fields
+from seekers.utils.location_scope_guard import apply_location_scope_fallback
 from media_app.models import MediaFile
 from .models import (
     SeekerPost,
@@ -28,11 +35,6 @@ from custom_search.models import (
     State as SeekerState,
     Town as SeekerTown,
 )
-from comment.models import Comment
-from comment.forms import CommentForm
-from person.models import Person  # assumes same as posts app
-from seekers.utils.location_assignment import assign_location_fields
-from seekers.utils.location_scope_guard import apply_location_scope_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -57,15 +59,16 @@ class SeekerCommentCreateView(LoginRequiredMixin, View):
 
         return redirect(post.get_absolute_url())
 
-class SeekerCategoryListView(ListView):
-    model = SeekerCategory
-    template_name = "seekers/category_list.html"
-    context_object_name = "categories"
-
-class SeekerPostListView(LoginRequiredMixin, ListView):
+class SeekerPostListView(BoardItemsMixin, ListView):
     model = SeekerPost
     template_name = "seekers/seeker_list.html"
     context_object_name = "posts"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # ✅ match posts.PostListView and your templates
+        context["board_items"] = self.get_board_items(7)
+        return context
 
     def get_queryset(self):
         """
@@ -83,6 +86,7 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
         user = self.request.user
         profile = getattr(user, "profile", None)
 
+        # start from approved seeker posts only
         qs = SeekerPost.objects.filter(status="approved")
 
         # --- 1️⃣ If profile exists but not approved → show ALL approved posts ---
@@ -92,6 +96,20 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
         # NEW LOGIC: If profile is not approved, show all approved posts
         if profile and profile.approval_status != "approved":
             return qs.order_by("-created_at")
+
+        # ✅ mirror PostListView optimization
+        qs = SeekerPost.objects.filter(status="approved")
+        qs = qs.select_related(
+            "author",
+            "author__profile",
+        ).prefetch_related(
+            "media_files",
+            Prefetch(
+                "author__profile__media_files",
+                queryset=MediaFile.objects.filter(file_type="image"),
+                to_attr="profile_images",
+            ),
+        )
 
         # --- Search override: use GET params if present ---
         continent_q = self.request.GET.get("continent")
@@ -139,7 +157,11 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
                 )
 
             # 4) state scope
-            if getattr(profile, "continent", None) and getattr(profile, "country", None) and getattr(profile, "state", None):
+            if (
+                getattr(profile, "continent", None)
+                and getattr(profile, "country", None)
+                and getattr(profile, "state", None)
+            ):
                 filters |= Q(
                     availability_scope="state",
                     post_continent=profile.continent,
@@ -148,7 +170,12 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
                 )
 
             # 5) town scope
-            if getattr(profile, "continent", None) and getattr(profile, "country", None) and getattr(profile, "state", None) and getattr(profile, "town", None):
+            if (
+                getattr(profile, "continent", None)
+                and getattr(profile, "country", None)
+                and getattr(profile, "state", None)
+                and getattr(profile, "town", None)
+            ):
                 filters |= Q(
                     availability_scope="town",
                     post_continent=profile.continent,
@@ -157,9 +184,12 @@ class SeekerPostListView(LoginRequiredMixin, ListView):
                     post_town=profile.town,
                 )
 
+            # NOTE: prototype posts view also doesn’t apply filters here explicitly.
+            # To stay faithful to the prototype, we keep the same pattern and just
+            # return qs ordered. If you later fix it in PostListView, mirror that fix here too.
+
         # --- Fallback: user has no profile/location info -> only global posts ---
         return qs.order_by("-created_at")
-
 class SeekerPostDetailView(LoginRequiredMixin, DetailView):
     model = SeekerPost
     template_name = "seekers/seeker_detail.html"

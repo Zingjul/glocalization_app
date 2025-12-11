@@ -9,7 +9,7 @@
       {% endif %}
       {{ comment.created_at|naturaltime }}
     </small>
-    <p class="mt-1">{{ comment.text }}</p>
+    <p class="mt-1">{{ comment.text|urlize|linebreaksbr|truncatewords:1400 }}</p>
   </div>
 
   {% if comment.author == user %}
@@ -41,5 +41,5 @@
         {% include "comment/partials/comment_thread.html" with comment=reply target_object=target_object comment_form=comment_form app_label=app_label model_name=model_name %}
       {% endfor %}
     </ul>
-  {% endif %}
+  {% endif %} 
 </li>

@@ -1,75 +1,257 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+
+{% block body_class %}platform-page post-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'post_home' %}"
+           class="nav-link js-back-link"
+           title="Back"
+           data-page="back">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
+
 {% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
 
-<!-- 🔧 Edit/Delete Post -->
-{% if user == post.author %}
-  <div class="mt-6 space-y-2">
-    <a href="{% url 'post_edit_'|add:post.category.name|lower post.pk %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      Edit
-    </a>
-    <form method="POST" action="{% url 'post_delete' post.pk %}">
-      {% csrf_token %}
-      <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-        Delete
-      </button>
-    </form>
-  </div>
-{% endif %}
+        <!-- Single feed card for this post -->
+        <article class="feed-card feed-card--detail" data-post-id="{{ post.pk }}">
+            <div class="feed-card-header">
+                {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+                
+                <div class="feed-card-meta">
+                    <div class="feed-card-author">
+                        <span class="feed-card-name">
+                            {{ post.author.profile.business_name|default:post.author.username }}
+                        </span>
+                        <span class="feed-card-time"> • {{ post.date|short_time }}</span>
+                    </div>
+                </div>
+            </div>
 
-<!-- Owner Info -->
-<div id="profile" class="mb-4">
-  {% if post.author.profile and post.author.profile.business_name %}
-    <p class="font-semibold">{{ post.author.profile.business_name }}</p>
-  {% else %}
-    <p class="font-semibold">{{ post.author.username }}</p>
-  {% endif %}
+            <div class="feed-card-body">
+                <span class="follow-cta" title="Follow this user">
+                    {% if post.author_phone_number %}
+                        <a href="tel:{{ post.author_phone_number }}" class="post-hero-cta">
+                            Follow
+                        </a>
+                    {% endif %}
+                </span>
+                <!-- Full description (no clamp) + "View more" opens modal -->
+                <div class="feed-card-text feed-card-text--detail">
+                    {{ post.description|urlize|linebreaksbr|truncatewords:14 }}
+                    {% if post.description|length > 100 %}
+                        <button type="button" class="post-hero-view-more js-open-description" style="font-style:italic">
+                            See more!
+                        </button>
+                    {% endif %}
+                </div>
+                
+                {% if post.price %}
+                <div class="mb-2">
+                    <span class="text-success fs-5 fw-bold">
+                        ${{ post.price|floatformat:2|intcomma }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="text-muted">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {% if post.post_town %}{{ post.post_town.name }}
+                    {% elif post.post_town_input %}{{ post.post_town_input }}
+                    {% endif %}
+                    {% if post.post_state %}, {{ post.post_state.name }}{% endif %},
+                    {% if post.post_country %}{{ post.post_country.name }}{% endif %},
+                    {% if post.post_continent %}{{ post.post_continent.name }}{% endif %}.
+                </div>
+                
+                <!-- Media carousel (same as list) -->
+                {% if post.media_files.count > 0 %}
+                <div class="media-carousel" data-post-id="{{ post.pk }}">
+                    <div class="media-carousel__container">
+                        <div class="media-carousel__track">
+                            {% for media in post.media_files.all %}
+                            <div class="media-carousel__item {% if forloop.first %}active{% endif %}" 
+                                 data-index="{{ forloop.counter0 }}">
+                                {% if media.file_type == "image" %}
+                                    <img src="{{ media.file.url }}" 
+                                         alt="{{ post.product_name }}"
+                                         loading="lazy"
+                                         class="media-carousel__image"
+                                         onerror="this.style.display='none'; this.closest('.media-carousel__item').innerHTML='<p class=\'text-red-500 p-4\'>Image failed to load.</p>'">
+                                {% elif media.file_type == "video" %}
+                                    <video class="media-carousel__video" preload="metadata"
+                                           onclick="event.stopPropagation();">
+                                        <source src="{{ media.file.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if post.media_files.count > 1 %}
+                            <button class="media-carousel__nav media-carousel__nav--prev" 
+                                    onclick="navigateMedia(this, 'prev')" 
+                                    aria-label="Previous Media">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="media-carousel__nav media-carousel__nav--next" 
+                                    onclick="navigateMedia(this, 'next')" 
+                                    aria-label="Next Media">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+
+                            <div class="media-carousel__indicators">
+                                {% for media in post.media_files.all %}
+                                    <div class="media-carousel__indicator {% if forloop.first %}active{% endif %}"
+                                         onclick="goToMedia('{{ post.pk }}', '{{ forloop.counter0 }}')"
+                                         aria-label="Go to media item {{ forloop.counter }}">
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="media-carousel__counter">
+                                {{ post.media_files.count }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Actions: Contact + Comments button -->
+                <div class="feed-card-actions">
+                    <button type="button"
+                            class="post-comments-open js-open-comments ms-2">
+                        💬 Reviews ({{ comments|length }})
+                    </button>
+                </div>
+                <span class="contact-cta" title="Dial user contact">
+                    {% if post.author_phone_number %}
+                        <a href="tel:{{ post.author_phone_number }}" class="post-hero-cta">
+                            Contact
+                        </a>
+                    {% endif %}
+                </span>
+            </div>
+        </article>
+
+    </div>
+</main>
+
+{# ---------- Tabbed Description/Comments Modal ---------- #}
+<div class="post-comments-modal" id="postCommentsModal" aria-hidden="true">
+    <div class="post-comments-modal__backdrop"></div>
+    <div class="post-comments-modal__content">
+        <button type="button"
+                class="post-comments-modal__close js-close-comments"
+                aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="post-comments-modal__tabs">
+            <button type="button"
+                    class="post-comments-modal__tab is-active"
+                    data-pane="description"
+                    title="Description">
+                Description
+            </button>
+            <button type="button"
+                    class="post-comments-modal__tab"
+                    data-pane="comments"
+                    title="Review">
+                Comments ({{ comments|length }})
+            </button>
+        </div>
+
+        <div class="post-comments-modal__body">
+            <div class="post-comments-modal__pane post-comments-modal__pane--description is-active"
+                 data-pane-target="description">
+                <h3 class="post-comments-modal__pane-title">Description</h3>
+                <div class="post-comments-modal__description">
+                    {{ post.description|urlize|linebreaksbr }}
+                </div>
+            </div>
+
+            <div class="post-comments-modal__pane post-comments-modal__pane--comments"
+                 data-pane-target="comments">
+                <h3 class="post-comments-modal__pane-title">Comments</h3>
+                {% include "comment/partials/comment_section.html" with comments=comments comment_form=comment_form target_object=post app_label=app_label model_name=model_name %}
+            </div>
+        </div>
+    </div>
 </div>
 
-<h2 class="text-2xl font-bold text-green-700 mb-4">
-  {% if post.category.name == 'Product' %}
-    {{ post.product_name }}
-  {% elif post.category.name == 'Service' %}
-    {{ post.service_name }}
-  {% elif post.category.name == 'Labor' %}
-    {{ post.labor_title }}
-  {% else %}
-    Untitled Post
-  {% endif %}
-</h2>
+{# ---------- Fullscreen image viewer ---------- #}
+<div class="post-fullscreen-overlay" id="postImageOverlay" aria-hidden="true">
+    <div class="post-fullscreen-inner">
 
-<!-- Media Files -->
-{% include "media_app/current_images.html" %}
+        <div class="post-fullscreen-top">
+            <a href="{% url 'person_detail' post.author.pk %}" class="post-fullscreen-author-link">
+                {% profile_picture post.author size=32 css_class="post-fullscreen-avatar" %}
+                <span class="post-fullscreen-author-name">
+                    {% if post.author.profile and post.author.profile.business_name %}
+                        {{ post.author.profile.business_name }}
+                    {% else %}
+                        {{ post.author.username }}
+                    {% endif %}
+                </span>
+            </a>
 
-<!-- Post Info -->
-<p><strong>Category:</strong> {{ post.category.name }}</p>
-<p><strong>Description:</strong> {{ post.description }}</p>
-{% if post.price %}
-  <p><strong>Price:</strong> ${{ post.price }}</p>
-{% endif %}
-<p><strong>Contact:</strong> {{ post.author_phone_number }} | {{ post.author_email }}</p>
+            <div class="post-fullscreen-top-actions">
+                {% if post.author_phone_number %}
+                <a href="tel:{{ post.author_phone_number }}" class="post-fullscreen-cta">
+                    Contact
+                </a>
+                {% endif %}
+                <button class="post-fullscreen-close" aria-label="Close fullscreen">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
 
-<!-- Location -->
-<p><i class="fa fa-map-marker"></i> {{ post.post_town.name|default:post.post_town_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_state.name|default:post.post_state_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_country.name|default:post.post_country_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ post.post_continent.name|default:post.post_continent_input }}</p>
+        <button class="post-fullscreen-nav post-fullscreen-nav--prev" aria-label="Previous image">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
 
-<!-- Timestamps -->
-<p class="text-sm text-gray-500 mt-2">
-  Created on: {{ post.created_at|date:"F j, Y, g:i a" }}<br>
-  Last updated: {{ post.updated_at|date:"F j, Y, g:i a" }}
-</p>
+        <img src="" alt="" class="post-fullscreen-image">
+        {# Video for videos #}
+        <video class="post-fullscreen-video">
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <button class="post-fullscreen-nav post-fullscreen-nav--next" aria-label="Next image">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
 
-<!-- 💬 Comments -->
-{% include "comment/partials/comment_section.html" with comments=comments comment_form=comment_form target_object=post app_label="posts" model_name="post" %}
+        <div class="post-fullscreen-counter" id="postFullscreenCounter">
+            1 / 1
+        </div>
+    </div>
+</div>
 
-<a href="{% url 'post_home' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-  Back to Posts
-</a>
-
-<!-- 🚀 Reply Form Toggle Script -->
 <script src="{% static 'js/comment_toggler.js' %}"></script>
-    {% include "posts/includes/js_imports.html" %}
+{% include "posts/includes/js_imports.html" %}
+<script src="{% static 'js/01-frontend/media_carousel.js' %}"></script>
+<script src="{% static 'js/01-frontend/post-detail/image-fullscreen-viewer.js' %}"></script>
+<script src="{% static 'js/01-frontend/post-detail/comments-modal.js' %}"></script>
 {% endblock content %}

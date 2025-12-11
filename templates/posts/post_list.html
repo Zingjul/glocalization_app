@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load humanize %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
 
 {% block title %}Home - TradesApp{% endblock %}
 
@@ -10,106 +13,34 @@
 {% endblock %}
 
 {% block site-header-content %}
-    <a href="{% url 'seekers:seeker_list' %}" class="nav-link" title="Create a want">
-        {% include 'icons/icon-seeker.html' %}
-    </a>
-{% endblock site-header-content %}
-{% block content %}
-<body class="platform-page">
-
-<div class="platform-wrapper" id="platformWrapper">
-    <!-- LEFT SIDEBAR -->
-    <aside class="platform-sidebar" id="platformSidebar">
-        <div class="function-key-toggle-notification" id="hideSideBar" title="Toggle Notifications Sidebar Hide">
-            <span>
-                x
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <!-- Active page indicator for Home/Feed -->
+        <a href="/" class="nav-link nav-link--active" title="Feed" data-page="feed">
+            <span class="nav-link__icon">
+                {% include 'icons/home.html' %}
             </span>
-        </div>
-        <!-- User Info (if authenticated) -->
-        {% if user.is_authenticated %}
-        <div class="sidebar-header">
-            <a href="/">
-            <div class="sidebar-user-info">
-                <div class="sidebar-user-details">
-                </div>
-            </div>
-            </a>
-        </div>
-        {% endif %}
+            <span class="nav-link__label">Ads</span>
+            <span class="nav-link__indicator"></span>
+        </a>
         
-        <!-- Navigation -->
-        <nav class="sidebar-nav">            
-            {% if user.is_authenticated %}         
-            <a href="{% url 'notifications:notifications-page' %}" class="sidebar-nav-item" data-tooltip="Notifications">
-                {% include 'icons/notification.html' %}
-                <span>Notifications</span>
-                {% comment %}
-                <!-- Add notification count if available -->
-                <span class="sidebar-nav-badge">3</span>
-                {% endcomment %}
-            </a>
-            
-            <a href="{% url 'person_list' %}" class="sidebar-nav-item" data-tooltip="Community">
-                {% include 'icons/store.html' %}
-                <span>Community</span>
-            </a>
-            
-            <a href="{% url 'my_pending_posts' %}" class="sidebar-nav-item" data-tooltip="Pending Posts">
-                {% include 'icons/draft.html' %}
-                <span>Pending Posts</span>
-            </a>
-            
-            <a href="{% url 'subscription:plans' %}" class="sidebar-nav-item" data-tooltip="Premium">
-                {% include 'icons/crown.html' %}                    
-                <span>Premium</span>
-            </a>
-            <a href="{% url 'person_detail' user.pk %}" class="sidebar-nav-item" alt="Profile Picture {{ user.username }}">
-                {% include "icons/icon-profile.html" %}
-                <span>Profile</span>
-            </a>
+        <a href="{% url 'seekers:seeker_list' %}" class="nav-link" title="Seekers" data-page="seekers">
+            <span class="nav-link__icon">
+                {% include 'icons/icon-seeker.html' %}
+            </span>
+            <span class="nav-link__label">Want</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+    
+    <!-- Optional search icon on the right -->
+</div>
+{% endblock site-header-content %}
 
-            <!-- Create Post Button -->
-            <!-- <div class="sidebar-cta">
-                <a href="{% url 'post_create' %}" class="btn-create-post">
-                    <i class="fas fa-plus"></i> Create New Post
-                </a>
-            </div> -->
-            {% else %}
-            <a href="{% url 'login' %}" class="sidebar-nav-item">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Login</span>
-            </a>
-            
-            <a href="{% url 'signup' %}" class="sidebar-nav-item">
-                <i class="fas fa-user-plus"></i>
-                <span>Sign Up</span>
-            </a>
-            {% endif %}
-        </nav>
-        
-    </aside>
+{% block content %}
     
     <!-- CENTER FEED -->
     <main class="platform-feed">        
-        <!-- Search Bar Section -->
-        <div class="feed-search header">
-            <!-- Search form that submits to the postfinder_search URL endpoint -->
-            <form method="get" action="{% url 'postfinder_search' %}" class="search-form">
-                <!-- Text input field for search queries -->
-                <input type="text" 
-                    name="q" 
-                    class="form-control"
-                    placeholder=""
-                    value="{{ request.GET.q|default:'' }}">  <!-- Preserves search term after submission -->
-                
-                <!-- Submit button positioned inside the search bar -->
-                <button type="submit" class="search-button">
-                    <!-- Using Bootstrap Icons for search icon, can replace with text -->
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-            </form>
-        </div>
-        
         <!-- Filter Path (if searching) -->
         {% if search_path %}
         <div class="px-3 py-2 bg-light border-bottom">
@@ -120,63 +51,126 @@
         {% endif %}
         
         <!-- Feed Content -->
-        <div class="feed-content" id="postContainer">
+        <div class="feed-content  container-fluid" id="postContainer">
             
             {% for post in posts %}
             <!-- Feed Card (X/Twitter Style) -->
-            <article class="feed-card" 
-                     data-scope="{{ post.availability_scope }}"
-                     data-town="{{ post.post_town.name|default:post.post_town_input|lower }}"
-                     onclick="window.location=`{% url 'post_detail' post.pk %}`">
-                
-                <div class="feed-card-header">
-                    <img src="profile_pics/" 
-                         alt="{{ post.author.business_name }}" 
-                         class="feed-card-avatar">
+                <article class="feed-card feed-card--detail" 
+                    data-scope="{{ post.availability_scope }}"
+                    data-town="{{ post.post_town.name|default:post.post_town_input|lower }}"
+                    data-post-id="{{ post.pk }}" onclick="window.location=`{% url 'post_detail' post.pk %}`">
                     
-                    <div class="feed-card-meta">
-                        <div class="feed-card-author">
-                            <span class="feed-card-name">
-                                {{ post.author.profile.business_name }}
-                            </span>
-                            <span class="feed-card-time">· {{ post.date|naturaltime }}</span>
+                    <div class="feed-card-header" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                        {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+                        
+                        <div class="feed-card-meta">
+                            <div class="feed-card-author">
+                                <span class="feed-card-name">
+                                    {{ post.author.profile.business_name }}
+                                </span>
+                                <span class="feed-card-time"> • {{ post.date|short_time }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="feed-card-body">
-                    <!-- <div class="feed-card-title">{{ post.product_name }}</div> -->
-                    <div class="feed-card-text">{{ post.description }}</div>
                     
-                    {% if post.price %}
-                    <div class="mb-2">
-                        <span class="text-success fs-5 fw-bold">${{ post.price|floatformat:2|intcomma }}</span>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="text-muted">
-                        <i class="fas fa-map-marker-alt"></i>
-                        {% if post.post_town %}{{ post.post_town.name }}{% elif post.post_town_input %}{{ post.post_town_input }}{% endif %}{% if post.post_state %}, {{ post.post_state.name }}{% endif %}
-                    </div>
-                    
-                    {% with first_media=post.media_files.first %}
-                    {% if first_media %}
-                    <div class="feed-card-media">
-                        {% if first_media.file_type == "image" %}
-                        <img src="{{ first_media.file.url }}" alt="{{ post.product_name }}">
-                        {% elif first_media.file_type == "video" %}
-                        <video controls onclick="event.stopPropagation();">
-                            <source src="{{ first_media.file.url }}" type="video/mp4">
-                        </video>
+                    <div class="feed-card-body">
+                        <div class="feed-card-text" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                            {{ post.description|urlize|linebreaksbr }}
+                        </div>
+                        
+                        {% if post.price %}
+                        <div class="mb-2" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                            <span class="text-success fs-5 fw-bold">${{ post.price|floatformat:2|intcomma }}</span>
+                        </div>
                         {% endif %}
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                        <a href="#" class="feed-action">
+                        
+                        <div class="text-muted" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                            <i class="fas fa-map-marker-alt"></i>
+                                {% if post.post_town %}{{ post.post_town.name }}
+                                {% elif post.post_town_input %}{{ post.post_town_input }}
+                                {% endif %}
+                                {% if post.post_state %}, {{ post.post_state.name }}{% endif %},
+                                {% if post.post_country %}{{ post.post_country.name }}{% endif %},
+                                {% if post.post_continent %}{{ post.post_continent.name }}{% endif %}.
+                        </div>
+                        
+                        <!-- Enhanced Media Carousel -->
+                        {% if post.media_files.count > 0 %}
+                        <div class="media-carousel" data-post-id="{{ post.pk }}">
+                            
+                            <div class="media-carousel__container">
+                                <div class="media-carousel__track">
+
+                                    {% for media in post.media_files.all %}
+                                        <!-- 
+                                            IMPORTANT: The media-carousel__item is the wrapper for each slide. 
+                                            The 'active' class ensures the first item is visible initially. 
+                                        -->
+                                        <div class="media-carousel__item {% if forloop.first %}active{% endif %}" 
+                                            data-index="{{ forloop.counter0 }}">
+                                            
+                                            {% if media.file_type == "image" %}
+                                                <img src="{{ media.file.url }}" 
+                                                    alt="{{ post.product_name }}"
+                                                    loading="lazy"
+                                                    class="media-carousel__image"
+                                                    onerror="this.style.display='none'; this.closest('.media-carousel__item').innerHTML='<p class=\'text-red-500 p-4\'>Image failed to load.</p>'"
+                                                >
+                                            
+                                            {% elif media.file_type == "video" %}
+                                                <video class="media-carousel__video" controls preload="metadata"
+                                                    onclick="event.stopPropagation();">
+                                                    <source src="{{ media.file.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {% endif %}
+                                            
+                                            <!-- NOTE: The media-carousel__counter has been moved outside this loop -->
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                                
+                                <!-- NAVIGATION, INDICATORS, AND COUNTER (Only appear if multiple files exist) -->
+                                {% if post.media_files.count > 1 %}
+                                    
+                                    <!-- Navigation Buttons -->
+                                    <button class="media-carousel__nav media-carousel__nav--prev" 
+                                            onclick="navigateMedia(this, 'prev')" 
+                                            aria-label="Previous Media">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button class="media-carousel__nav media-carousel__nav--next" 
+                                            onclick="navigateMedia(this, 'next')" 
+                                            aria-label="Next Media">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+
+                                    <!-- Indicators -->
+                                    <div class="media-carousel__indicators">
+                                        {% for media in post.media_files.all %}
+                                            <div aria-disabled="true" class="media-carousel__indicator {% if forloop.first %}active{% endif %}" onclick="goToMedia('{{ post.pk }}', '{{ forloop.counter0 }}')" aria-label="Go to media item {{ forloop.counter }}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Single Counter (JS updates the current index) -->
+                                    <div class="media-carousel__counter">
+                                        {{ post.media_files.count }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+                        {% endif %}
+                        
+                        <span class="feed-action" >
                             2<i class="fa-solid fa-chart-simple"></i>
-                        </a>
-                </div>
-            </article>
+                        </span>
+                    </div>
+                </article>
             {% empty %}
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
@@ -195,73 +189,20 @@
                         <span class="jump-to-top" onclick="location.reload();">
                             <i class="fa-solid fa-arrow-up"></i>
                             <p>Load new</p>
-                            <div class="floating-cta-button">
-                                <a href="{% url 'post_create' %}" class="floating-cta-button-child" aria-label="Post ad">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <!-- <span>Post</span> -->
-                                </a>
-                            </div>                            
+                            <a href="{% url 'post_create' %}">
+                                <div class="floating-cta-button">
+                                    <a href="{% url 'post_create' %}" class="floating-cta-button-child" aria-label="Post ad">
+                                        {% include "icons/icon-create.html" %}
+                                        <!-- <span>Post</span> -->
+                                    </a>
+                                </div>                                
+                            </a>
                         </span>
                     </a>
                 </center>
             </div>
         </div>
     </main>
-    
-    <!-- RIGHT WIDGETS -->
-    <aside class="platform-widgets">
-        <!-- Trending Categories -->
-        <a href="{% url 'board:unified_board' %}">
-            <div class="widget-card">
-                <h4 class="widget-title">Trending Categories <i class="fas fa-fire"></i></h4>
-                <div class="widget-item">
-                    <span>null</span>
-                    <span class="text-muted">null</span>
-                </div> 
-                <div class="widget-item">
-                    <span>null</span>
-                    <span class="text-muted">null</span>
-                </div>
-                <div class="widget-item">
-                    <span>null</span>
-                    <span class="text-muted">null</span>
-                </div>
-                <div class="widget-item">
-                    <span></span>
-                    <span class="text-muted"></span>
-                </div>
-            </div>
-        </a>
-        <!-- Quick Stats -->
-        {% if user.is_authenticated %}
-        <div class="widget-card">
-            <h4 class="widget-title">Your Stats</h4>
-            <div class="widget-item">
-                <span>Active Posts</span>
-                <span class="fw-bold">null</span>
-            </div>
-            <div class="widget-item">
-                <span>Total Views</span>
-                <span class="fw-bold">null</span>
-            </div>
-            <div class="widget-item">
-                <span>Messages</span>
-                <span class="fw-bold">null</span>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Footer -->
-        <div class="text-muted small mt-4">
-            <a href="#" class="text-muted me-2">About</a>
-            <a href="#" class="text-muted me-2">Terms</a>
-            <a href="#" class="text-muted me-2">Privacy</a>
-            <a href="#" class="text-muted">Help</a>
-            <div class="mt-2">© 2025 TradesApp</div>
-        </div>
-    </aside>
-</div>
-
 <!-- User's town for JS filtering -->
 <script>
     const currentUserTown = "{{ user.profile.town.name|lower }}";
@@ -270,5 +211,35 @@
 
 <!-- Your existing JS files (unchanged) -->
 <script src="{% static 'js/post_render_onload.js' %}"></script>
+<script src="{% static 'js/media-carousel.js' %}"></script>
 <script src="{% static 'js/post_scope_filter.js' %}"></script>
 {% endblock %}
+{% block bottom_navigation %}
+        <nav class="bottom-nav" aria-label="Mobile navigation">
+            <a href="/" class="bottom-nav-item nav-link--active" aria-label="Home">
+                <!-- <i class="fa-solid fa-house"></i> -->
+                {% include 'icons/icon-home-bottom-nav.html'%}
+                <span class="bottom-nav-link__label">Ads</span>
+                <span class="bottom-nav-link__indicator"></span>
+                <!-- <span>Home</span> -->
+            </a>
+            <a href="{% url 'postfinder_search' %}" class="bottom-nav-item" aria-label="Search">
+                <!-- <i class="fa-solid fa-magnifying-glass"></i> -->
+                {% include 'icons/magnifier_bottom_svg.html' %}
+                <span class="bottom-nav-link__label">Search</span>
+                <!-- <span class="bottom-nav-link__indicator"></span> -->
+                <!-- <span>Search</span> -->
+            </a>
+            <a href="{% url 'seekers:seeker_list' %}" class="bottom-nav-item" aria-label="Home">
+                <!-- <i class="fa-solid fa-house"></i> -->
+                {% include 'icons/icon-seeker-bottom-nav.html'%}
+                <span class="bottom-nav-link__label">Want</span>
+                <!-- <span class="bottom-nav-link__indicator"></span> -->
+                <!-- <span>Home</span> -->
+            </a>
+            <a href="{% url 'post_create' %}" class="bottom-nav-item bottom-nav-cta" aria-label="Post ad">
+                {% include 'icons/icon-create.html' %}
+                <!-- <span>Post</span> -->
+            </a>
+        </nav>
+{% endblock bottom_navigation %}

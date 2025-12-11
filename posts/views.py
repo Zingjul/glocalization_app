@@ -19,7 +19,8 @@ from comment.forms import CommentForm
 from person.models import Person  # Make sure this is imported
 from posts.utils.location_assignment import assign_location_fields
 from posts.utils.location_scope_guard import apply_location_scope_fallback
-
+from board.mixins import BoardItemsMixin
+from django.db.models import Prefetch
 logger = logging.getLogger(__name__)
 
 class CategoryListView(ListView):
@@ -27,10 +28,15 @@ class CategoryListView(ListView):
     template_name = "posts/category_list.html"
     context_object_name = "categories"
 
-class PostListView(ListView):
+class PostListView(BoardItemsMixin, ListView):
     model = Post
     template_name = "posts/post_list.html"
     context_object_name = "posts"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['board_items'] = self.get_board_items(7)
+        return context
 
     def get_queryset(self):
         """
@@ -54,11 +60,26 @@ class PostListView(ListView):
         # --- 1️⃣ If profile exists but not approved → show ALL approved posts ---
         if profile and getattr(profile, "approval_status", None) != "approved":
             return qs.order_by("-created_at")
-
+ 
         # NEW LOGIC: If profile is not approved, show all approved posts
         if profile and profile.approval_status != "approved":
             return qs.order_by("-created_at")
 
+        qs = Post.objects.filter(status="approved")
+        
+        # Optimize queries by prefetching profile and media files
+        qs = qs.select_related(
+            'author',
+            'author__profile',
+        ).prefetch_related(
+            'media_files',  # Post's media files
+            Prefetch(
+                'author__profile__media_files',
+                queryset=MediaFile.objects.filter(file_type='image'),
+                to_attr='profile_images'
+            )
+        )
+        
         # If explicit search filters provided, treat as search override (include global)
         continent_q = self.request.GET.get("continent")
         country_q = self.request.GET.get("country")
@@ -126,7 +147,7 @@ class PostListView(ListView):
         # User has no profile/location info -> only show global posts
         return qs.order_by("-created_at")
 
-class PostDetailView(DetailView):
+class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = "posts/post_detail.html"
     context_object_name = "post"
@@ -151,6 +172,11 @@ class PostDetailView(DetailView):
         context.update({
             "comments": comments,
             "comment_form": CommentForm(),
+            "target_object": post,
+            # These two are what your templates need:
+            "app_label": post._meta.app_label,      # e.g. "posts"
+            "model_name": post._meta.model_name,    # e.g. "post"
+
         })
 
         # ✅ add the unified variable
