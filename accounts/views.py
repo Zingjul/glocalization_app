@@ -14,6 +14,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import F
 from .models import Follow, CustomUser
+
+from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_protect
 from .forms import (
     CustomUserCreationForm,
     CustomLoginForm,
@@ -242,3 +246,111 @@ class FollowingListView(ListView):
         context["list_type"] = "following"
         context["target_user"] = CustomUser.objects.get(id=self.kwargs["user_id"])
         return context
+
+
+
+
+# recently
+@login_required
+@require_POST
+@csrf_protect
+def toggle_follow(request, user_id):
+    """
+    Toggle follow/unfollow for a user.
+    Works with both AJAX and regular form submissions.
+    """
+    # Validate user_id
+    if not user_id:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid user ID.'
+            }, status=400)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    
+    # Prevent self-follow
+    if request.user.id == target_user.id:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'You cannot follow yourself.'
+            }, status=400)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    
+    # Check if already following
+    follow_instance = Follow.objects.filter(
+        follower_id=request.user.id,
+        following_id=target_user.id
+    ).first()
+    
+    if follow_instance:
+        # Unfollow
+        follow_instance.delete()
+        is_following = False
+        action = 'unfollowed'
+    else:
+        # Follow
+        Follow.objects.create(
+            follower=request.user,
+            following=target_user
+        )
+        is_following = True
+        action = 'followed'
+    
+    # Refresh counts from database
+    target_user.refresh_from_db()
+    request.user.refresh_from_db()
+    
+    # AJAX response
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'is_following': is_following,
+            'action': action,
+            'follower_count': target_user.follower_count,
+            'following_count': request.user.following_count,
+            'target_user_id': target_user.id,
+        })
+    
+    # Regular form submission - redirect back
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required
+def check_follow_status(request, user_id):
+    """
+    Check if current user follows the target user.
+    """
+    if not user_id:
+        return JsonResponse({'error': 'Invalid user ID'}, status=400)
+    
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    
+    is_following = Follow.objects.filter(
+        follower_id=request.user.id,
+        following_id=target_user.id
+    ).exists()
+    
+    return JsonResponse({
+        'is_following': is_following,
+        'follower_count': target_user.follower_count,
+        'is_self': request.user.id == target_user.id,
+    })
+
+
+def get_follow_counts(request, user_id):
+    """
+    Get follower/following counts for a user.
+    Public endpoint - no authentication required.
+    """
+    if not user_id:
+        return JsonResponse({'error': 'Invalid user ID'}, status=400)
+    
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    
+    return JsonResponse({
+        'follower_count': target_user.follower_count,
+        'following_count': target_user.following_count,
+    })

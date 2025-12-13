@@ -1733,6 +1733,330 @@ body.platform-page {
 }
 
 /* ============================================
-   RESPONSIVE ADJUSTMENTS
+   Follow button
    ============================================ */
+/* ================================================
+   FOLLOW BUTTON STYLES
+   ================================================ */
 
+.follow-button-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Base Button Styles */
+.follow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.follow-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Size Variants */
+.follow-btn--small {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 14px;
+}
+
+.follow-btn--small .follow-btn__icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.follow-btn--medium {
+  padding: 8px 18px;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+.follow-btn--medium .follow-btn__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.follow-btn--large {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 24px;
+}
+
+.follow-btn--large .follow-btn__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Style Variants */
+
+/* Primary - Filled */
+.follow-btn--primary {
+  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.follow-btn--primary:hover {
+  background: linear-gradient(135deg, #0066CC 0%, #4745B5 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.follow-btn--primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+}
+
+/* Primary Following State */
+.follow-btn--primary.is-following {
+  background: #E8F0FE;
+  color: #007AFF;
+  box-shadow: none;
+}
+
+.follow-btn--primary.is-following:hover {
+  background: #FFE5E5;
+  color: #FF3B30;
+}
+
+/* Outline */
+.follow-btn--outline {
+  background: transparent;
+  color: #007AFF;
+  border: 2px solid #007AFF;
+  box-shadow: none;
+}
+
+.follow-btn--outline:hover {
+  background: rgba(0, 122, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.follow-btn--outline.is-following {
+  background: #007AFF;
+  color: #ffffff;
+}
+
+.follow-btn--outline.is-following:hover {
+  background: #FF3B30;
+  border-color: #FF3B30;
+}
+
+/* Minimal */
+.follow-btn--minimal {
+  background: rgba(0, 122, 255, 0.08);
+  color: #007AFF;
+  box-shadow: none;
+}
+
+.follow-btn--minimal:hover {
+  background: rgba(0, 122, 255, 0.15);
+}
+
+.follow-btn--minimal.is-following {
+  background: rgba(0, 122, 255, 0.15);
+  color: #007AFF;
+}
+
+.follow-btn--minimal.is-following:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
+/* Icon Styles */
+.follow-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.follow-btn__icon svg {
+  display: block;
+}
+
+/* Text Styles */
+.follow-btn__text {
+  display: inline-block;
+}
+
+.follow-btn__text--unfollow {
+  display: none;
+}
+
+/* Show unfollow text on hover when following */
+.follow-btn.is-following:hover .follow-btn__text--following {
+  display: none;
+}
+
+.follow-btn.is-following:hover .follow-btn__text--unfollow {
+  display: inline-block;
+}
+
+.follow-btn.is-following:hover .follow-btn__icon--following {
+  display: none !important;
+}
+
+.follow-btn.is-following:hover .follow-btn__icon--follow {
+  display: inline-flex !important;
+}
+
+/* Loading State */
+.follow-btn.is-loading {
+  pointer-events: none;
+}
+
+.follow-btn__loader {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.follow-btn.is-loading .follow-btn__loader {
+  display: inline-flex;
+}
+
+.follow-btn.is-loading .follow-btn__icon,
+.follow-btn.is-loading .follow-btn__text {
+  opacity: 0;
+}
+
+/* Spinner Animation */
+.follow-btn__loader .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Follow Count */
+.follow-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.follow-count__number {
+  font-weight: 600;
+  color: #111827;
+}
+
+.follow-count__label {
+  font-weight: 400;
+}
+
+/* Ripple Effect */
+.follow-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.follow-btn:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+/* Self Profile Button */
+.follow-button-wrapper--self .follow-btn {
+  gap: 6px;
+}
+
+/* ================================================
+   RESPONSIVE ADJUSTMENTS
+   ================================================ */
+
+@media (max-width: 480px) {
+  .follow-btn--large {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .follow-btn--medium {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  
+  .follow-btn--small {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
+
+/* ================================================
+   DARK MODE SUPPORT
+   ================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .follow-btn--primary.is-following {
+    background: rgba(0, 122, 255, 0.2);
+    color: #5AC8FA;
+  }
+  
+  .follow-btn--primary.is-following:hover {
+    background: rgba(255, 59, 48, 0.2);
+    color: #FF6961;
+  }
+  
+  .follow-count__number {
+    color: #F3F4F6;
+  }
+  
+  .follow-count__label {
+    color: #9CA3AF;
+  }
+}
+
+/* ================================================
+   ACCESSIBILITY
+   ================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .follow-btn {
+    transition: none;
+  }
+  
+  .follow-btn::before {
+    transition: none;
+  }
+  
+  .follow-btn__loader .spinner {
+    animation: none;
+  }
+}

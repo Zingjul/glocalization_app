@@ -1,7 +1,30 @@
 # accounts/urls.py
 
 from django.urls import path
-from .views import PerformLogoutView, SignupView, signup_success, CustomLoginView, ConfirmLogoutView, LoggedOutView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView, CustomPasswordChangeView, UserList, UserDetail, UserDeleteView, SuccessfulLoginView, toggle_follow, FollowersListView, FollowingListView
+from .views import (
+    PerformLogoutView,
+    SignupView,
+    signup_success,
+    CustomLoginView,
+    ConfirmLogoutView,
+    LoggedOutView,
+    CustomPasswordResetView,
+    CustomPasswordResetDoneView,
+    CustomPasswordResetConfirmView,
+    CustomPasswordResetCompleteView,
+    CustomPasswordChangeView,
+    UserList,
+    UserDetail,
+    UserDeleteView,
+    SuccessfulLoginView,
+    FollowersListView,
+    FollowingListView,
+    toggle_follow,
+    check_follow_status,
+    get_follow_counts,
+)
+
+# NO app_name here since you don't use namespaces
 
 urlpatterns = [
     # Auth routes
@@ -19,11 +42,20 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    # Password change\
+    # Password change
     path('password-change/', CustomPasswordChangeView.as_view(), name='password_change'),
 
     # User management
     path('users/', UserList.as_view(), name='user_list'),
     path('users/<int:pk>/', UserDetail.as_view(), name='user_detail'),
     path('delete-account/', UserDeleteView.as_view(), name='delete_account'),
+    
+    # Follow system
+    path('follow/<int:user_id>/', toggle_follow, name='toggle_follow'),
+    path('follow/status/<int:user_id>/', check_follow_status, name='check_follow_status'),
+    path('follow/counts/<int:user_id>/', get_follow_counts, name='get_follow_counts'),
+    
+    # Followers/Following lists
+    path('followers/<int:user_id>/', FollowersListView.as_view(), name='followers_list'),
+    path('following/<int:user_id>/', FollowingListView.as_view(), name='following_list'),
 ]

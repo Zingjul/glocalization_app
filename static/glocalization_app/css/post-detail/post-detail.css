@@ -1048,3 +1048,102 @@ body.post-detail-page .post-comments-modal__pane--comments ul.ml-4 {
   /* font-size: 16px; */
   color: rgba(255, 255, 255, 0.95);
 }
+
+
+/* ================================================
+   SIMPLE FEED CARD ACTIONS
+   Clean & Minimal
+   ================================================ */
+
+/* Feed Card Actions Container */
+.feed-card-actions {
+    display: flex;
+    /* background: red; */
+    justify-content: center;
+    /* gap: 10px; */
+    /* border-top: 1px solid rgba(0, 0, 0, 0.06); */
+}
+
+/* Reviews Button - Simple */
+.post-comments-open {
+    display: inline-flex;
+    font-weight: 500;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin: 0px 12px;
+    text-align: center;
+}
+
+.post-comments-open:hover {
+    background: #00000014;
+    color: #374151;
+}
+
+/* Contact CTA Container */
+.contact-cta {
+    display: inline-flex;
+    justify-content: end;
+}
+
+/* Contact Button - Circular Icon Only */
+.post-hero-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--bg-gradient-magic);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+
+}
+
+.post-hero-cta:hover {
+    transform: scale(1.1);
+    transition: transform 0.6s ease;
+}
+
+.post-hero-cta:active {
+    transform: scale(0.95);
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+
+@media (max-width: 768px) {
+    .feed-card-actions {
+        gap: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+    
+    .post-comments-open {
+        padding: 7px 14px;
+        font-size: 0.8125rem;
+    }
+    
+    .post-hero-cta {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9375rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-hero-cta {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+}
