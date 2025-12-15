@@ -37,8 +37,9 @@
         <!-- Single feed card for this post -->
         <article class="feed-card feed-card--detail" data-post-id="{{ post.pk }}">
             <div class="feed-card-header">
-                {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
-                
+                <a href="{% url 'person_detail' post.author.pk %}">
+                    {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+                </a>
                 <div class="feed-card-meta">
                     <div class="feed-card-author">
                         <span class="feed-card-name">
@@ -136,12 +137,14 @@
                 {% endif %}
                 
                 <!-- Actions: Contact + Comments button -->
+            </div>
                 <div class="feed-card-actions">
                     <span
                             class="post-comments-open js-open-comments ms-2">
                         See reviews ({{ comments|length }})
                 </span>
                 </div>
+
                 <span class="contact-cta" title="Dial user contact">
                     {% if post.author_phone_number %}
                         <a href="tel:{{ post.author_phone_number }}" class="post-hero-cta">
@@ -149,7 +152,6 @@
                         </a>
                     {% endif %}
                 </span>
-            </div>
         </article>
 
     </div>
@@ -217,7 +219,7 @@
             <div class="post-fullscreen-top-actions">
                 {% if post.author_phone_number %}
                 <a href="tel:{{ post.author_phone_number }}" class="post-fullscreen-cta">
-                    Contact
+                    <i class="fa-solid fa-phone"></i>
                 </a>
                 {% endif %}
                 <button class="post-fullscreen-close" aria-label="Close fullscreen">
@@ -232,7 +234,7 @@
 
         <img src="" alt="" class="post-fullscreen-image">
         {# Video for videos #}
-        <video class="post-fullscreen-video">
+        <video class="post-fullscreen-video" controls>
             <source src="" type="video/mp4">
             Your browser does not support the video tag.
         </video>

@@ -51,7 +51,7 @@
   }
   
   .platform-wrapper {
-    font-size: var(--gen-lg-font-size);
+    /* font-size: var(--gen-lg-font-size); */
   }
 }
 
@@ -274,7 +274,7 @@
   
   /* Grid - Slim two-column */
   .platform-wrapper {
-    grid-template-columns: 35% 65% 0% !important;
+    grid-template-columns: 25% 75% 0% !important;
     gap: 2px;
     padding: 0;
     min-height: calc(100vh - 60px);
@@ -331,6 +331,7 @@
   .platform-widgets {
     display: none;
   }
+  
 }
 
 /* ================================================
@@ -549,7 +550,7 @@
   
   .feed-action {
     /* font-size: var(--scrn711-sm-font-size) !important; */
-    padding: 0 !important;
+    padding: 9px !important;
     transition: background 0.2s !important;
   }
   
@@ -1270,8 +1271,27 @@
     justify-content: center;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);  
     } 
+    
 }
-/* ================================================
-   MICRO SCREENS (below 105px)
-   Ultra minimal - edge case handling
-   ================================================ */
+
+@media (min-width: 551px) and (max-width: 764px) {
+  .sidebar-nav-item span{
+      display: none;
+      transition: display 2s ease;
+
+  }
+  .sidebar-nav{
+    /* background: yellow; */
+    display: flex !important;
+    justify-content: end !important;
+    margin-left: 53px;
+  }
+  .sidebar-nav-item{
+    padding: 12px 20px;
+    transition: all 1s ease;
+  }
+
+  .sidebar-nav-item-container{
+    transition: all 1s ease;
+  }
+}

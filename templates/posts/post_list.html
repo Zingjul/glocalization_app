@@ -58,12 +58,14 @@
                 <article class="feed-card feed-card--detail" 
                     data-scope="{{ post.availability_scope }}"
                     data-town="{{ post.post_town.name|default:post.post_town_input|lower }}"
-                    data-post-id="{{ post.pk }}" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                    data-post-id="{{ post.pk }}">
                     
-                    <div class="feed-card-header" onclick="window.location=`{% url 'post_detail' post.pk %}`">
-                        {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
-                        
-                        <div class="feed-card-meta">
+                    <div class="feed-card-header">
+                        <a href="{% url 'person_detail' post.author.pk %}">
+                            {% profile_picture post.author size=48 css_class="feed-card-avatar" %}                        
+                        </a>
+                    
+                        <div class="feed-card-meta" onclick="window.location=`{% url 'post_detail' post.pk %}`">
                             <div class="feed-card-author">
                                 <span class="feed-card-name">
                                     {{ post.author.profile.business_name }}
@@ -165,10 +167,11 @@
 
                         </div>
                         {% endif %}
-                        
+                        <a href="tel:{{ post.author_phone_number }}" class="post-fullscreen-cta">
                         <span class="feed-action" >
-                            2<i class="fa-solid fa-chart-simple"></i>
+                                <i class="fa-solid fa-phone"></i>
                         </span>
+                        </a>
                     </div>
                 </article>
             {% empty %}
@@ -193,6 +196,7 @@
                                 <div class="floating-cta-button">
                                     <a href="{% url 'post_create' %}" class="floating-cta-button-child" aria-label="Post ad">
                                         {% include "icons/icon-create.html" %}
+                                        <!-- <i class="fa-solid fa-plus"></i> -->
                                         <!-- <span>Post</span> -->
                                     </a>
                                 </div>                                
