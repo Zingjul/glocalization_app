@@ -1,0 +1,49 @@
+{% load humanize %}
+{% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{# ---------- Tabbed Description/Comments Modal ---------- #}
+<div class="post-comments-modal" id="postCommentsModal" aria-hidden="true">
+    <div class="post-comments-modal__backdrop"></div>
+    <div class="post-comments-modal__content">
+        <button type="button"
+                class="post-comments-modal__close js-close-comments"
+                aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="post-comments-modal__tabs">
+            <button type="button"
+                    class="post-comments-modal__tab is-active"
+                    data-pane="description"
+                    title="Description">
+                Description
+            </button>
+            <button type="button"
+                    class="post-comments-modal__tab"
+                    data-pane="comments"
+                    title="Review">
+                Comments ({{ comments|length }})
+            </button>
+        </div>
+
+        <div class="post-comments-modal__body">
+            <div class="post-comments-modal__pane post-comments-modal__pane--description is-active"
+                 data-pane-target="description">
+                <h3 class="post-comments-modal__pane-title">Description</h3>
+                <div class="post-comments-modal__description">
+                    {{ post.description|urlize|linebreaksbr }}
+                </div>
+            </div>
+
+            <div class="post-comments-modal__pane post-comments-modal__pane--comments"
+                 data-pane-target="comments">
+                <h3 class="post-comments-modal__pane-title">Comments</h3>
+                {% include "comment/partials/comment_section.html" with comments=comments comment_form=comment_form target_object=post app_label=app_label model_name=model_name %}
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,107 @@
+{% load humanize %}
+{% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+<!-- Canonical Post Card Component -->
+<article class="feed-card feed-card--detail" data-post-id="{{ post.pk }}">
+    <div class="feed-card-header">
+        <a href="{% url 'person_detail' post.author.pk %}">
+            {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+        </a>
+        <div class="feed-card-meta">
+            <div class="feed-card-author">
+                <span class="feed-card-name">
+                    {{ post.author.profile.business_name|default:post.author.username }}
+                </span>
+                <span class="feed-card-time"> • {{ post.date|short_time }}</span>
+
+                {# Phone CTA: clickable only in detail/list, not in edit mode #}
+                {% if post.author_phone_number %}
+                    {% if not is_edit %}
+                        <a href="tel:{{ post.author_phone_number }}">
+                    {% endif %}
+                            <i class="fa-solid fa-phone"></i>
+                    {% if not is_edit %}
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            {# Owner controls: dropdown only if not editing #}
+            {% if not is_edit and request.user == post.author %}
+                <div class="feed-card-settings-modal">
+                    <button type="button" class="btn btn-link p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'post_edit' post.pk %}">
+                                <i class="fas fa-edit me-2"></i> Edit Post
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'post_delete' post.pk %}">
+                                <i class="fas fa-trash me-2"></i> Delete Post
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="feed-card-body">
+        <!-- Description Zone -->
+        <div class="feed-card-text feed-card-text--detail">
+            {% if is_edit %}
+                {% include "posts/includes/fields/description.html" %}
+            {% else %}
+                {{ post.description|urlize|linebreaksbr|truncatewords:14 }}
+                {% if post.description|length > 100 %}
+                    <button type="button" class="post-hero-view-more js-open-description" style="font-style:italic">
+                        See more!
+                    </button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Price Zone -->
+        {% if post.price %}
+        <div class="mb-2">
+            {% if is_edit %}
+                {% include "posts/includes/fields/price.html" %}
+            {% else %}
+                <span class="text-success fs-5 fw-bold">
+                    ${{ post.price|floatformat:2|intcomma }}
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Location Zone -->
+        <div class="text-muted">
+            {% if is_edit %}
+                {% include "posts/includes/fields/location.html" %}
+            {% else %}
+                {% if post.post_town %}{{ post.post_town.name }}
+                {% elif post.post_town_input %}{{ post.post_town_input }}
+                {% endif %}
+                {% if post.post_state %}, {{ post.post_state.name }}{% endif %},
+                {% if post.post_country %}{{ post.post_country.name }}{% endif %},
+                {% if post.post_continent %}{{ post.post_continent.name }}{% endif %}.
+            {% endif %}
+        </div>
+
+        <!-- Media Zone -->
+        {% include 'media_app/media_carousel.html' with media_files=post.media_files.all object_id=post.pk editable=is_edit %}
+
+        <!-- Actions -->
+        <div class="feed-card-actions">
+            <span class="post-comments-open js-open-comments ms-2 feed-card-location">
+                See reviews ({{ comments|length }})
+            </span>
+        </div>
+    </div>
+</article>

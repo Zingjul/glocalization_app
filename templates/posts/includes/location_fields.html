@@ -1,27 +1,36 @@
         <!-- Location Fields with wrapper -->
     <div class="field-wrapper">
       <p id="location_field_continent">
-          {{ form.post_continent.label_tag }} {{ form.post_continent }}
-          <!-- {{ form.post_continent_input.label_tag }} {{ form.post_continent_input }} -->
+          Continent: <br/>
+          {{ form.post_continent }}
+          <!-- {{ form.post_continent_input }} -->
       </p>
     </div>
     <div class="field-wrapper">
       <p id="location_field_country">
-          {{ form.post_country.label_tag }} {{ form.post_country }}
-          <!-- {{ form.post_country_input.label_tag }} {{ form.post_country_input }} -->
+          Country: <br/>
+          {{ form.post_country }}
+          <!-- {{ form.post_country_input }} -->
       </p>
     </div>
     <div class="field-wrapper">
       <p id="location_field_state">
-          {{ form.post_state.label_tag }} {{ form.post_state }}
-          <!-- {{ form.post_state_input.label_tag }} {{ form.post_state_input }} -->
+          State/Province: <br/>
+          {{ form.post_state }}
+          <!-- {{ form.post_state_input }} -->
       </p>
     </div>
     <div data-town-sync>
       <div class="field-wrapper">
         <p id="location_field_town">
-          {{ form.post_town.label_tag }} {{ form.post_town }}
-          {{ form.post_town_input.label_tag }} {{ form.post_town_input }}        
+          Town:<br/>
+          {{ form.post_town }}
+          <span class="town-input-field">
+            <span class="town-input-instruction">
+            If your town is not listed, please type it here:<br/>
+            </span> 
+            {{ form.post_town_input }}        
+          </span>
         </p>
       </div>
     </div>

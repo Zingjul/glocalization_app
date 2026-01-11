@@ -1,55 +1,195 @@
 {% extends "base.html" %}
+{% load static %}
+{% load profile_tags %}
+{% load time_filters %}
+{% load humanize %}
+
+{% block body_class %}platform-page person-detail-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/person/person.css' %}">
+{% endblock %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="javascript:history.back()" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+        </a>
+    </span>
+</div>
+{% endblock %}
 
 {% block content %}
-<h2>Profile of {{ profile.user.username }}</h2>
-            <form action="{% url 'toggle_follow' profile.user.id %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button 
-                    type="submit"
-                    class="btn btn-sm {% if is_followed %}btn-danger{% else %}btn-success{% endif %}">
-                    {% if is_followed %}Unfollow{% else %}Follow{% endif %}
-                </button>
-            </form>
-{% if profile.person_profile_picture %}
-    <img src="{{ profile.person_profile_picture.url }}" alt="Profile Picture" width="150">
-{% endif %}
-<!-- ✅ Show follower/following counts for this profile -->
-<div>
-    <a href="{% url 'followers_list' profile.user.id %}">
-        <span id="followers-{{ profile.pk }}">  
-            {{ profile.user.follower_count }}
-        </span> followers | 
-    </a>
-    <a href="{% url 'following_list' profile.user.id %}">
-        <span id="following-{{ profile.pk }}">
-            {{ profile.user.following_count }}
-        </span> following
-    </a>
-</div>
-<p><strong>Business Name:</strong> {{ profile.business_name }}</p>
-<p><strong>About:</strong> {{ profile.about }}</p>
-<p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
-<p><strong>Call:</strong> {{ profile.user.phone_number }}</p>
-<p><strong>Email:</strong> {{ profile.user.email }}</p>
+<main class="platform-feed">
+    <div class="feed-content container-fluid" id="postContainer">
+        <!-- Business Profile Card - Glassmorphism Professional Design -->
+        <div class="setting-botton center-object">
+            <i class="fas fa-user-cog"></i>
+        </div>
+        <article class="feed-card feed-card--detail">
+            <!-- Header Section with Avatar & Business Name -->
+                <div class="feed-card-header">
+                    <span>
+                        {% profile_picture profile.user size=48 css_class="feed-card-avatar" %}                        
+                    </span>
+                
+                    <div class="feed-card-meta">
+                        <div class="feed-card-author">
+                            <span class="feed-card-name">
+                                {{ profile.business_name }}
+                            </span>
 
-<div><strong>Location:</strong> 
-    <p>Continent: {% if profile.continent %} {{ profile.continent.name }} {% endif %}</p>
-    <p>Country: {% if profile.country %} {{ profile.country.name }} {% endif %}</p>
-    <p>State/Province: {% if profile.state %} {{ profile.state.name }} {% endif %}</p>
-    <p>Town: {% if profile.town %} {{ profile.town.name }} {% endif %}</p>
-</div>
+                            <span class="feed-card-manage-gallery">
+                                {% if request.user == profile.user %} 
+                                    <a href="{% url 'gallery_view' %}">
+                                        <i class="fas fa-images me-2"> </i>Edit Gallery 
+                                    </a>
+                                {% endif %}
+                            </span> 
+                        </div>
+                    </div>
+                </div>
+                <div class="gellery-container">
+                    {% include 'media_app/media_carousel.html' with media_files=person.media_files.all object_id=person.pk %}
+                </div>
+            <!-- Quick Contact Bar - Glassy Floating Panel -->
+            <div class="contact-bar">
+                {% if profile.user.phone_number %}
+                    <div class="contact-item" id="phone-container">
+                        <i class="fas fa-phone"></i>
+                        <span class="contact-text">{{ profile.user.phone_number }}</span>
+                        <button type="button" class="copy-btn" onclick="copyToClipboard('{{ profile.user.phone_number }}', 'phone-container')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                {% endif %}
 
-<!-- 🔹 Display approval status -->
-<p><strong>Approval Status:</strong> {{ profile.approval_status }}</p>
+                {% if profile.user.email %}
+                    <div class="contact-item" id="email-container">
+                        <i class="fas fa-envelope"></i>
+                        <span class="contact-text">{{ profile.user.email }}</span>
+                        <button type="button" class="copy-btn" onclick="copyToClipboard('{{ profile.user.email }}', 'email-container')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                {% endif %}
 
-{% if user == profile.user %}
-    {% if profile.approval_status != "pending" %}
-        <a href="{% url 'person_setup' %}" class="btn btn-warning">Edit Profile</a>
-    {% else %}
-        <button class="btn btn-secondary" disabled>Your profile is under review</button>
-    {% endif %}
-    <a href="{% url 'person_delete' profile.pk %}" class="btn btn-danger">Delete Account</a>
-{% endif %}
+                {% if profile.website %}
+                    <a href="{{ profile.website }}" target="_blank" class="contact-item website-link">
+                        <i class="fas fa-globe"></i>
+                        <span class="contact-text">{{ profile.website }}</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                {% endif %}
+                <div class="contact-item">
+                        {% if profile.continent %}
+                            {% if profile.continent.name == 'Africa' %}
+                                <i class="fas fa-globe-africa"></i>
+                            {% elif profile.continent.name == 'Asia' %}
+                                <i class="fas fa-globe-asia"></i>
+                            {% elif profile.continent.name == 'Europe' %}
+                                <i class="fas fa-globe-europe"></i>
+                            {% elif profile.continent.name == 'North America' %}
+                                <i class="fas fa-globe-americas"></i>
+                            {% elif profile.continent.name == 'Oceania' %}
+                                {% include 'icons/icon-oceania.html' %}
+                            {% elif profile.continent.name == 'South America' %}
+                                <i class="fas fa-globe-americas"></i>
+                            {% elif profile.continent.name == 'Antarctica' %}
+                                {% include 'icons/icon-antarctica.html' %}
+                            {% else %}
+                                <i class="fas fa-globe"></i>
+                            {% endif %}
+                    <div class="contact-text">
+                        
+                            {{ profile.continent.name }}
+                        {% else %}
+                            <i class="fas fa-globe"></i> Not specified
+                        {% endif %}
+                        
+                        {% if profile.town %}, {{ profile.town.name }}{% endif %}
+                        {% if profile.state %}, {{ profile.state.name }}{% endif %}
+                        {% if profile.country %}, {{ profile.country.name }}{% endif %}
+                        
+                        {% if not profile.town and not profile.state and not profile.country and not profile.continent %}
+                            Unapproved Location
+                        {% endif %}
+                    </div>
+                </div>
 
-<a href="{% url 'person_list' %}" class="btn btn-secondary">Back to Profiles</a>
-{% endblock content %}
+            </div>
+
+            <!-- Business Details Grid -->
+                <!-- <div class="detail-item">
+                    <div class="detail-label">Member Since</div>
+                    <div class="detail-value">{{ profile.user.date_joined|date:"M Y" }}</div>
+                </div> -->
+
+                <!-- <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value status-{{ profile.approval_status }}">
+                        {% if profile.approval_status == "approved" %}
+                            <i class="fas fa-check-circle text-success"></i> Verified Business
+                        {% elif profile.approval_status == "pending" %}
+                            <i class="fas fa-clock text-warning"></i> Under Review
+                        {% else %}
+                            {{ profile.approval_status|capfirst }}
+                        {% endif %}
+                    </div>
+                </div> -->
+            <!-- Action Buttons -->
+            <div class="profile-actions">
+                {% if request.user == profile.user %} 
+                    <a href="{% url 'person_setup' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Business Profile
+                    </a>
+                {% else %}
+                    <div class="center-object">
+                    <form action="{% url 'toggle_follow' profile.user.id %}" method="post" class="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn follow-btn {% if is_followed %}btn-outline-danger{% else %}btn-primary{% endif %}">
+                            {% if is_followed %}Unfollow{% else %}Follow Business{% endif %}
+                        </button>
+                    </form>
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+            <div class="business-info">
+                {% if profile.about %}
+                    <p class="business-tagline">
+                        {{ profile.about }}
+                    </p>
+                {% endif %}
+            </div>
+    </div>
+
+</main>
+{% include 'full_screen_previewer.html' %}
+{% include "posts/includes/js_imports.html" %}
+<script>
+// Copy to clipboard with visual feedback
+function copyToClipboard(text, containerId) {
+    navigator.clipboard.writeText(text);
+    
+    const container = document.getElementById(containerId);
+    const btn = container.querySelector('.copy-btn');
+    const originalHTML = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    btn.style.background = '#10b981';
+    btn.style.color = 'white';
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.style.background = '';
+    }, 2000);
+}
+</script>
+{% endblock %}

@@ -11,6 +11,7 @@ from .views import (
     SeekerPostEditLaborView,
     SeekerPostDetailView,
     SeekerPostDeleteView,
+    SeekerPostUpdateView
 )
 
 app_name = "seekers"
@@ -35,6 +36,7 @@ urlpatterns = [
     path("create/labor/", SeekerLaborPostCreateView.as_view(), name="create_labor_request"),
 
     # 🛠 Type-based editing
+    path("post/<int:pk>/edit/", SeekerPostUpdateView.as_view(), name="seeker_edit"),
     path("edit/product/<int:pk>/", SeekerPostEditProductView.as_view(), name="seeker_edit_product"),
     path("edit/service/<int:pk>/", SeekerPostEditServiceView.as_view(), name="seeker_edit_service"),
     path("edit/labor/<int:pk>/", SeekerPostEditLaborView.as_view(), name="seeker_edit_labor"),

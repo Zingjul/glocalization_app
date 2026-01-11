@@ -1,40 +1,55 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}platform-page post-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/registration/logout-successfully.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+  <span class="feed-nav-icon-container">
+    <a href="{% url 'post_home' %}" class="nav-link js-back-link" title="Back" data-page="back">
+      <span class="nav-link__icon">
+        {% include 'icons/detail-page/back-botton.html' %}
+      </span>
+      <span class="nav-link__label">Back</span>
+    </a>
+  </span>
+</div>
+{% endblock site-header-content %}
+
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 px-4">
-    <div class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-3xl shadow-xl p-10 max-w-md w-full text-center animate-fade-in">
+<main class="platform-feed">
+  <div class="feed-content container-fluid">
+    <div class="min-h-screen flex items-center justify-center from-white to-gray-100 px-4">
+      <div class="border border-gray-200 rounded-3xl shadow-sm p-10 max-w-md w-full text-center animate-fade-in">
         
         {% if messages %}
-            {% for message in messages %}
-                <div class="mb-4 text-green-600 font-semibold">
-                    {{ message }}
-                </div>
-            {% endfor %}
+          {% for message in messages %}
+            <div class="mb-4 text-green-600 font-semibold">
+              {{ message }}
+            </div>
+          {% endfor %}
         {% endif %}
         
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">You have been logged out.</h2>
-        <p class="text-gray-600 mb-6">Thanks for stopping by. Come back soon!</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Done!</h2>
         
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{% url 'login' %}" class="py-2 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition">
-                Log in again
-            </a>
-            <a href="{% url 'post_home' %}" class="py-2 px-6 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-300 transition">
-                Homepage
-            </a>
+          <a href="{% url 'login' %}" class="py-2 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-sm hover:bg-green-700 transition">
+            Log in again
+          </a>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+</main>
 
-<style>
-@keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-}
-</style>
-{% load static %}
-    <script src="{% static 'js/accounts/logout.js' %}"></script>
-
+<script src="{% static 'js/accounts/logout.js' %}"></script>
+<script src="{% static 'js/01-frontend/registration/logged_out.js' %}"></script>
+<script src="{% static 'js/01-frontend/registration/logout_successfully.js' %}"></script>
+{% include "posts/includes/js_imports.html" %}
 {% endblock content %}

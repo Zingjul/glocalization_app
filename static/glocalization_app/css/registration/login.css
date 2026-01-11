@@ -1,0 +1,26 @@
+/* Login Page Custom Styles */
+.login-wrapper {
+  /* background: linear-gradient(135deg, #f5f7fa, #c3cfe2); */
+}
+
+.login-card {
+  max-width: 400px;
+  border: none;
+}
+
+.login-card h2 {
+  font-weight: 600;
+}
+
+#loginForm input {
+  border-radius: 8px;
+  padding: 10px;
+}
+
+#loginForm button {
+  transition: all 0.3s ease;
+}
+
+#loginForm button:hover {
+  transform: translateY(-2px);
+}

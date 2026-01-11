@@ -63,7 +63,7 @@ def signup_success(request):
 class CustomLoginView(LoginView):
     authentication_form = CustomLoginForm
     template_name = 'registration/login.html'
-
+    success_url = reverse_lazy('post_home')
 
 # Logout Confirmation Page
 class ConfirmLogoutView(LoginRequiredMixin, TemplateView):
@@ -184,7 +184,7 @@ class UserDeleteView(LoginRequiredMixin, FormView):
 def toggle_follow(request, user_id):
     profile = getattr(request.user, "profile", None)
     if not profile or profile.approval_status != "approved":
-        messages.error(request, "Your profile must be approved before you can follow or unfollow users.")
+        messages.error(request, "Your security is crucial, unlock the power to follow other users by verifying your account.")
         return redirect(request.META.get("HTTP_REFERER", "person_list"))
     target_user = get_object_or_404(CustomUser, id=user_id)
 

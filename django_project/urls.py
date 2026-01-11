@@ -23,10 +23,10 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),
+    path('', include("posts.urls")),
     path('user/', include("person.urls")),
     path("api/", include("custom_search.urls")),
     path('about/', include('about.urls', namespace="about")),
-    path('', include("posts.urls")),
     path('comments/', include("comment.urls")),
     path('search/', include("search.urls")),
     path('custom_search/', include('custom_search.urls')),

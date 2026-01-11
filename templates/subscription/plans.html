@@ -1,22 +1,92 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container mt-5">
-  <h2 class="text-center mb-4">Choose Your Subscription Plan</h2>
+{% load static %}
+{% load humanize %}
 
-  <div class="row justify-content-center">
-    {% for plan in plans %}
-      <div class="col-md-3 m-2 p-3 border rounded text-center">
-        <h4>{{ plan.name }}</h4>
-        <p class="text-muted">{{ plan.description }}</p>
-        <h3>${{ plan.price }}</h3>
-        <p>Duration: {{ plan.duration_days }} days</p>
-        <a href="{% url 'subscription:choose' plan.id %}" class="btn btn-primary mt-2">
-          Subscribe
+{% block body_class %}platform-page subscription-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/subscription/plans.css' %}">
+{% endblock %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="javascript:history.back()" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
         </a>
-      </div>
-    {% empty %}
-      <p class="text-center">No plans available at the moment.</p>
-    {% endfor %}
-  </div>
+    </span>
 </div>
+{% endblock %}
+
+{% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
+
+        <!-- Header -->
+        <div class="text-center py-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-crown text-warning me-3"></i>
+                Upgrade your account
+            </h1>
+            <p class="lead text-muted">Unlock premium features and grow faster</p>
+        </div>
+
+        <!-- Plans Grid -->
+         <center>
+        <div class="g-1">
+            {% for plan in plans %}
+                <div class="cols">
+                    <div class="subscription-plan-card {% if plan.is_popular %}plan-popular{% endif %}">
+                        {% if plan.is_popular %}
+                            <div class="plan-badge">Most Popular</div>
+                        {% endif %}
+
+                        <div class="plan-header">
+                            <h3 class="plan-name">{{ plan.name }}</h3>
+                            <div class="plan-price">
+                                <span class="price">${{ plan.price }}</span>
+                            </div>
+                                <span class="duration">{{ plan.duration_days }} days</span>
+
+                        </div>
+
+                        <div class="plan-features">
+                            <ul>
+                                <li>✓ Unlimited posts</li>
+                                <li>✓ Verified badge</li>
+                                <li>✓ Priority in search</li>
+                                <li>✓ Analytics dashboard</li>
+                                <li>✓ Remove ads</li>
+                            </ul>
+                        </div>
+
+                        <div class="plan-action">
+                            <a href="{% url 'subscription:choose' plan.id %}" 
+                               class="b
+                               tn plan-btn {% if plan.is_popular %}btn-warning{% else %}btn-outline-primary{% endif %}">
+                                {% if plan.is_current %}Current Plan{% else %}Choose Plan{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No plans available at the moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5 py-4">
+            <small class="text-muted">
+                Secure payment •
+            </small>
+        </div>
+</center>   
+    </div>
+</main>
 {% endblock %}

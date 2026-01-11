@@ -5,30 +5,25 @@
 {% load post_filters %}
 {% load time_filters %}
 
+{% block body_class %}platform-page seeker-list-page{% endblock body_class %}
 {% block title %}Seekers - TradesApp{% endblock %}
 
 {% block extra_head %}
-<!-- Same platform layout CSS as post_list prototype -->
 <link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
 {% endblock %}
 
 {% block site-header-content %}
 <div class="feed-nav header">
     <span class="feed-nav-icon-container">
-        <!-- Ads tab -->
         <a href="/" class="nav-link" title="Feed" data-page="feed">
-            <span class="nav-link__icon">
-                {% include 'icons/home.html' %}
-            </span>
+            <span class="nav-link__icon">{% include 'icons/home.html' %}</span>
             <span class="nav-link__label">Ads</span>
             <span class="nav-link__indicator"></span>
         </a>
-        
-        <!-- Want tab (active for seekers) -->
+
         <a href="{% url 'seekers:seeker_list' %}" class="nav-link nav-link--active" title="Seekers" data-page="seekers">
-            <span class="nav-link__icon">
-                {% include 'icons/icon-seeker.html' %}
-            </span>
+            <span class="nav-link__icon">{% include 'icons/icon-seeker.html' %}</span>
             <span class="nav-link__label">Want</span>
             <span class="nav-link__indicator"></span>
         </a>
@@ -36,140 +31,160 @@
 </div>
 {% endblock site-header-content %}
 
-{% block content %}   
-    <!-- CENTER FEED (seeker cards in post_list style) -->
-    <main class="platform-feed">
-        {% if search_path %}
-        <div class="px-3 py-2 bg-light border-bottom">
-            <small class="text-muted">
-                <i class="fas fa-filter"></i> Filtered by: {{ search_path|join:" → " }}
-            </small>
-        </div>
-        {% endif %}
-        
-        <div class="feed-content container-fluid" id="seekerContainer">
-            {% for post in posts %}
-            <article class="feed-card" 
-                     data-scope="{{ post.availability_scope }}"
-                     data-town="{{ post.post_town.name|default:post.post_town_input|lower }}" onclick="window.location=`{% url 'post_detail' post.pk %}`">
-                
-                <div class="feed-card-header" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                    {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
-                    
-                    <div class="feed-card-meta">
-                        <div class="feed-card-author">
-                            <span class="feed-card-name">
-                                {% if post.author.profile %}
-                                    {{ post.author.profile.business_name|default:post.author.username }}
-                                {% else %}
-                                    {{ post.author.username }}
-                                {% endif %}
-                            </span>
-                            <span class="feed-card-time"> • {{ post.date|short_time }}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="feed-card-body">
-                    {% if post.title %}
-                    <div class="feed-card-title" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                        {{ post.title }}
-                    </div>
-                    {% endif %}
-                    
-                    <div class="feed-card-text" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                        {{ post.description|urlize|linebreaksbr }}
-                    </div>
-                    
-                    {% if post.budget %}
-                    <div class="mb-2" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                        <span class="text-primary fs-5 fw-bold">
-                            Budget: ${{ post.budget|floatformat:2|intcomma }}
-                        </span>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="text-muted" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                        <i class="fas fa-map-marker-alt"></i>
-                        {% if post.post_town %}
-                            {{ post.post_town.name }}
-                        {% elif post.post_town_input %}
-                            {{ post.post_town_input }}
-                        {% endif %}
-                        {% if post.post_state %}
-                            , {{ post.post_state.name }}
-                        {% elif post.post_state_input %}
-                            , {{ post.post_state_input }}
-                        {% endif %}
-                    </div>
-                    
-                    {% if post.preferred_fulfillment_time %}
-                    <div class="mt-2" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
-                        <span class="text-warning">
-                            <i class="fas fa-clock"></i>
-                            Preferred: {{ post.preferred_fulfillment_time }}
-                        </span>
-                    </div>
-                    {% endif %}
-                </div>
-            </article>
-            {% empty %}
-            <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <h3>No seeker requests yet</h3>
-                <p>Be the first to post what you're looking for!</p>
-                {% if user.is_authenticated %}
-                <a href="{% url 'seekers:seeker_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Post Seeker Request
-                </a>
-                {% endif %}
-            </div>
-            {% endfor %}
+{% block content %}
+<main class="platform-feed">
 
-            <div class="jump-to-top-container">                
-                <center>
-                    <a href="{% url 'seekers:seeker_list' %}">
-                        <span class="jump-to-top" onclick="location.reload();">
-                            <i class="fa-solid fa-arrow-up"></i>
-                            <p>Load new</p>
-                            <a href="{% url 'seekers:seeker_create' %}">
-                                <div class="floating-cta-button">
-                                    <a href="{% url 'seekers:seeker_create' %}" class="floating-cta-button-child" aria-label="Post seeker request">
-                                        <i class="fa-solid fa-search"></i>
-                                    </a>
-                                </div>                                
-                            </a>
+    {% if search_path %}
+    <div class="px-3 py-2 bg-light border-bottom">
+        <small class="text-muted">
+            <i class="fas fa-filter"></i> Filtered by: {{ search_path|join:" → " }}
+        </small>
+    </div>
+    {% endif %}
+
+    <div class="feed-content container-fluid" id="seekerContainer">
+
+        {% for post in posts %}
+        <article class="feed-card feed-card--detail"
+                 data-scope="{{ post.availability_scope }}"
+                 data-town="{{ post.post_town.name|default:post.post_town_input|lower }}"
+                 data-post-id="{{ post.pk }}">
+
+            <!-- Header -->
+            <div class="feed-card-header">
+                <a href="{% url 'person_detail' post.author.pk %}">
+                    {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+                </a>
+
+                <div class="feed-card-meta" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                    <div class="feed-card-author">
+                        <span class="feed-card-name">
+                           {{ post.author.profile.business_name|default:post.author.username }}
                         </span>
-                    </a>
-                </center>
+                        <span class="feed-card-time"> • {{ post.date|short_time }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="feed-card-body">
+
+                <div class="feed-card-text" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                    {{ post.description|urlize|linebreaksbr }}
+                </div>
+
+                <div class="text-muted feed-card-location" onclick="window.location=`{% url 'seekers:seeker_detail' post.pk %}`">
+                    <!-- <i class="fas fa-map-marker-alt"></i> -->
+                    {% if post.post_town %}{{ post.post_town.name }}
+                    {% elif post.post_town_input %}{{ post.post_town_input }}{% endif %}
+                    {% if post.post_state %}, {{ post.post_state.name }}
+                    {% elif post.post_state_input %}, {{ post.post_state_input }}{% endif %}
+                    {% if post.post_country %}, {{ post.post_country.name }}{% endif %}
+                    {% if post.post_continent %}, {{ post.post_continent.name }}{% endif %}.
+                </div>
+                <!-- media/carousel -->
+                {% include 'media_app/media_carousel.html' with media_files=seeker.media_files.all object_id=seeker.pk %}
+
+                <a href="tel:{{ post.author_phone_number }}">
+                    <span class="feed-action">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                </a>
+
+            </div>
+        </article>
+
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>No seeker requests yet</h3>
+            <p>Be the first to post what you're looking for!</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'seekers:seeker_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Post Seeker Request
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="jump-to-top-container">
+            <center>
+                <a href="{% url 'seekers:seeker_list' %}">
+                    <span class="jump-to-top" onclick="location.reload();">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        <p>Load new</p>
+                        <a href="{% url 'seekers:seeker_create' %}">
+                            <div class="floating-cta-button">
+                                <a href="{% url 'seekers:seeker_create' %}"
+                                   class="floating-cta-button-child"
+                                   aria-label="Post seeker request">
+                                        {% include "icons/icon-create.html" %}
+                                    <!-- <i class="fa-solid fa-search"></i> -->
+                                </a>
+                            </div>
+                        </a>
+                    </span>
+                </a>
+            </center>
+        </div>
+    </div>
+</main>
+
+<div class="post-fullscreen-overlay" id="postImageOverlay" aria-hidden="true">
+    <div class="post-fullscreen-inner">
+        <div class="post-fullscreen-top">
+            <div class="post-fullscreen-top-actions">
+                <button class="post-fullscreen-close" aria-label="Close fullscreen">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
         </div>
-    </main>
+
+        <button class="post-fullscreen-nav post-fullscreen-nav--prev" aria-label="Previous media">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <img src="" alt="" class="post-fullscreen-image">
+
+        <video class="post-fullscreen-video" controls>
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <button class="post-fullscreen-nav post-fullscreen-nav--next" aria-label="Next media">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="post-fullscreen-counter" id="postFullscreenCounter">1 / 1</div>
+    </div>
+</div>
 
 <script>
     const currentUserTown = "{{ user.profile.town.name|lower }}";
 </script>
 
-<script src="{% static 'js/seekers_render_onload.js' %}"></script>
-<script src="{% static 'js/seekers_scope_filter.js' %}"></script>
-{% endblock %}
+<!-- Your existing JS files (unchanged) -->
+{% include "posts/includes/js_imports.html" %}
 
+{% endblock %}
 {% block bottom_navigation %}
 <nav class="bottom-nav" aria-label="Mobile navigation">
-    <a href="/" class="bottom-nav-item" aria-label="Home">
+    <a href="/" class="bottom-nav-item" aria-label="Ads">
         {% include 'icons/icon-home-bottom-nav.html'%}
         <span class="bottom-nav-link__label">Ads</span>
     </a>
+
     <a href="{% url 'postfinder_search' %}" class="bottom-nav-item" aria-label="Search">
         {% include 'icons/magnifier_bottom_svg.html' %}
         <span class="bottom-nav-link__label">Search</span>
     </a>
+
     <a href="{% url 'seekers:seeker_list' %}" class="bottom-nav-item nav-link--active" aria-label="Want">
         {% include 'icons/icon-seeker-bottom-nav.html'%}
         <span class="bottom-nav-link__label">Want</span>
         <span class="bottom-nav-link__indicator"></span>
-
     </a>
+
     <a href="{% url 'post_create' %}" class="bottom-nav-item bottom-nav-cta" aria-label="Post ad">
         {% include 'icons/icon-create.html' %}
     </a>

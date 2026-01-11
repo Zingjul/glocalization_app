@@ -30,7 +30,6 @@
 }
 .floating-cta-button-child{
   color: #fff !important;
-  /* font-size: var(--tablet-nav-icon-size); */
 }
 .function-key-toggle-notification {
   visibility: visible;
@@ -56,11 +55,9 @@
   height: auto;
 }
 body.platform-page {
-  font-size: var(--gen-lg-font-size);
   background: #f0f2f5;  /*WhatsApp-style background */
   padding-top: 0px;  /* Space for fixed header */
   padding-bottom: 0;
-  /* font-size: var(--gen-md-font-size); */
   /* backdrop-filter: var(--blur-percentage) !important; */
 }
 
@@ -78,13 +75,13 @@ body.platform-page {
     backdrop-filter 220ms ease,
     box-shadow 220ms ease,
     transform 220ms ease;
-  will-change: transform, backdrop-filter, box-shadow;
+  will-change: transform, backdrop-filter;
 }
 
 .site-header--scrolled {
-  background: rgba(15, 23, 42, 0.85); /* or keep var(--background-for-blur) if you prefer */
+  /* background: rgba(15, 23, 42, 0.85); or keep var(--background-for-blur) if you prefer */
   backdrop-filter: blur(14px);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+  /* box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18); */
   transform: translateY(-2px); /* subtle upward shift */
 }
 
@@ -99,7 +96,6 @@ body.platform-page {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  /* font-size: var(--gen-font-size); */
   padding: 0 0.75rem;
   min-height: 50px;   /* was: height: 50px; */
   height: auto;       /* allow it to grow with content */
@@ -139,7 +135,6 @@ body.platform-page {
   width: 3em;
   height: 3em;
   fill: white;
-  /* font-size: var(--gen-font-size); */
 }
 
 /* Optional: feed-nav inside header */
@@ -160,11 +155,11 @@ body.platform-page {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  /* font-size: 0.9rem; */
 }
 
 /* Main platform wrapper - Three columns */
 .platform-wrapper {
+    font-size: var(--gen-lg-font-size);
     display: grid;
     grid-template-columns: 25% 47% 28%;
     justify-content: center;
@@ -174,7 +169,6 @@ body.platform-page {
     min-height: calc(100vh - 0px);
     background: transparent;
     transition: grid-template-columns 0.3s cubic-bezier(1, 1, 1, 1);
-    /* font-size: var(--gen-font-size); */
 }
 /* Make text inside the sidebar fade in and out smoothly */
   .sidebar-nav-item span,
@@ -227,7 +221,6 @@ body.platform-page {
   color: #fff;
   padding: 6px 12px;
   border-radius: 6px;
-  /* font-size: 13px; */
   white-space: nowrap;
   
   /* Animation for the tooltip */
@@ -333,7 +326,6 @@ body.platform-page {
 .sidebar-nav-item-container {
   display: flex;
   align-items: center;
-  font-size: var(--gen-font-size);
   padding: 0;
   padding-bottom: 10px;
 }
@@ -351,7 +343,6 @@ body.platform-page {
   position: relative;
   /* background: yellow; */
   top: 3.5px;
-  font-size: px;
 }
 .sidebar-nav-item:hover {
   background: rgba(245, 245, 247, 1);
@@ -383,7 +374,6 @@ body.platform-page {
   margin-left: auto;
   background: #ff3b30;
   color: white;
-  /* font-size: 11px; */
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -404,7 +394,6 @@ body.platform-page {
   border-radius: 12px;
   text-decoration: none;
   transition: all 0.2s ease;
-  /* font-size: 15px; */
 }
 
 .btn-create-post:hover {
@@ -439,13 +428,13 @@ body.platform-page {
 
 /* Feed Header */
 .feed-header {
-  background: #fff;
+  background: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 20px;
+  padding: 10px;
   position: sticky;
-  top: 60px;
-  z-index: 10;
-  backdrop-filter: var(--blur-percentage);
+  top: 45px;
+  z-index: 20;
+  /* backdrop-filter: var(--blur-percentage); */
 }
 
 
@@ -479,7 +468,6 @@ body.platform-page {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: --var(--radius-md);
   color: black; /* changed from red */
-  /* font-size: 15px; */
   padding-left: 55px; /* make room for button */
   width: 60%;
   /* background: red !important; */
@@ -564,7 +552,6 @@ body.platform-page {
 .bottom-nav-link__label {
   bottom: 4px;
   position: absolute;
-  /* font-size: var(--gen-sm-font-size); */
   margin-top: -2px;
 }
 
@@ -577,7 +564,6 @@ body.platform-page {
     transition: all 0.3s ease;
     position: absolute;
     bottom: 2px;
-    /* font-size:var(--gen-sm-font-size); */
 }
 .bottom-nav-link__indicator{
     position: absolute;
@@ -780,7 +766,6 @@ body.platform-page {
 
 /* Items */
 .widget-item {
-  /* font-size: 20px; */
 
   display: flex;
   padding: 6px 12px;
@@ -986,7 +971,6 @@ body.platform-page {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        /* font-size: var(--scrn711-xs-font-size); */
         transition: color 0.2s;
         border-radius: var(--radius-ex-lg);
     }
@@ -1092,7 +1076,6 @@ body.platform-page {
     color: white;
     padding: 4px 10px;
     border-radius: 20px;
-    /* font-size: 12px; */
     font-weight: 600;
     /* backdrop-filter: blur(10px); */
     /* -webkit-backdrop-filter: blur(10px); */
@@ -1105,13 +1088,13 @@ body.platform-page {
 .media-carousel__nav {
     position: absolute;
     /* background:red; */
-    background: transparent;
+    background: transparent !important;
     /* backdrop-filter:; */
     /* -webkit-backdrop-filter: blur(10px); */
     border: none;
     width: 23%;
-    height: 95%;
-    /* border-radius: 50%; */
+    height: 95% !important;
+    border-radius: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1119,6 +1102,7 @@ body.platform-page {
     opacity: 0.7;
     transition: all 0.3s ease;
     z-index: 20;
+    top: 2% !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
 }
 
@@ -1130,16 +1114,15 @@ body.platform-page {
 
 /* oh the nav.. its just the invisble cover on each media on a post when we click on it triggers the change of pictures */
 .media-carousel__nav i {
-    /* font-size: 14px; */
     color: white;
 }
 
 .media-carousel__nav--prev {
-    left: 2px;
+    left: 0px !important;
 }
 
 .media-carousel__nav--next {
-    right: 2px;
+    right: 0px !important;
 }
 
 /* Show nav buttons on hover */
@@ -1214,8 +1197,8 @@ body.platform-page {
     }
     
     .media-carousel__nav {
-        width: 32px;
-        height: 32px;
+        /* width: 32px; */
+        /* height: 32px; */
     }
 }
 /* Fallback for very tall images */
@@ -1285,14 +1268,14 @@ body.platform-page {
 /* Feed Card - Enhanced */
 .feed-card {
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-ex-lg);
   padding: 16px;
   margin-bottom: 5px !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); */
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); */  
 }
 
 .feed-card:hover {
@@ -1306,40 +1289,44 @@ body.platform-page {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 19px;
   padding-bottom: 0;
 }
 
 .feed-card-avatar {
   width: 48px;
-  height: 48px;
+  height: 45px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(37, 99, 235, 0.1);
   transition: border-color 0.2s ease;
 }
-
 .feed-card:hover .feed-card-avatar {
   border-color: rgba(37, 99, 235, 0.3);
 }
-
 .feed-card-meta {
-  flex: 1;
-  min-width: 0;
-}
-
-.feed-card-author {
+  width: 100%;
+  /* background: red; */
   display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
+  flex-direction: row;
+  /* background: green; */
 }
-
+.feed-card-author {
+  /* background: blue; */
+  display: flex;
+  flex-direction: row;
+  /* align-items: center; */
+  gap: 12px;
+  margin-bottom: 2px;
+  /* justify-content: space-between; */
+  flex-grow: 9;
+}
+.feed-card-settings-modal{
+  /* background: yellow; */
+}
 .feed-card-name {
   font-weight: 600;
-  /* font-size: 0.9375rem; */
   color: #111827;
-  display: inline-block;
   transition: color 0.2s ease;
 }
 
@@ -1349,7 +1336,6 @@ body.platform-page {
 
 .feed-card-time {
   color: #6b7280;
-  /* font-size: 0.875rem; */
   font-weight: 400;
 }
 
@@ -1359,7 +1345,7 @@ body.platform-page {
   flex-direction: column;
   gap: 0px;
   margin-top: -33px;
-  margin-left: 60px;
+  margin-left: 55px;
   margin-bottom: 0;
   padding-bottom: 0;
 }
@@ -1371,7 +1357,6 @@ body.platform-page {
 /* Feed Card Text */
 .feed-card-text {
   color: #374151;
-  /* font-size: 0.9375rem; */
   line-height: 1.6;
   margin-bottom: 0;
   padding-bottom: 0;
@@ -1399,7 +1384,6 @@ body.platform-page {
   padding: 8px 16px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
-  /* font-size: 1.25rem; */
   font-weight: 700;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
@@ -1414,12 +1398,11 @@ body.platform-page {
 /* Location Info - Enhanced */
 .feed-card-location {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
   color: #6b7280;
-  /* font-size: 0.875rem; */
-  padding: 6px 12px;
-  background: rgba(107, 114, 128, 0.05);
+  padding:0px;
+  /* background: rgba(107, 114, 128, 0.05); */
   border-radius: 8px;
   width: fit-content;
   transition: all 0.2s ease;
@@ -1427,11 +1410,10 @@ body.platform-page {
 
 .feed-card-location i {
   color: #2563eb;
-  /* font-size: 0.875rem; */
 }
 
 .feed-card:hover .feed-card-location {
-  background: rgba(107, 114, 128, 0.1);
+  /* background: rgba(107, 114, 128, 0.1); */
 }
 
 /* ============================================
@@ -1443,7 +1425,7 @@ body.platform-page {
   margin: 12px 0;
   border-radius: 12px;
   overflow: hidden;
-  background: #000000;
+  background: transparent;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -1495,13 +1477,7 @@ body.platform-page {
 /* Navigation Buttons - Refined */
 .media-carousel__nav {
   position: absolute;
-  background: rgba(0, 0, 0, 0.004);
-  backdrop-filter: blur(0.01px);
-  -webkit-backdrop-filter: blur(0.01px);
   border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1525,7 +1501,6 @@ body.platform-page {
 }
 
 .media-carousel__nav i {
-  /* font-size: 16px; */
   color: #ffffff;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
@@ -1540,15 +1515,16 @@ body.platform-page {
 
 /* Counter Badge - Modern */
 .media-carousel__counter {
+  display: none !important;
+  font-size: 0.5rem !important;
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.09);
   backdrop-filter: blur(10px);
   color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 8px;
-  /* font-size: 0.8125rem; */
+  padding: 3px 6px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   z-index: 10;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1600,15 +1576,14 @@ body.platform-page {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(107, 114, 128, 0.08);
+  /* background: rgba(107, 114, 128, 0.08); */
   border-radius: 8px;
   color: #6b7280;
-  /* font-size: 0.875rem; */
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
-  width: 100%;
+  width: 98%;
   justify-content: center;
 }
 
@@ -1620,7 +1595,6 @@ body.platform-page {
 }
 
 .feed-action i {
-  /* font-size: 1rem; */
 }
 
 /* ============================================
@@ -1641,20 +1615,17 @@ body.platform-page {
 }
 
 .empty-state i {
-  /* font-size: 4rem; */
   color: #d1d5db;
   margin-bottom: 20px;
 }
 
 .empty-state h3 {
-  /* font-size: 1.5rem; */
   font-weight: 600;
   color: #111827;
   margin-bottom: 8px;
 }
 
 .empty-state p {
-  /* font-size: 1rem; */
   color: #6b7280;
   margin-bottom: 24px;
 }
@@ -1715,12 +1686,10 @@ body.platform-page {
 }
 
 .jump-to-top i {
-  /* font-size: 1.25rem; */
 }
 
 .jump-to-top p {
   margin: 0;
-  /* font-size: 0.875rem; */
 }
 
 .gradient-animate {
@@ -1735,218 +1704,44 @@ body.platform-page {
 }
 
 /* ============================================
-   Follow button
+   FOLLOW BUTTON – NEW TOP-CENTER POSITION
+   Perfectly centered at the very top of the card
+   Zero conflicts · Zero movement · Pure elegance
    ============================================ */
-/* ================================================
-   FOLLOW BUTTON STYLES
-   ================================================ */
+
+.follow-cta {
+  position: absolute !important;
+  top: 0px !important;           /* Half of button height pokes above the card */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
+}
 
 .follow-button-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Base Button Styles */
-.follow-btn {
-  display: inline-flex;
-  align-items: center;
+  display: flex !important;
   justify-content: center;
-  gap: 6px;
-  border: none;
-  border-radius: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-  white-space: nowrap;
-  position: relative;
-  overflow: hidden;
+  align-items: center;
+  background: transparrent;                    /* White backdrop so it floats cleanly */
+  /* border: 3px solid #ffffff;              Covers card border for perfect circle effect */
+  /* border-radius: 50px;                    Makes the pill float beautifully */
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); */
+  /* padding: 0 4px; */
+  height: 36px;                           /* Fixed height */
+  /* backdrop-filter: blur(10px); */
+  transition: all 0.25s ease;
 }
 
-.follow-btn:focus {
-  outline: none;
-  /* box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); */
+.follow-button-wrapper:hover {
+  transform: translateY(-2px);
+  /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18); */
 }
 
-.follow-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Size Variants */
+/* Optional: subtle lift on hover */
 .follow-btn--small {
-  padding: 4px 12px;
-  font-size: 12px;
-  border-radius: 14px;
-}
-
-.follow-btn--small .follow-btn__icon svg {
-  width: 12px;
-  height: 12px;
-}
-
-.follow-btn--medium {
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 20px;
-}
-
-.follow-btn--medium .follow-btn__icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.follow-btn--large {
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 24px;
-}
-
-.follow-btn--large .follow-btn__icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* Style Variants */
-
-/* Primary - Filled */
-.follow-btn--primary {
-  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-}
-
-.follow-btn--primary:hover {
-  background: linear-gradient(135deg, #0066CC 0%, #4745B5 100%);
-  transform: translateY(-1px);
-  /* box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); */
-}
-
-.follow-btn--primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
-}
-
-/* Primary Following State */
-.follow-btn--primary.is-following {
-  background: #E8F0FE;
-  color: #007AFF;
-  box-shadow: none;
-}
-
-.follow-btn--primary.is-following:hover {
-  background: #FFE5E5;
-  color: #FF3B30;
-}
-
-/* Outline */
-.follow-btn--outline {
-  background: transparent;
-  color: #007AFF;
-  border: 2px solid #007AFF;
-  box-shadow: none;
-}
-
-.follow-btn--outline:hover {
-  background: rgba(0, 122, 255, 0.08);
-  transform: translateY(-1px);
-}
-
-.follow-btn--outline.is-following {
-  background: #007AFF;
-  color: #ffffff;
-}
-
-.follow-btn--outline.is-following:hover {
-  background: #FF3B30;
-  border-color: #FF3B30;
-}
-
-/* Minimal */
-.follow-btn--minimal {
-  background: rgba(0, 122, 255, 0.08);
-  color: #007AFF;
-  box-shadow: none;
-}
-
-.follow-btn--minimal:hover {
-  background: rgba(0, 122, 255, 0.15);
-}
-
-.follow-btn--minimal.is-following {
-  background: rgba(0, 122, 255, 0.15);
-  color: #007AFF;
-}
-
-.follow-btn--minimal.is-following:hover {
-  background: rgba(255, 59, 48, 0.1);
-  color: #FF3B30;
-}
-
-/* Icon Styles */
-.follow-btn__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.follow-btn__icon svg {
-  display: block;
-}
-
-/* Text Styles */
-.follow-btn__text {
-  display: inline-block;
-}
-
-.follow-btn__text--unfollow {
-  display: none;
-}
-
-/* Show unfollow text on hover when following */
-.follow-btn.is-following:hover .follow-btn__text--following {
-  display: none;
-}
-
-.follow-btn.is-following:hover .follow-btn__text--unfollow {
-  display: inline-block;
-}
-
-.follow-btn.is-following:hover .follow-btn__icon--following {
-  display: none !important;
-}
-
-.follow-btn.is-following:hover .follow-btn__icon--follow {
-  display: inline-flex !important;
-}
-
-/* Loading State */
-.follow-btn.is-loading {
-  pointer-events: none;
-}
-
-.follow-btn__loader {
-  display: none;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.follow-btn.is-loading .follow-btn__loader {
-  display: inline-flex;
-}
-
-.follow-btn.is-loading .follow-btn__icon,
-.follow-btn.is-loading .follow-btn__text {
-  opacity: 0;
-}
-
-/* Spinner Animation */
-.follow-btn__loader .spinner {
-  animation: spin 1s linear infinite;
+  height: 32px !important;
+  padding: 0 14px !important;
+  font-size: 13.5px !important;
 }
 
 @keyframes spin {
@@ -1963,7 +1758,6 @@ body.platform-page {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
   color: #6B7280;
 }
 
@@ -2003,21 +1797,28 @@ body.platform-page {
 /* ================================================
    RESPONSIVE ADJUSTMENTS
    ================================================ */
+.center-object{
+  width: 100%;
+  display: flex;
+  flex-direction: center; 
+  justify-content: center;
+}
+
+.feed-card[data-edit="true"] {
+    outline: 2px dashed #28a745;
+}
 
 @media (max-width: 480px) {
   .follow-btn--large {
     padding: 10px 20px;
-    font-size: 14px;
   }
   
   .follow-btn--medium {
     padding: 6px 14px;
-    font-size: 13px;
   }
   
   .follow-btn--small {
     padding: 4px 10px;
-    font-size: 11px;
   }
 }
 

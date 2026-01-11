@@ -33,5 +33,5 @@ urlpatterns = [
     path('edit/product/<int:pk>/', PostEditProductView.as_view(), name='post_edit_product'),
     path('edit/service/<int:pk>/', PostEditServiceView.as_view(), name='post_edit_service'),
     path('edit/labor/<int:pk>/', PostEditLaborView.as_view(), name='post_edit_labor'),
-    path('my-pending-posts/', PendingPostsByUserView.as_view(), name='my_pending_posts'),
+    path('my-pending-posts/', PendingPostsByUserView.as_view(), name='my_pending_posts'),   #ok i changed the pending post feature to rather display already approved posts, so that the user can see and interact with his content
 ]

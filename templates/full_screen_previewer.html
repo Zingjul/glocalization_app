@@ -1,0 +1,35 @@
+{# ---------- Fullscreen image/video viewer ---------- #}
+<div class="post-fullscreen-overlay" id="postImageOverlay" aria-hidden="true">
+    <div class="post-fullscreen-inner">
+
+        <div class="post-fullscreen-top">
+            {# On list we don’t have a single post context, so we just show a close button #}
+            <div class="post-fullscreen-top-actions">
+                <button class="post-fullscreen-close" aria-label="Close fullscreen">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <button class="post-fullscreen-nav post-fullscreen-nav--prev" aria-label="Previous media">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        {# Image for photos #}
+        <img src="" alt="" class="post-fullscreen-image">
+
+        {# Video for videos #}
+        <video class="post-fullscreen-video" controls>
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <button class="post-fullscreen-nav post-fullscreen-nav--next" aria-label="Next media">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="post-fullscreen-counter" id="postFullscreenCounter">
+            1 / 1
+        </div>
+    </div>
+</div>    

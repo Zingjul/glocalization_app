@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{% block body_class %}platform-page seeker-edit-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'post_home' %}" class="nav-link js-back-link" title="Back" data-page="back">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
+
+{% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
+
+        <h2 class="text-xl font-semibold mb-4">Edit Your Request</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {# Canonical seeker card in edit mode #}
+            {% include "seekers/includes/seeker_card.html" with seekerpost=post_object mode="edit" %}
+
+            {# Social media handles form #}
+            <div class="mt-4">
+                {{ social_form.as_p }}
+            </div>
+
+            <div class="post-edit-actions mt-3">
+                <button type="submit" class="btn btn-success">Update Request</button>
+                <a href="{{ post_object.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</main>
+
+{% include "posts/includes/js_imports.html" %}
+{% endblock content %}

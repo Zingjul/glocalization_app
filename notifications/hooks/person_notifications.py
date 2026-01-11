@@ -9,7 +9,7 @@ def notify_profile_approval(person):
     """
     Notification.objects.create(
         recipient=person.user,
-        verb="Your profile update has been approved 🎉",
+        verb="Your profile update has been approved",
         target_object_id=person.pk,
         target_content_type="person"
     )
@@ -20,7 +20,7 @@ def notify_profile_rejection(person):
     """
     Notification.objects.create(
         recipient=person.user,
-        verb="Your profile update was rejected. Please review and resubmit ⚠️",
+        verb="Your profile update was rejected. Please review and resubmit.",
         target_object_id=person.pk,
         target_content_type="person"
     )
@@ -31,7 +31,7 @@ def notify_pending_town(person, typed_town):
     """
     Notification.objects.create(
         recipient=person.user,
-        verb=f"Your town '{typed_town}' is pending admin review.",
+        verb=f"Thank you kind user, your town '{typed_town}' will be confirmed and approved shortly.",
         target_object_id=person.pk,
         target_content_type="person"
     )
@@ -42,7 +42,7 @@ def notify_town_approval(person, typed_town):
     """
     Notification.objects.create(
         recipient=person.user,
-        verb=f"Your town '{typed_town}' has been approved and linked to your profile 🎉",
+        verb=f"Congratulation your town '{typed_town}' has been approved and linked to your profile",
         target_object_id=person.pk,
         target_content_type="person"
     )
@@ -53,7 +53,7 @@ def notify_town_rejection(person, typed_town):
     """
     Notification.objects.create(
         recipient=person.user,
-        verb=f"Your town '{typed_town}' request was rejected. Please correct and resubmit.",
+        verb=f"Unfortunately, '{typed_town}' was rejected. This might be due to mispellings or the technical unable to confirm your location, you are welcome to try again.",
         target_object_id=person.pk,
         target_content_type="person"
     )

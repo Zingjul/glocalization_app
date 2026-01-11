@@ -1,32 +1,70 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{% block body_class %}platform-page post-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'post_home' %}"
+           class="nav-link js-back-link"
+           title="Back"
+           data-page="back">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
+
 {% block content %}
-  <h1>My Pending Posts</h1>
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
 
-  {% if pending_posts %}
-    <ul>
-      {% for post in pending_posts %}
-        <li>
-          {% if post.category.name|lower == "product" %}
-            <a href="{% url 'seekers:seeker_edit_product' post.pk %}">
-              {{ post.title|default:"(No Title)" }}
-            </a>
-          {% elif post.category.name|lower == "service" %}
-            <a href="{% url 'seekers:seeker_edit_service' post.pk %}">
-              {{ post.title|default:"(No Title)" }}
-            </a>
-          {% elif post.category.name|lower == "labor" %}
-            <a href="{% url 'seekers:seeker_edit_labor' post.pk %}">
-              {{ post.title|default:"(No Title)" }}
-            </a>
-          {% else %}
-            {{ post.title|default:"(No Title)" }}
-          {% endif %}
-          – Submitted on: {{ post.created_at|date:"SHORT_DATE_FORMAT" }}
+    {% if pending_posts %}
+      <article class="feed-card feed-card--detail">
+        <ul>
+          {% for post in pending_posts %}
+            <li>
+              {% if post.category.name|lower == "product" %}
+                <a href="{% url 'seekers:seeker_edit_product' post.pk %}">
+                  {{ post.title|default:"(No Title)" }}
+                </a>
+              {% elif post.category.name|lower == "service" %}
+                <a href="{% url 'seekers:seeker_edit_service' post.pk %}">
+                  {{ post.title|default:"(No Title)" }}
+                </a>
+              {% elif post.category.name|lower == "labor" %}
+                <a href="{% url 'seekers:seeker_edit_labor' post.pk %}">
+                  {{ post.title|default:"(No Title)" }}
+                </a>
+              {% else %}
+                {{ post.title|default:"(No Title)" }}
+              {% endif %}
+              – Submitted on: {{ post.created_at|date:"SHORT_DATE_FORMAT" }}
 
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You have no pending posts.</p>
-  {% endif %}
-{% endblock content %}
+            </li>
+          {% endfor %}
+        </ul>
+    {% else %}
+      <p>You have no pending posts.</p>
+      </article>
+    {% endif %}
+    </div>
+</main>
+<script src="{% static 'js/01-frontend/smart-back-botton.js' %}"></script>
+{% include "posts/includes/js_imports.html" %}
+  {% endblock content %}

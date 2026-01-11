@@ -243,14 +243,7 @@ class SeekerPostUpdateView(LoginRequiredMixin, UpdateView):
             return LaborSeekerForm
 
     def get_template_names(self):
-        category = self.object.category.name.lower()
-        if category == "product":
-            return ["seekers/seeker_edit_product.html"]
-        elif category == "service":
-            return ["seekers/seeker_edit_service.html"]
-        elif category == "labor":
-            return ["seekers/seeker_edit_labor.html"]
-        return ["seekers/post_edit_generic.html"]
+        return ["seekers/seeker_edit.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -258,9 +251,11 @@ class SeekerPostUpdateView(LoginRequiredMixin, UpdateView):
         social_form = SeekerSocialMediaHandleForm(instance=getattr(post, "social_handles", None))
         context["social_form"] = social_form
         context["post"] = post
+        context["post_object"] = self.object
 
-        # ✅ add the unified variable
-        context['post_object'] = self.object
+        context["mode"] = "edit"  # or "detail" depending on the view
+        context["is_edit"] = (context["mode"] == "edit")
+        context["is_detail"] = (context["mode"] == "detail")
 
         return context
 
@@ -620,9 +615,8 @@ class SeekerPendingPostsByUserView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return SeekerPost.objects.filter(
             author=self.request.user,   # ✅ use author, not profile
-            status="pending"
+            status="approved"
         ).order_by("-id")
-
 
 def get_seeker_posts_visible_to_user(user):
     location = getattr(user, "profile", None)

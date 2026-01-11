@@ -1,17 +1,61 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>User Profiles</h2>
-<ul id="profile-list" class="list-group">
-    {% for profile in profiles %}
-        <li class="list-group-item">
-            <strong>{{ profile.business_name }}</strong>
+{% load static %}
+{% load humanize %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
 
-            <!-- View profile -->
-            <a href="{% url 'person_detail' profile.pk %}" class="btn btn-sm btn-primary">
-                View Profile
-            </a>  
-        </li>
-    {% endfor %}
-</ul>
-{% include "person/includes/js_imports.html" %}
-{% endblock content %}
+{% block body_class %}platform-page postfinder-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-finder/post-finder.css' %}">
+{% endblock %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="javascript:history.back()" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+        </a>
+    </span>
+</div>
+{% endblock %}
+
+{% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid" id="postContainer">
+        <!-- RESULTS — FULL CARD STYLE (exactly like post_list.html) -->
+        {% for profile in profiles %}
+            <article class="feed-card feed-card--detail" data-post-id="{{ post.pk }}">
+                <a href="{% url 'person_detail' profile.pk %}" class="list-group-item list-group-item-action px-3 py-4">
+                    <div class="d-flex align-items-center gap-3">
+                        {% profile_picture profile.user size=44 css_class="rounded-circle flex-shrink-0" %}
+                        <div>
+                            <div class="fw-bold">
+                                {{ profile.business_name|default:profile.user.username }}
+                            </div>
+                            {% if profile.bio %}
+                                <small class="text-muted">{{ profile.bio|truncatechars:80 }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="text-center py-5 text-muted">
+                    No profiles found.
+                </div>
+            {% endfor %}
+            </article>
+    </div>
+</main>
+
+<!-- Scripts -->
+{% include "posts/includes/extra_script_js.html" %}
+{% include "posts/includes/js_imports.html" %}
+{% endblock %}

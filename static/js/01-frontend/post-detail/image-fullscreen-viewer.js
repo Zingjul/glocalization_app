@@ -1,6 +1,11 @@
 // static/js/01-frontend/post-detail/image-fullscreen-viewer.js
 document.addEventListener('DOMContentLoaded', function () {
-    if (!document.body.classList.contains('post-detail-page')) return;
+    // Run on both detail and list pages
+    const isDetail = document.body.classList.contains('post-detail-page');
+    const isPostList = document.body.classList.contains('post-list-page');
+    const isSeekerList = document.body.classList.contains('seeker-list-page');
+
+    if (!isDetail && !isPostList && !isSeekerList) return;
 
     const overlay = document.getElementById('postImageOverlay');
     if (!overlay) return;
@@ -14,35 +19,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnClose = overlay.querySelector('.post-fullscreen-close');
     const counterEl = document.getElementById('postFullscreenCounter');
 
-    // Collect both images and videos from the main carousel
-    const mediaEls = Array.from(
-        document.querySelectorAll(
-            '.platform-feed .media-carousel__image, .platform-feed .media-carousel__video'
-        )
-    );
-    if (!mediaEls.length) return;
-
-    // Normalize into a media queue
-    const galleryMedia = mediaEls.map(function (el) {
-        const isVideo = el.tagName.toLowerCase() === 'video';
-        let src = '';
-
-        if (isVideo) {
-            const s = el.querySelector('source');
-            src = s ? s.src : (el.currentSrc || el.src || '');
-        } else {
-            src = el.currentSrc || el.src || '';
-        }
-
-        return {
-            type: isVideo ? 'video' : 'image',
-            src: src
-        };
-    });
-
+    // Current gallery for the *clicked* post only
+    let galleryMedia = [];   // [{type: 'image'|'video', src: '...'}, ...]
     let currentIndex = 0;
 
+    function buildGalleryFromCarousel(carouselEl, clickedEl) {
+        const mediaEls = Array.from(
+            carouselEl.querySelectorAll('.media-carousel__image, .media-carousel__video')
+        );
+        galleryMedia = mediaEls.map(function (el) {
+            const isVideo = el.tagName.toLowerCase() === 'video';
+            let src = '';
+
+            if (isVideo) {
+                const s = el.querySelector('source');
+                src = s ? s.src : (el.currentSrc || el.src || '');
+            } else {
+                src = el.currentSrc || el.src || '';
+            }
+
+            return {
+                type: isVideo ? 'video' : 'image',
+                src: src
+            };
+        });
+
+        currentIndex = mediaEls.indexOf(clickedEl);
+        if (currentIndex < 0) currentIndex = 0;
+    }
+
     function updateViewer() {
+        if (!galleryMedia.length) return;
+
         const item = galleryMedia[currentIndex];
 
         if (item.type === 'image') {
@@ -58,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (imgEl) {
                 imgEl.style.display = 'none';
             }
-
             if (videoEl) {
                 if (videoSourceEl) {
                     videoSourceEl.src = item.src;
@@ -71,14 +78,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (counterEl) {
-            counterEl.textContent =
-                (currentIndex + 1) + ' / ' + galleryMedia.length;
+            counterEl.textContent = (currentIndex + 1) + ' / ' + galleryMedia.length;
         }
     }
 
-    function openFullscreen(index) {
-        if (index < 0 || index >= galleryMedia.length) return;
-        currentIndex = index;
+    function openFullscreenFromElement(clickedEl) {
+        const carousel = clickedEl.closest('.media-carousel');
+        if (!carousel) return;
+
+        buildGalleryFromCarousel(carousel, clickedEl);
+        if (!galleryMedia.length) return;
+
         updateViewer();
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
@@ -93,20 +103,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function showPrev() {
+        if (!galleryMedia.length) return;
         currentIndex = (currentIndex - 1 + galleryMedia.length) % galleryMedia.length;
         updateViewer();
     }
 
     function showNext() {
+        if (!galleryMedia.length) return;
         currentIndex = (currentIndex + 1) % galleryMedia.length;
         updateViewer();
     }
 
-    // Attach click to all media (images + videos)
-    mediaEls.forEach(function (el, index) {
+    // Attach click handlers to all media in all carousels
+    const allMediaEls = document.querySelectorAll('.media-carousel__image, .media-carousel__video');
+    allMediaEls.forEach(function (el) {
         el.style.cursor = 'zoom-in';
         el.addEventListener('click', function () {
-            openFullscreen(index);
+            openFullscreenFromElement(el);
         });
     });
 
@@ -125,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Prev/Next buttons
+    // Navigation
     if (btnPrev) {
         btnPrev.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -139,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Keyboard navigation
+    // Keyboard support
     document.addEventListener('keydown', function (e) {
         if (!overlay.classList.contains('is-open')) return;
 

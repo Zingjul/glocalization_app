@@ -1,22 +1,85 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container mt-5">
-  <div class="text-center">
-    <h3>You selected the <strong>{{ plan.name }}</strong> plan</h3>
-    <p>{{ plan.description }}</p>
-    <h4>Price: ${{ plan.price }}</h4>
-    <p>Duration: {{ plan.duration_days }} days</p>
+{% load static %}
 
-    <form method="post" class="mt-4">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-success">
-        Proceed to Payment Instructions
-      </button>
-    </form>
+{% block body_class %}platform-page subscription-confirm-page{% endblock %}
 
-    <a href="{% url 'subscription:plans' %}" class="btn btn-outline-secondary mt-3">
-      Back to Plans
-    </a>
-  </div>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/subscription/payment_confirm.css' %}">
+{% endblock %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'subscription:plans' %}" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back to Plans</span>
+        </a>
+    </span>
 </div>
+{% endblock %}
+
+{% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
+
+        <!-- Confirmation Card -->
+        <div class="subscription-confirm-card mx-auto">
+
+            <div class="confirm-header text-center">
+                <div class="confirm-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h1 class="confirm-title">Great choice!</h1>
+                <p class="confirm-subtitle">You selected the <strong>{{ plan.name }}</strong> plan</p>
+            </div>
+
+            <div class="confirm-details">
+                <div class="detail-row">
+                    <span class="detail-label">Plan</span>
+                    <span class="detail-value">{{ plan.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">{{ plan.description }}</span>
+                </div>
+                <div class="detail-row highlight">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value price">${{ plan.price }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Duration</span>
+                    <span class="detail-value">{{ plan.duration_days }} days</span>
+                </div>
+            </div>
+
+            <div class="confirm-actions">
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn confirm-btn-proceed">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Proceed to Payment
+                    </button>
+                </form>
+
+                <a href="{% url 'subscription:plans' %}" class="btn confirm-btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Choose Different Plan
+                </a>
+            </div>
+
+            <div class="confirm-footer text-center">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Secure • Instant activation • Cancel anytime
+                </small>
+            </div>
+
+        </div>
+
+    </div>
+</main>
 {% endblock %}

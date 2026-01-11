@@ -200,14 +200,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
             return LaborPostForm
 
     def get_template_names(self):
-        category = self.object.category.name.lower()
-        if category == "product":
-            return ["posts/post_edit_product.html"]
-        elif category == "service":
-            return ["posts/post_edit_service.html"]
-        elif category == "labor":
-            return ["posts/post_edit_labor.html"]
-        return ["posts/post_edit_generic.html"]
+        return ["posts/post_edit.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -215,9 +208,11 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         social_form = SocialMediaHandleForm(instance=getattr(post, "social_handles", None))
         context["social_form"] = social_form
         context["post"] = post
-
-        # ✅ add the unified variable
         context['post_object'] = self.object
+
+        context["mode"] = "edit"  # or "detail" depending on the view
+        context["is_edit"] = (context["mode"] == "edit")
+        context["is_detail"] = (context["mode"] == "detail")
 
         return context
 
@@ -593,7 +588,7 @@ class PendingPostsByUserView(LoginRequiredMixin, ListView):
     context_object_name = "pending_posts"
 
     def get_queryset(self):
-        return Post.objects.filter(author=self.request.user, status='pending').order_by('-created_at')
+        return Post.objects.filter(author=self.request.user, status='approved').order_by('-created_at')
 
 
 def get_posts_visible_to_user(user):

@@ -1,0 +1,106 @@
+{% load humanize %}
+{% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+<!-- Canonical Seeker Card Component -->
+<article class="feed-card feed-card--detail" data-post-id="{{ seekerpost.pk }}" data-edit="{{ is_edit|yesno:'true,false' }}">
+    <div class="feed-card-header">
+        <a href="{% url 'person_detail' seekerpost.author.pk %}">
+            {% profile_picture seekerpost.author size=48 css_class="feed-card-avatar" %}
+        </a>
+        <div class="feed-card-meta">
+            <div class="feed-card-author">
+                <span class="feed-card-name">
+                    {{ seekerpost.author.profile.business_name|default:seekerpost.author.username }} • {{ seekerpost.created_at|short_time }}
+                </span>
+
+                {# Phone CTA: clickable only in detail/list, not in edit mode #}
+                {% if seekerpost.author.profile.phone_number %}
+                    {% if not is_edit %}
+                        <a href="tel:{{ seekerpost.author.profile.phone_number }}">
+                    {% endif %}
+                            <i class="fa-solid fa-phone"></i>
+                    {% if not is_edit %}
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            {# Owner controls: dropdown only if not editing #}
+            {% if not is_edit and request.user == seekerpost.author %}
+                <div class="feed-card-settings-modal">
+                    <button type="button" class="btn btn-link p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'seekers:seeker_edit' seekerpost.pk %}">
+                                <i class="fas fa-edit me-2"></i> Edit Post
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'seekers:seeker_delete' seekerpost.pk %}">
+                                <i class="fas fa-trash me-2"></i> Delete Post
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="feed-card-body">
+        <!-- Description Zone -->
+        <div class="feed-card-text feed-card-text--detail">
+            {% if is_edit %}
+                {% include "seekers/includes/fields/description.html" %}
+            {% else %}
+                {{ seekerpost.description|urlize|linebreaksbr|truncatewords:14 }}
+                {% if seekerpost.description|length > 100 %}
+                    <button type="button" class="post-hero-view-more js-open-description" style="font-style:italic">
+                        See more!
+                    </button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Budget Zone -->
+        {% if seekerpost.budget %}
+        <div class="mb-2">
+            {% if is_edit %}
+                {% include "seekers/includes/fields/budget.html" %}
+            {% else %}
+                <span class="text-success fs-5 fw-bold">
+                    Budget: ${{ seekerpost.budget|floatformat:2|intcomma }}
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Location Zone -->
+        <div class="text-muted">
+            {% if is_edit %}
+                {% include "seekers/includes/fields/location.html" %}
+            {% else %}
+                {% if seekerpost.post_town %}{{ seekerpost.post_town.name }}
+                {% elif seekerpost.post_town_input %}{{ seekerpost.post_town_input }}
+                {% endif %}
+                {% if seekerpost.post_state %}, {{ seekerpost.post_state.name }}{% endif %},
+                {{ seekerpost.post_country.name }},
+                {{ seekerpost.post_continent.name }}.
+            {% endif %}
+        </div>
+
+        <!-- Media Zone -->
+        {% include 'media_app/media_carousel.html' with media_files=seekerpost.media_files.all object_id=seekerpost.pk editable=is_edit %}
+
+        <!-- Actions -->
+        <div class="feed-card-actions">
+            <span class="post-comments-open js-open-comments ms-2 feed-card-location">
+                See reviews ({{ comments|length }})
+            </span>
+        </div>
+    </div>
+</article>

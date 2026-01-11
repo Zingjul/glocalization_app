@@ -1,0 +1,21 @@
+/* Login Success Page Styles */
+.success-wrapper {
+  /* background: linear-gradient(135deg, #d4fc79, #96e6a1); */
+}
+
+.success-card {
+  max-width: 500px;
+  border: none;
+}
+
+.success-card h2 {
+  font-weight: 700;
+}
+
+.success-card a.btn {
+  transition: all 0.3s ease;
+}
+
+.success-card a.btn:hover {
+  transform: translateY(-2px);
+}

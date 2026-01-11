@@ -14,22 +14,22 @@ def notify_on_signup(sender, instance, created, **kwargs):
         Notification.objects.create(
             recipient=instance,
             actor=None,
-            verb="Welcome! Your account has been created successfully.",
+            verb="Congratulations you have created your account!",
             target_object_id=instance.id,
             target_content_type="user"
         )
 
 # alert follow and unfollow
-@receiver(post_save, sender=Follow)
-def notify_follow(sender, instance, created, **kwargs):
-    if created:
-        Notification.objects.create(
-            recipient=instance.following,
-            actor=instance.follower,
-            verb=f"{instance.follower.username} is now following you 👋",
-            target_object_id=instance.id,
-            target_content_type="follow"
-        )
+# @receiver(post_save, sender=Follow)
+# def notify_follow(sender, instance, created, **kwargs):
+#     if created:
+#         Notification.objects.create(
+#             recipient=instance.following,
+#             actor=instance.follower,
+#             verb=f"{instance.follower.username} is now following you.",
+#             target_object_id=instance.id,
+#             target_content_type="follow"
+#         )
 
 @receiver(post_save, sender=Follow)
 def create_follow_notification(sender, instance, created, **kwargs):
@@ -40,10 +40,11 @@ def create_follow_notification(sender, instance, created, **kwargs):
         Notification.objects.create(
             recipient=instance.following,   # The person being followed
             actor=instance.follower,       # The person who followed
-            verb="started_following",      # Action type
+            verb= f"{instance.follower.username} is now your new potential client",      # Action type
             target_content_type="user",    # For frontend routing
             target_object_id=instance.follower.id,  # The follower's ID
             extra={
                 "message": f"{instance.follower.username} started following you"
             }
         )
+        pass

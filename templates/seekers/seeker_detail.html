@@ -1,82 +1,43 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{% block body_class %}platform-page seeker-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'seekers:seeker_list' %}"
+           class="nav-link js-back-link"
+           title="Back"
+           data-page="back">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
+
 {% block content %}
-
-<!-- 🔧 Edit/Delete SeekerPost -->
-{% if user == seekerpost.author %}
-  <div class="mt-6 space-y-2">
-    <a href="{% url 'seekers:seeker_edit_'|add:seekerpost.category.name|lower seekerpost.pk %}" 
-       class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      Edit
-    </a>
-    <form method="POST" action="{% url 'seekers:seeker_delete' seekerpost.pk %}">
-      {% csrf_token %}
-      <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-        Delete
-      </button>
-    </form>
-  </div>
-{% endif %}
-
-<!-- 📷 Media Files -->
-{% if seekerpost.media_files.all %}
-  <div class="flex flex-wrap gap-4 mb-4">
-    {% for media in seekerpost.media_files.all %}
-      {% if media.file_type == "image" %}
-        <img src="{{ media.file.url }}" alt="Seeker Media" class="w-36 h-36 object-cover rounded shadow">
-      {% elif media.file_type == "video" %}
-        <video controls class="w-64 h-40 rounded shadow">
-          <source src="{{ media.file.url }}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      {% endif %}
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="w-full bg-gray-100 text-gray-500 p-4 rounded mb-4 text-center">
-    No media uploaded for this request.
-  </div>
-{% endif %}
-
-<h2 class="text-2xl font-bold text-green-700 mb-4">
-  {% if seekerpost.category.name == 'Product' %}
-    {{ seekerpost.product_name }}
-  {% elif seekerpost.category.name == 'Service' %}
-    {{ seekerpost.service_name }}
-  {% elif seekerpost.category.name == 'Labor' %}
-    {{ seekerpost.labor_title }}
-  {% else %}
-    Untitled Request
-  {% endif %}
-</h2>
-
-<!-- Request Details -->
-<p><strong>Category:</strong> {{ seekerpost.category.name }}</p>
-<p><strong>Description:</strong> {{ seekerpost.description }}</p>
-{% if seekerpost.budget %}
-  <p><strong>Budget:</strong> ${{ seekerpost.budget }}</p>
-{% endif %}
-<p><strong>Contact:</strong> {{ seekerpost.author_phone_number }} | {{ seekerpost.author_email }}</p>
-
-<!-- Location -->
-<p><i class="fa fa-map-marker"></i> {{ seekerpost.post_town.name|default:seekerpost.post_town_input }}</p>
-<p><i class="fa fa-map-marker"></i> {{ seekerpost.post_state.name }}</p>
-<p><i class="fa fa-map-marker"></i> {{ seekerpost.post_country.name }}</p>
-<p><i class="fa fa-map-marker"></i> {{ seekerpost.post_continent.name }}</p>
-
-<!-- Timestamps -->
-<p class="text-sm text-gray-500 mt-2">
-  Created on: {{ seekerpost.created_at|date:"F j, Y, g:i a" }}<br>
-  Last updated: {{ seekerpost.updated_at|date:"F j, Y, g:i a" }}
-</p>
-
-<!-- 💬 Comments -->
-{% include "comment/partials/comment_section.html" with comments=comments comment_form=comment_form target_object=seekerpost app_label="seekers" model_name="seekerpost" %}
-
-<a href="{% url 'seekers:seeker_list' %}" class="inline-block mt-6 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-  Back to Seekers
-</a>
-
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
+        {% include "seekers/includes/seeker_card.html" with seekerpost=post_object mode="detail" %}
+    </div>
+</main>
+{% include "posts/includes/modal-description.html" %}
+{% include "posts/includes/modal-fullscreen.html" %}
 <script src="{% static 'js/comment_toggler.js' %}"></script>
-{% endblock %}
+{% include "posts/includes/js_imports.html" %}
+{% endblock content %}

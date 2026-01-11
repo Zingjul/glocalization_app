@@ -1,0 +1,21 @@
+/* Confirm Logout Page Styles */
+.logout-confirm-wrapper {
+  /* background: linear-gradient(135deg, #fdfcfb, #e2d1c3); */
+}
+
+.confirm-card {
+  max-width: 400px;
+  border: none;
+}
+
+.confirm-card h2 {
+  font-weight: 700;
+}
+
+.confirm-card .btn {
+  transition: all 0.3s ease;
+}
+
+.confirm-card .btn:hover {
+  transform: translateY(-2px);
+}

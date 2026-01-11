@@ -1,0 +1,19 @@
+{# Editable location fields #}
+<div class="row g-2">
+    <div class="col-md-4">
+        <input type="text" name="post_town_input" class="form-control"
+               value="{{ post.post_town_input|default_if_none:'' }}" placeholder="Town">
+    </div>
+    <div class="col-md-4">
+        <input type="text" name="post_state_input" class="form-control"
+               value="{{ post.post_state.name|default_if_none:'' }}" placeholder="State">
+    </div>
+    <div class="col-md-4">
+        <input type="text" name="post_country_input" class="form-control"
+               value="{{ post.post_country.name|default_if_none:'' }}" placeholder="Country">
+    </div>
+    <div class="col-md-4">
+        <input type="text" name="post_continent_input" class="form-control"
+               value="{{ post.post_continent.name|default_if_none:'' }}" placeholder="Continent">
+    </div>
+</div>

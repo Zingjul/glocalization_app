@@ -1,51 +1,189 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{% block body_class %}platform-page postfinder-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-finder/post-finder.css' %}">
+    <style>
+        .town-input-field{
+            display: none;
+        }
+    </style>
+{% endblock %}
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="javascript:history.back()" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+        </a>
+    </span>
+</div>
+{% endblock %}
 
 {% block content %}
-  <h1>Search Results for "{{ query }}"</h1>
+<main class="platform-feed">
+    <div class="feed-content container-fluid" id="postContainer">
 
-  <!-- Unified search + filters form -->
-  <form method="get" action="{% url 'postfinder_search' %}" id="postfinderForm">
-    <!-- Keyword search -->
-    <div>
-      <input type="text" name="q" placeholder="Search posts..." value="{{ query }}">
+        <!-- Header -->
+        <div class="feed-header">
+            <h1 class="h5 mb-1">
+                {% if query %}
+                    <span class="text-muted">{{ results|length }} result{{ results|length|pluralize }}</span> for "{{ query }}" - scroll down to see them.
+                {% else %}
+                    <span class="text-muted">{{ results|length }} result{{ results|length|pluralize }}</span> for " " 
+                {% endif %}
+            </h1>
+        </div>
+
+        <!-- Search Form -->
+        <!-- Search Form -->
+        <div class="mx-3 mb-4">
+            <div class="mt-2">
+                <form method="get" action="{% url 'postfinder_search' %}">
+                    
+                    <!-- ADD THIS WRAPPER -->
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-input-icon"></i>
+                        <input type="text" 
+                              name="q" 
+                              class="form-control form-control-lg" 
+                              placeholder="Search anything..." 
+                              value="{{ query }}" 
+                              autofocus>
+                    </div>
+                    <!-- END WRAPPER -->
+                    
+                    <div class="availability_scope-container">
+                        <div>How wide do you want to search?</div>
+                        <div>
+                            <div>{{ form.availability_scope }}</div>
+                        </div>
+                    </div>
+                    {% include "posts/includes/location_fields.html" %}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-search me-2"></i>Search & Filter
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- RESULTS — FULL CARD STYLE (exactly like post_list.html) -->
+        {% for post in results %}
+            <article class="feed-card feed-card--detail" data-post-id="{{ post.pk }}">
+
+                {% if post.author_phone_number %}
+                <span class="contact-cta" title="Call seller">
+                    <a href="tel:{{ post.author_phone_number }}" class="post-hero-cta">
+                        <i class="fa-solid fa-phone"></i>
+                    </a>
+                </span>
+                {% endif %}
+
+                <!-- <a href="{% url 'post_detail' post.pk %}" class="text-decoration-none text-dark"> -->
+
+                    <div class="feed-card-header">
+                        {% profile_picture post.author size=48 css_class="feed-card-avatar" %}
+                        <div class="feed-card-meta">
+                            <div class="feed-card-author">
+                                <span class="feed-card-name">
+                                    {{ post.author.profile.business_name|default:post.author.username }}
+                                </span>
+                                <span class="feed-card-time" onclick="window.location=`{% url 'post_detail' post.pk %}`">• {{ post.created_at|short_time }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="feed-card-body">
+
+                        <div class="feed-card-text feed-card-text--detail" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                            {{ post.description|urlize|linebreaksbr|truncatewords:14 }}
+                            {% if post.description|length > 100 %}
+                                <button type="button" class="post-hero-view-more js-open-description" style="font-style:italic">
+                                    See more!
+                                </button>
+                            {% endif %}
+                        </div>
+
+                        {% if post.price %}
+                        <div class="mb-2">
+                            <span class="text-success fs-5 fw-bold">
+                                ${{ post.price|floatformat:2|intcomma }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <div class="text-muted" onclick="window.location=`{% url 'post_detail' post.pk %}`">
+                            <!-- <i class="fas fa-map-marker-alt"></i> -->
+                            {% if post.post_town %}{{ post.post_town.name }}
+                            {% elif post.post_town_input %}{{ post.post_town_input }}
+                            {% endif %}
+                            {% if post.post_state %}, {{ post.post_state.name }}{% endif %},
+                            {% if post.post_country %}{{ post.post_country.name }}{% endif %},
+                            {% if post.post_continent %}{{ post.post_continent.name }}{% endif %}.
+                        </div>
+
+                        <!-- Media Carousel -->
+                        {% if post.media_files.count > 0 %}
+                        <div class="media-carousel mt-3" data-post-id="{{ post.pk }}">
+                            <div class="media-carousel__container">
+                                <div class="media-carousel__track">
+                                    {% for media in post.media_files.all %}
+                                    <div class="media-carousel__item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
+                                        {% if media.file_type == "image" %}
+                                            <img src="{{ media.file.url }}" alt="{{ post.title }}" class="media-carousel__image" loading="lazy">
+                                        {% elif media.file_type == "video" %}
+                                            <video class="media-carousel__video" controls preload="metadata">
+                                                <source src="{{ media.file.url }}" type="video/mp4">
+                                            </video>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if post.media_files.count > 1 %}
+                                <button class="media-carousel__nav media-carousel__nav--prev" onclick="navigateMedia(this, 'prev')">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="media-carousel__nav media-carousel__nav--next" onclick="navigateMedia(this, 'next')">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <div class="media-carousel__indicators">
+                                    {% for media in post.media_files.all %}
+                                    <div class="media-carousel__indicator {% if forloop.first %}active{% endif %}"
+                                         onclick="goToMedia('{{ post.pk }}', '{{ forloop.counter0 }}')"></div>
+                                    {% endfor %}
+                                </div>
+                                <div class="media-carousel__counter">{{ post.media_files.count }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                <!-- </a> -->
+            </article>
+        {% empty %}
+            <div class="text-center py-5 mx-3">
+                <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                <h3>No results found</h3>
+                <p class="text-muted">Try different keywords or remove some filters.</p>
+            </div>
+        {% endfor %}
+
     </div>
+</main>
 
-    <!-- Availability scope -->
-    <div style="margin-top: 1rem;">
-      {{ form.availability_scope.label_tag }} {{ form.availability_scope }}
-    </div>
-
-    <!-- Location fields -->
-    {% include "posts/includes/location_fields.html" %}
-
-    <!-- Submit button -->
-    <button type="submit" style="margin-top: 1rem;">Search & Filter</button>
-  </form>
-
-  <!-- Results -->
-  {% if results %}
-    <ul id="resultsList">
-      {% for post in results %}
-        <li class="post-item"
-            data-continent="{{ post.post_continent.name }}"
-            data-country="{{ post.post_country.name }}"
-            data-state="{{ post.post_state.name }}"
-            data-town="{{ post.post_town.name }}">
-          <a href="{% url 'post_detail' post.pk %}">
-            {{ post.title }} ({{ post.business_name }})
-          </a>
-          – {{ post.created_at|date:"SHORT_DATE_FORMAT" }}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No posts matched your search.</p>
-  {% endif %}
-
-  <!-- External JS -->
-    {% include "posts/includes/extra_script_js.html" %}
-    {% include "posts/includes/js_imports.html" %}
-  <script src="{% static 'js/postfinder/postfinder_filter.js' %}"></script>
+<!-- Scripts -->
+{% include "posts/includes/extra_script_js.html" %}
+{% include "posts/includes/js_imports.html" %}
 {% endblock %}
-<!-- File: glocalization_app/postfinder/templatetags/postfinder_extras.py -->

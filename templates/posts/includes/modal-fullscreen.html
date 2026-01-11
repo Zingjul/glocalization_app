@@ -1,0 +1,54 @@
+{% load humanize %}
+{% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{# ---------- Fullscreen image viewer ---------- #}
+<div class="post-fullscreen-overlay" id="postImageOverlay" aria-hidden="true">
+    <div class="post-fullscreen-inner">
+
+        <div class="post-fullscreen-top">
+            <a href="{% url 'person_detail' post.author.pk %}" class="post-fullscreen-author-link">
+                {% profile_picture post.author size=32 css_class="post-fullscreen-avatar" %}
+                <span class="post-fullscreen-author-name">
+                    {% if post.author.profile and post.author.profile.business_name %}
+                        {{ post.author.profile.business_name }}
+                    {% else %}
+                        {{ post.author.username }}
+                    {% endif %}
+                </span>
+            </a>
+
+            <div class="post-fullscreen-top-actions">
+                {% if post.author_phone_number %}
+                <a href="tel:{{ post.author_phone_number }}" class="post-fullscreen-cta">
+                    <i class="fa-solid fa-phone"></i>
+                </a>
+                {% endif %}
+                <button class="post-fullscreen-close" aria-label="Close fullscreen">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <button class="post-fullscreen-nav post-fullscreen-nav--prev" aria-label="Previous image">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <img src="" alt="" class="post-fullscreen-image">
+        {# Video for videos #}
+        <video class="post-fullscreen-video" controls>
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <button class="post-fullscreen-nav post-fullscreen-nav--next" aria-label="Next image">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="post-fullscreen-counter" id="postFullscreenCounter">
+            1 / 1
+        </div>
+    </div>
+</div>

@@ -1,0 +1,229 @@
+.subscription-plan-card {
+  background: white;
+  border-radius: var(--radius-ex-lg);
+  padding: 1rem 1rem;
+  text-align: center;
+  /* box-shadow: 0 10px 10px -10px rgba(0,0,0,0.08); */
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  margin-bottom: 12px;
+ }
+
+.subscription-plan-card:hover {
+  transform: translateY(-2px);
+}
+
+.plan-popular {
+  border: 2px solid #f59e0b;
+  transform: scale(1.05);
+}
+
+.plan-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: white;
+  padding: 0.4rem 1.2rem;
+  border-radius: 0 0 1rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 10;
+}
+
+.plan-header {
+}
+
+.plan-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: #0f172a;
+}
+
+.plan-price {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.plan-price .price {
+  color: #007AFF;
+}
+
+.plan-price .duration {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.plan-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  flex-grow: 1;
+}
+
+.plan-features li {
+  padding: 0.6rem 0;
+  color: #475569;
+  font-weight: 500;
+}
+
+.plan-action {
+  margin-top: auto;
+  padding-top: 1rem;
+  /* background: #007AFF; */
+}
+
+.plan-btn {
+  width: 100%;
+  padding: 0.9rem;
+  font-weight: 600;
+  border-radius: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .plan-popular {
+    transform: none;
+  }
+  .plan-price {
+    font-size: 2.4rem;
+  }
+}
+
+
+.subscription-plan-card {
+  background: white;
+  border-radius: 1.8rem;
+  padding: 1.2rem 1.8rem;
+  text-align: center;
+  box-shadow: 0 12px -20px 10px rgba(0,0,0,0.09);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.subscription-plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 10px -10px rgba(0,0,0,0.08);
+}
+
+.plan-popular {
+  border: 3px solid #f59e0b;
+  transform: scale(1.06);
+  z-index: 2;
+}
+
+.plan-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 0.5rem 1.4rem;
+  border-radius: 0 0 1.4rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.plan-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 1.2rem;
+  color: #0f172a;
+}
+
+.plan-price {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin: 0;
+  color: #1e293b;
+}
+
+.plan-price .price {
+  color: #007AFF;
+}
+
+.plan-price .duration {
+  font-size: 1.1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.plan-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.8rem 0;
+  flex-grow: 1;
+}
+
+.plan-features li {
+  padding: 0.7rem 0;
+  color: #475569;
+  font-weight: 500;
+  font-size: 1.02rem;
+}
+
+.plan-action {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.plan-btn {
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  border-radius: 1.6rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+}
+
+/* Mobile Perfection */
+@media (max-width: 768px) {
+  .row-cols-md-2 > .col {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+  
+  .plan-popular {
+    transform: none;
+  }
+  
+  .plan-price {
+    font-size: 2.8rem;
+  }
+}

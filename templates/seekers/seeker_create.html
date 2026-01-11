@@ -1,21 +1,55 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load humanize %}
 {% load static %}
+{% load profile_tags %}
+{% load post_filters %}
+{% load time_filters %}
+{% load follow_tags %}
+
+{% block body_class %}platform-page post-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="{% url 'post_home' %}"
+           class="nav-link js-back-link"
+           title="Back"
+           data-page="back">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+            <span class="nav-link__indicator"></span>
+        </a>
+    </span>
+</div>
+{% endblock site-header-content %}
 
 {% block content %}
-  <h2>What do you need?</h2>
-  <p>Select the type of request you want to make:</p>
-  <div style="display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
-    <a href="{% url 'seekers:create_product_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
-      <h3>🛒 Product</h3>
-      <p>Looking for a specific product? Post a request and let suppliers find you.</p>
-    </a>
-    <a href="{% url 'seekers:create_service_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
-      <h3>🧰 Service</h3>
-      <p>Need help with something? Describe the service you’re looking for.</p>
-    </a>
-    <a href="{% url 'seekers:create_labor_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
-      <h3>💪 Labor</h3>
-      <p>Hiring hands-on help? Request laborers based on skills and location.</p>
-    </a>
-  </div>
-{% endblock content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid">
+
+    <h2>What do you need?</h2>
+    <p>Select the type of request you want to make:</p>
+    <div style="display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
+      <a href="{% url 'seekers:create_product_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+        <h3>🛒 Product</h3>
+        <p>Looking for a specific product? Post a request and let suppliers find you.</p>
+      </a>
+      <a href="{% url 'seekers:create_service_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+        <h3>🧰 Service</h3>
+        <p>Need help with something? Describe the service you’re looking for.</p>
+      </a>
+      <a href="{% url 'seekers:create_labor_request' %}" style="flex: 1; min-width: 200px; text-align: center; border: 2px solid #ccc; padding: 20px; border-radius: 10px; text-decoration: none;">
+        <h3>💪 Labor</h3>
+        <p>Hiring hands-on help? Request laborers based on skills and location.</p>
+      </a>
+    </div>
+    </div>
+  </main> 
+  {% endblock content %}

@@ -1,0 +1,22 @@
+/* Logout Page Custom Styles */
+.logout-wrapper {
+  /* background: linear-gradient(135deg, #fdfcfb, #e2d1c3); */
+}
+
+.logout-card {
+  max-width: 500px;
+  border: none;
+}
+
+.logout-card h2,
+.logout-card h4 {
+  font-weight: 600;
+}
+
+.logout-card .btn {
+  transition: all 0.3s ease;
+}
+
+.logout-card .btn:hover {
+  transform: scale(1.05);
+}

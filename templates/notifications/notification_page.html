@@ -1,18 +1,52 @@
 {% extends "base.html" %}
 {% load static %}
-{% block content %}
+{% load humanize %}
+{% load time_filters %}
 
-<div class="notifications-container">
-  <h2 class="mb-3">Notification</h2>
+{% block body_class %}platform-page notifications-page{% endblock %}
 
-  <ul id="notifications-list" class="list-group">
-    <!-- Notifications will be injected here by JS -->
-  </ul>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/notification/notification.css' %}">
+{% endblock %}
 
-  <p id="no-notifications" class="text-muted" style="display: none;">
-    No notifications yet!
-  </p>
+{% block site-header-content %}
+<div class="feed-nav header">
+    <span class="feed-nav-icon-container">
+        <a href="javascript:history.back()" class="nav-link js-back-link">
+            <span class="nav-link__icon">
+                {% include 'icons/detail-page/back-botton.html' %}
+            </span>
+            <span class="nav-link__label">Back</span>
+        </a>
+    </span>
 </div>
+{% endblock %}
+
+{% block content %}
+<main class="platform-feed">
+    <div class="feed-content container-fluid" id="postContainer">
+
+        <!-- Header -->
+        <div class="feed-header">
+            <small class="text-muted" id="notification-count">Loading...</small>
+        </div>
+
+        <!-- Notifications List -->
+        <div id="notifications-container">
+            <!-- JS will inject cards here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="no-notifications" class="text-center" style="display:none;">
+            <i class="fas fa-bell-slash fa-2x text-muted mb-4"></i>
+            <h3 class="text-muted">All caught up!</h3>
+            <p class="text-muted">No new notifications right now.</p>
+        </div>
+
+    </div>
+</main>
 
 <script src="{% static 'js/notifications/notification_list.js' %}"></script>
-{% endblock %}
+{% endblock content %}

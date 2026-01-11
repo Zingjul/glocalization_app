@@ -11,6 +11,10 @@ def profile_pic_upload_path(instance, filename):
     # Each user gets their own folder inside profile_pics/
     return f"profile_pics/user_{instance.user.id}/{filename}"
 
+def gallery_upload_path(instance, filename):
+    # Each user gets their own folder inside gallery/
+    return f"gallery/user_{instance.person.user.id}/{filename}"
+
 class Person(models.Model):
     APPROVAL_CHOICES = [
         ('awaiting_user', 'Awaiting User'),
@@ -153,6 +157,22 @@ class Person(models.Model):
         """Get profile picture URL or None"""
         pic = self.profile_picture
         return pic.file.url if pic else None
+
+    @property
+    def gallery_images(self):
+        """Get all gallery images"""
+        return self.gallery_items.filter(media_type='image')
+
+    @property
+    def gallery_videos(self):
+        """Get all gallery videos"""
+        return self.gallery_items.filter(media_type='video')
+
+    @property
+    def gallery_count(self):
+        """Get total gallery items count"""
+        return self.gallery_items.count()
+        
 class PendingLocationRequest(models.Model):
     """Stores user-typed locations for admin review before approval."""
     person = models.OneToOneField(
@@ -190,3 +210,57 @@ class Availability(models.Model):
     def __str__(self):
         return f"{self.person} - {self.day_of_week}: {self.start_time} to {self.end_time}"
 
+class PersonGallery(models.Model):
+    MEDIA_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+    ]
+    
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name='gallery_items',
+        verbose_name=_("Person")
+    )
+    file = models.FileField(
+        upload_to=gallery_upload_path,
+        verbose_name=_("File")
+    )
+    media_type = models.CharField(
+        max_length=10,
+        choices=MEDIA_TYPE_CHOICES,
+        default='image',
+        verbose_name=_("Media Type")
+    )
+    caption = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Caption")
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Uploaded At")
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Display Order")
+    )
+    
+    class Meta:
+        verbose_name = _("Gallery Item")
+        verbose_name_plural = _("Gallery Items")
+        ordering = ['order', '-uploaded_at']
+    
+    def __str__(self):
+        return f"{self.person.user.username} - {self.media_type} ({self.id})"
+    
+    def save(self, *args, **kwargs):
+        # Auto-detect media type based on file extension
+        if self.file:
+            extension = self.file.name.lower().split('.')[-1]
+            video_extensions = ['mp4', 'mov', 'avi', 'mkv', 'webm']
+            if extension in video_extensions:
+                self.media_type = 'video'
+            else:
+                self.media_type = 'image'
+        super().save(*args, **kwargs)

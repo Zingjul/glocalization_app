@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from accounts.models import Follow
 from .mixins import LocationFieldsSetupMixin
 from posts.utils.location_assignment import assign_location_fields
-
+from .models import PersonGallery
 
 class PersonForm(forms.ModelForm, LocationFieldsSetupMixin):
     class Meta:
@@ -138,4 +138,31 @@ class ProfileFollowForm(forms.ModelForm):
         if commit:
             follow.save()
         return follow
-    
+
+# Form for uploading gallery images
+from django import forms
+from media_app.models import MediaFile
+
+class GalleryUploadForm(forms.ModelForm):
+    class Meta:
+        model = MediaFile
+        fields = ['file', 'caption']
+        widgets = {
+            'caption': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Add a caption (optional)'
+            }),
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*,video/*'
+            }),
+        }
+
+class MultipleGalleryUploadForm(forms.Form):
+    files = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*,video/*',
+        }),
+        label='Select files'
+    )

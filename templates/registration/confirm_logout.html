@@ -1,20 +1,48 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}platform-page post-detail-page{% endblock body_class %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'glocalization_app/css/02-platform-layout.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/post-detail/post-detail.css' %}">
+<link rel="stylesheet" href="{% static 'glocalization_app/css/registration/confirm-logout.css' %}">
+{% endblock extra_head %}
+
+{% block site-header-content %}
+<div class="feed-nav header">
+  <span class="feed-nav-icon-container">
+    <a href="{% url 'post_home' %}" class="nav-link js-back-link" title="Back" data-page="back">
+      <span class="nav-link__icon">
+        {% include 'icons/detail-page/back-botton.html' %}
+      </span>
+      <span class="nav-link__label">Back</span>
+    </a>
+  </span>
+</div>
+{% endblock site-header-content %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-    <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">Confirm Logout</h2>
-        <p class="text-gray-600 text-center mb-6">Are you sure you want to log out?</p>
-
-        <form method="post" action="{% url 'logout' %}" class="flex flex-col gap-4">
+<main class="platform-feed">
+  <div class="feed-content container-fluid">
+    <div class="logout-confirm-wrapper d-flex justify-content-center align-items-center min-vh-100">
+      <div class="card shadow-sm rounded-3 confirm-card text-center">
+        <div class="card-body p-5">
+          <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="w-full py-2 px-4 bg-red-600 text-white font-semibold rounded-xl shadow hover:bg-red-700 transition duration-300">
+            <div class="d-grid gap-3">
+              <button type="submit" class="btn btn-danger fw-semibold">
                 Yes, Log me out
-            </button>
-            <a href="{% url 'post_home' %}" class="w-full py-2 px-4 text-center bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-xl font-medium shadow transition duration-300">
+              </button>
+              <a href="{% url 'post_home' %}" class="btn btn-secondary fw-medium">
                 Cancel
-            </a>
-        </form>
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+</main>
+<script src="{% static 'glocalization_app/js/registration/confirm_logout.js' %}"></script>
 {% endblock content %}

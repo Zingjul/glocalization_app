@@ -1295,3 +1295,26 @@
     transition: all 1s ease;
   }
 }
+
+/* === PERMANENT FIX — KILL THE GAP FOREVER === */
+.platform-page .feed-header,
+.platform-page .feed-content,
+.platform-page .platform-feed {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.platform-page .feed-header {
+    position: sticky;
+    top: 0;
+    background: var(--background-for-blur, white);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 0 !important;
+}
+
+/* Optional: tiny breathing room only if needed */
+.platform-page .feed-content > *:first-child:not(.feed-header) {
+    margin-top: 1rem;
+}
